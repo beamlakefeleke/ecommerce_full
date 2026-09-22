@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795270039501",
+    "project_id": "flat-33157",
+    "storage_bucket": "flat-33157.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795270039501:android:49430289b19f14f46e2684",
+        "android_client_info": {
+          "package_name": "com.example.ecommerce"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Jfv7yFlSI1qryX3SLYryIbSapEU2-7g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
