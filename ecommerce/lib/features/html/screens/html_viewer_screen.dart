@@ -98,12 +98,13 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
                                           );
                                         },
                                       )
-                                    : Html(
+                                    : SelectableHtml(
                                         data: htmlController.htmlText,
                                         shrinkWrap: true,
                                         onLinkTap:
                                             (
                                               String? url,
+                                              RenderContext context,
                                               Map<String, String> attributes,
                                               element,
                                             ) {

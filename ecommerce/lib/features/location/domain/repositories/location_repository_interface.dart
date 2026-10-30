@@ -5,6 +5,10 @@ import 'package:ecommerce/interfaces/repository_interface.dart';
 
 abstract class LocationRepositoryInterface<T> implements RepositoryInterface {
   Future<String> getAddressFromGeocode(LatLng latLng);
-  Future<ZoneResponseModel> getZone(String? lat, String? lng, {bool handleError = false});
+  Future<ZoneResponseModel> getZone(
+    String? lat,
+    String? lng, {
+    bool handleError = false,
+  });
   Future<Response> searchLocation(String text);
 }

@@ -1,250 +1,271 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:ecommerce/core/usecase/usecase.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
-import 'package:ecommerce/features/auth/domain/usecases/check_auth_status_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/guest_login_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/login_usecase.dart';
-import 'package:ecommerce/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:ecommerce/features/auth/domain/usecases/manage_saved_credentials_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/register_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_login_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_register_usecase.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_state.dart';
 
-/// BLoC for the auth feature — replaces the legacy GetX [AuthController].
-///
-/// One Bloc per feature-page concern. Calls domain usecases, emits
-/// immutable states. **No navigation calls** — the UI layer uses
-/// `BlocListener` to handle navigation based on state transitions.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final LoginUseCase _loginUseCase;
-  final RegisterUseCase _registerUseCase;
-  final GuestLoginUseCase _guestLoginUseCase;
-  final SocialLoginUseCase _socialLoginUseCase;
-  final SocialRegisterUseCase _socialRegisterUseCase;
-  final LogoutUseCase _logoutUseCase;
-  final CheckAuthStatusUseCase _checkAuthStatusUseCase;
-  final ManageSavedCredentialsUseCase _credentialsUseCase;
-  final AuthRepository _authRepository;
+  final LoginUseCase loginUseCase;
+  final RegisterUseCase registerUseCase;
+  final GuestLoginUseCase guestLoginUseCase;
+  final SocialLoginUseCase socialLoginUseCase;
+  final SocialRegisterUseCase socialRegisterUseCase;
+  final AuthRepository repository;
+
+  /// Supplies the current `customerVerification` config flag. The config lives
+  /// in the splash feature (still GetX); the UI injects it when constructing
+  /// the bloc so the domain stays decoupled from SplashController.
+  final bool Function() isCustomerVerificationOn;
 
   AuthBloc({
-    required LoginUseCase loginUseCase,
-    required RegisterUseCase registerUseCase,
-    required GuestLoginUseCase guestLoginUseCase,
-    required SocialLoginUseCase socialLoginUseCase,
-    required SocialRegisterUseCase socialRegisterUseCase,
-    required LogoutUseCase logoutUseCase,
-    required CheckAuthStatusUseCase checkAuthStatusUseCase,
-    required ManageSavedCredentialsUseCase credentialsUseCase,
-    required AuthRepository authRepository,
-  })  : _loginUseCase = loginUseCase,
-        _registerUseCase = registerUseCase,
-        _guestLoginUseCase = guestLoginUseCase,
-        _socialLoginUseCase = socialLoginUseCase,
-        _socialRegisterUseCase = socialRegisterUseCase,
-        _logoutUseCase = logoutUseCase,
-        _checkAuthStatusUseCase = checkAuthStatusUseCase,
-        _credentialsUseCase = credentialsUseCase,
-        _authRepository = authRepository,
-        super(AuthInitial(
-          savedNumber: credentialsUseCase.getNumber(),
-          savedPassword: credentialsUseCase.getPassword(),
-          savedCountryCode: credentialsUseCase.getCountryCode(),
-          isNotificationActive: authRepository.isNotificationActive(),
-        )) {
-    on<LoginRequested>(_onLoginRequested);
-    on<RegisterRequested>(_onRegisterRequested);
-    on<GuestLoginRequested>(_onGuestLoginRequested);
-    on<SocialLoginRequested>(_onSocialLoginRequested);
-    on<SocialRegisterRequested>(_onSocialRegisterRequested);
-    on<LogoutRequested>(_onLogoutRequested);
+    required this.loginUseCase,
+    required this.registerUseCase,
+    required this.guestLoginUseCase,
+    required this.socialLoginUseCase,
+    required this.socialRegisterUseCase,
+    required this.repository,
+    required this.isCustomerVerificationOn,
+  }) : super(AuthState(notification: repository.isNotificationActive())) {
+    on<LoginRequested>(_onLogin);
+    on<RegistrationRequested>(_onRegister);
+    on<GuestLoginRequested>(_onGuestLogin);
+    on<SocialLoginRequested>(_onSocialLogin);
+    on<SocialRegistrationRequested>(_onSocialRegister);
     on<RememberMeToggled>(_onRememberMeToggled);
     on<TermsToggled>(_onTermsToggled);
-    on<TokenPersistenceRequested>(_onTokenPersistenceRequested);
+    on<NotificationToggled>(_onNotificationToggled);
   }
 
-  // ─── Convenience accessors (for compatibility shim) ────────────────
+  Future<void> _onLogin(LoginRequested event, Emitter<AuthState> emit) async {
+    emit(
+      state.copyWith(
+        isLoading: true,
+        actionStatus: AuthActionStatus.inProgress,
+        actionType: AuthActionType.login,
+      ),
+    );
+    final result = await loginUseCase(
+      LoginParams(
+        phone: event.phone,
+        password: event.password,
+        isCustomerVerificationOn: isCustomerVerificationOn(),
+      ),
+    );
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.failure,
+          actionType: AuthActionType.login,
+          message: failure.message,
+        ),
+      ),
+      (auth) {
+        final needsVerification =
+            isCustomerVerificationOn() && !auth.isPhoneVerified;
+        emit(
+          state.copyWith(
+            isLoading: false,
+            actionStatus: AuthActionStatus.success,
+            actionType: AuthActionType.login,
+            isPhoneVerified: auth.isPhoneVerified,
+            nextStep: needsVerification
+                ? AuthNextStep.verification
+                : AuthNextStep.location,
+            pendingToken: auth.token,
+            pendingPhone: event.phone,
+          ),
+        );
+      },
+    );
+  }
 
-  bool get isLoggedIn => _checkAuthStatusUseCase.isLoggedIn();
-  bool get isGuestLoggedIn => _checkAuthStatusUseCase.isGuestLoggedIn();
-  String get guestId => _checkAuthStatusUseCase.getGuestId();
-  String get userToken => _checkAuthStatusUseCase.getUserToken();
-
-  String get savedNumber => _credentialsUseCase.getNumber();
-  String get savedCountryCode => _credentialsUseCase.getCountryCode();
-  String get savedPassword => _credentialsUseCase.getPassword();
-
-  String get guestContactNumber => _authRepository.getGuestContactNumber();
-
-  bool get isNotificationActive => _authRepository.isNotificationActive();
-
-  // ─── Event handlers ────────────────────────────────────────────────
-
-  Future<void> _onLoginRequested(
-    LoginRequested event,
+  Future<void> _onRegister(
+    RegistrationRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoading());
-
-    final result = await _loginUseCase(
-      phone: event.phone,
-      password: event.password,
+    emit(
+      state.copyWith(
+        isLoading: true,
+        actionStatus: AuthActionStatus.inProgress,
+        actionType: AuthActionType.register,
+      ),
     );
-
+    final result = await registerUseCase(
+      RegisterParams(
+        signUp: event.signUp,
+        isCustomerVerificationOn: isCustomerVerificationOn(),
+      ),
+    );
     result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (response) => emit(AuthSuccess(response: response)),
+      (failure) => emit(
+        state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.failure,
+          actionType: AuthActionType.register,
+          message: failure.message,
+        ),
+      ),
+      (auth) => emit(
+        state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.success,
+          actionType: AuthActionType.register,
+          nextStep: isCustomerVerificationOn()
+              ? AuthNextStep.verification
+              : AuthNextStep.location,
+          pendingToken: auth.token,
+          pendingPhone: event.signUp.phone,
+        ),
+      ),
     );
   }
 
-  Future<void> _onRegisterRequested(
-    RegisterRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
-
-    final result = await _registerUseCase(event.body);
-
-    result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (response) => emit(AuthSuccess(response: response)),
-    );
-  }
-
-  Future<void> _onGuestLoginRequested(
+  Future<void> _onGuestLogin(
     GuestLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthGuestLoading());
-
-    final result = await _guestLoginUseCase();
-
+    emit(
+      state.copyWith(
+        guestLoading: true,
+        actionStatus: AuthActionStatus.inProgress,
+        actionType: AuthActionType.guestLogin,
+      ),
+    );
+    final result = await guestLoginUseCase(const NoParams());
     result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (guestId) => emit(AuthGuestSuccess(guestId: guestId)),
+      (failure) => emit(
+        state.copyWith(
+          guestLoading: false,
+          actionStatus: AuthActionStatus.failure,
+          actionType: AuthActionType.guestLogin,
+          message: failure.message,
+        ),
+      ),
+      (_) => emit(
+        state.copyWith(
+          guestLoading: false,
+          actionStatus: AuthActionStatus.success,
+          actionType: AuthActionType.guestLogin,
+        ),
+      ),
     );
   }
 
-  Future<void> _onSocialLoginRequested(
+  Future<void> _onSocialLogin(
     SocialLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoading());
-
-    final result = await _socialLoginUseCase(event.body);
-
+    emit(
+      state.copyWith(
+        isLoading: true,
+        actionStatus: AuthActionStatus.inProgress,
+        actionType: AuthActionType.socialLogin,
+      ),
+    );
+    final result = await socialLoginUseCase(
+      SocialLoginParams(
+        social: event.social,
+        isCustomerVerificationOn: isCustomerVerificationOn(),
+      ),
+    );
     result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (response) {
-        if (response.token.isNotEmpty) {
-          if (!response.isPhoneVerified) {
-            // User exists but phone not verified → verification screen
-            emit(AuthSocialNeedsVerification(
-              phone: response.phone ?? event.body.email ?? '',
-              token: response.token,
-            ));
-          } else {
-            // Fully authenticated
-            emit(AuthSuccess(response: response));
-          }
-        } else {
-          // No token → user needs to complete social registration
-          emit(AuthSocialNeedsRegistration(body: event.body));
-        }
-      },
+      (failure) => emit(
+        state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.failure,
+          actionType: AuthActionType.socialLogin,
+          message: failure.message,
+        ),
+      ),
+      (social) => emit(_fromSocial(social, AuthActionType.socialLogin)),
     );
   }
 
-  Future<void> _onSocialRegisterRequested(
-    SocialRegisterRequested event,
+  Future<void> _onSocialRegister(
+    SocialRegistrationRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoading());
-
-    final result = await _socialRegisterUseCase(event.body);
-
+    emit(
+      state.copyWith(
+        isLoading: true,
+        actionStatus: AuthActionStatus.inProgress,
+        actionType: AuthActionType.socialRegister,
+      ),
+    );
+    final result = await socialRegisterUseCase(
+      SocialRegisterParams(
+        social: event.social,
+        isCustomerVerificationOn: isCustomerVerificationOn(),
+      ),
+    );
     result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (response) {
-        if (!response.isPhoneVerified && response.token.isNotEmpty) {
-          emit(AuthSocialNeedsVerification(
-            phone: event.body.phone ?? '',
-            token: response.token,
-          ));
-        } else {
-          emit(AuthSuccess(response: response));
-        }
-      },
+      (failure) => emit(
+        state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.failure,
+          actionType: AuthActionType.socialRegister,
+          message: failure.message,
+        ),
+      ),
+      (social) => emit(_fromSocial(social, AuthActionType.socialRegister)),
     );
   }
 
-  void _onLogoutRequested(
-    LogoutRequested event,
-    Emitter<AuthState> emit,
-  ) {
-    _logoutUseCase();
-    emit(const AuthLoggedOut());
-  }
-
-  void _onRememberMeToggled(
-    RememberMeToggled event,
-    Emitter<AuthState> emit,
-  ) {
-    final current = state;
-    if (current is AuthInitial) {
-      emit(current.copyWith(
-        isRememberMeActive: !current.isRememberMeActive,
-      ));
+  AuthState _fromSocial(SocialAuthResult social, AuthActionType type) {
+    switch (social.outcome) {
+      case SocialAuthOutcome.authenticated:
+        return state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.success,
+          actionType: type,
+          nextStep: AuthNextStep.location,
+        );
+      case SocialAuthOutcome.needsVerification:
+        return state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.success,
+          actionType: type,
+          nextStep: AuthNextStep.verification,
+          pendingToken: social.token,
+          pendingPhone: social.phone,
+        );
+      case SocialAuthOutcome.needsRegistration:
+        return state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.success,
+          actionType: type,
+          nextStep: AuthNextStep.registration,
+          pendingPhone: social.phone,
+        );
+      case SocialAuthOutcome.failed:
+        return state.copyWith(
+          isLoading: false,
+          actionStatus: AuthActionStatus.failure,
+          actionType: type,
+          message: social.message,
+        );
     }
   }
 
-  void _onTermsToggled(
-    TermsToggled event,
+  void _onRememberMeToggled(RememberMeToggled event, Emitter<AuthState> emit) {
+    emit(state.copyWith(rememberMe: !state.rememberMe));
+  }
+
+  void _onTermsToggled(TermsToggled event, Emitter<AuthState> emit) {
+    emit(state.copyWith(acceptTerms: !state.acceptTerms));
+  }
+
+  void _onNotificationToggled(
+    NotificationToggled event,
     Emitter<AuthState> emit,
   ) {
-    final current = state;
-    if (current is AuthInitial) {
-      emit(current.copyWith(acceptTerms: !current.acceptTerms));
-    }
+    repository.setNotificationActive(event.isActive);
+    emit(state.copyWith(notification: event.isActive));
   }
-
-  Future<void> _onTokenPersistenceRequested(
-    TokenPersistenceRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    await _authRepository.saveUserToken(event.token);
-    await _authRepository.updateToken();
-    await _authRepository.clearGuestId();
-  }
-
-  // ─── Public methods for compatibility layer ────────────────────────
-
-  Future<void> saveCredentials({
-    required String number,
-    required String password,
-    required String countryCode,
-  }) async {
-    await _credentialsUseCase.save(
-      number: number,
-      password: password,
-      countryCode: countryCode,
-    );
-  }
-
-  Future<bool> clearCredentials() => _credentialsUseCase.clear();
-
-  Future<void> saveGuestNumber(String number) =>
-      _authRepository.saveGuestContactNumber(number);
-
-  bool clearSharedData() => _authRepository.clearSharedData();
-
-  Future<bool> clearSharedAddress() => _authRepository.clearSharedAddress();
-
-  Future<void> updateToken() => _authRepository.updateToken();
-
-  Future<void> updateZone() => _authRepository.updateZone();
-
-  void setNotificationActive(bool isActive) =>
-      _authRepository.setNotificationActive(isActive);
 }

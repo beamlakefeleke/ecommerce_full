@@ -12,18 +12,29 @@ class ChatRepository implements ChatRepositoryInterface {
   ChatRepository({required this.apiClient, required this.sharedPreferences});
 
   @override
-  Future getList({int? offset, bool conversationList = false, String? type, bool searchConversationalList = false, String? name}) async {
-    if(conversationList) {
+  Future getList({
+    int? offset,
+    bool conversationList = false,
+    String? type,
+    bool searchConversationalList = false,
+    String? name,
+  }) async {
+    if (conversationList) {
       return await _getConversationList(offset!, type!);
-    }else if(searchConversationalList) {
+    } else if (searchConversationalList) {
       return await _searchConversationList(name!);
     }
   }
 
-  Future<ConversationsModel?> _getConversationList(int offset, String type) async {
+  Future<ConversationsModel?> _getConversationList(
+    int offset,
+    String type,
+  ) async {
     ConversationsModel? conversationModel;
-    Response response = await apiClient.getData('${AppConstants.conversationListUri}?limit=10&offset=$offset&type=$type');
-    if(response.statusCode == 200){
+    Response response = await apiClient.getData(
+      '${AppConstants.conversationListUri}?limit=10&offset=$offset&type=$type',
+    );
+    if (response.statusCode == 200) {
       conversationModel = ConversationsModel.fromJson(response.body);
     }
     return conversationModel;
@@ -31,29 +42,58 @@ class ChatRepository implements ChatRepositoryInterface {
 
   Future<ConversationsModel?> _searchConversationList(String name) async {
     ConversationsModel? searchConversationModel;
-    Response response = await apiClient.getData('${AppConstants.searchConversationListUri}?name=$name&limit=20&offset=1');
-    if(response.statusCode == 200) {
+    Response response = await apiClient.getData(
+      '${AppConstants.searchConversationListUri}?name=$name&limit=20&offset=1',
+    );
+    if (response.statusCode == 200) {
       searchConversationModel = ConversationsModel.fromJson(response.body);
     }
     return searchConversationModel;
   }
 
   @override
-  Future<Response> getMessages(int offset, int? userID, String userType, int? conversationID) async {
-    return await apiClient.getData('${AppConstants.messageListUri}?${conversationID != null ? 'conversation_id' : userType == UserType.admin.name ? 'admin_id'
-        : userType == UserType.vendor.name ? 'vendor_id' : 'delivery_man_id'}=${conversationID ?? userID}&offset=$offset&limit=10');
+  Future<Response> getMessages(
+    int offset,
+    int? userID,
+    String userType,
+    int? conversationID,
+  ) async {
+    return await apiClient.getData(
+      '${AppConstants.messageListUri}?${conversationID != null
+          ? 'conversation_id'
+          : userType == UserType.admin.name
+          ? 'admin_id'
+          : userType == UserType.vendor.name
+          ? 'vendor_id'
+          : 'delivery_man_id'}=${conversationID ?? userID}&offset=$offset&limit=10',
+    );
   }
 
   @override
-  Future<Response> sendMessage(String message, List<MultipartBody> images, int? userID, String userType, int? conversationID) async {
+  Future<Response> sendMessage(
+    String message,
+    List<MultipartBody> images,
+    int? userID,
+    String userType,
+    int? conversationID,
+  ) async {
     Map<String, String> fields = {};
-    fields.addAll({'message': message, 'receiver_type': userType, 'offset': '1', 'limit': '10'});
-    if(conversationID != null) {
+    fields.addAll({
+      'message': message,
+      'receiver_type': userType,
+      'offset': '1',
+      'limit': '10',
+    });
+    if (conversationID != null) {
       fields.addAll({'conversation_id': conversationID.toString()});
-    }else {
+    } else {
       fields.addAll({'receiver_id': userID.toString()});
     }
-    return await apiClient.postMultipartData(AppConstants.sendMessageUri, fields, images);
+    return await apiClient.postMultipartData(
+      AppConstants.sendMessageUri,
+      fields,
+      images,
+    );
   }
 
   @override
@@ -75,5 +115,4 @@ class ChatRepository implements ChatRepositoryInterface {
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-
 }

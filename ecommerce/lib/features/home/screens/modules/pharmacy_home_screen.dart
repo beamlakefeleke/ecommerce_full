@@ -18,31 +18,32 @@ class PharmacyHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isLoggedIn = AuthHelper.isLoggedIn();
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          color: Theme.of(context).disabledColor.withOpacity(0.1),
+          child: const Column(
+            children: [
+              BadWeatherWidget(),
 
-      Container(
-        width: MediaQuery.of(context).size.width,
-        color: Theme.of(context).disabledColor.withOpacity(0.1),
-        child:  const Column(
-          children: [
-            BadWeatherWidget(),
-
-            BannerView(isFeatured: false),
-            SizedBox(height: 12),
-          ],
+              BannerView(isFeatured: false),
+              SizedBox(height: 12),
+            ],
+          ),
         ),
-      ),
 
-      const CategoryView(),
-      isLoggedIn ? const VisitAgainView() : const SizedBox(),
-      const ProductWithCategoriesView(),
-      const MiddleSectionBannerView(),
-      const BestStoreNearbyView(),
-      const JustForYouView(),
-      const NewOnMartView(isShop: false, isPharmacy: true, isNewStore: true),
-      const CommonConditionView(),
-      const PromotionalBannerView(),
-
-    ]);
+        const CategoryView(),
+        isLoggedIn ? const VisitAgainView() : const SizedBox(),
+        const ProductWithCategoriesView(),
+        const MiddleSectionBannerView(),
+        const BestStoreNearbyView(),
+        const JustForYouView(),
+        const NewOnMartView(isShop: false, isPharmacy: true, isNewStore: true),
+        const CommonConditionView(),
+        const PromotionalBannerView(),
+      ],
+    );
   }
 }

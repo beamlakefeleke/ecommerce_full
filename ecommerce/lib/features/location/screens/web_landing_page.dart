@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/address/domain/models/address_model.dart';
+import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/location/domain/models/prediction_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
@@ -239,8 +239,99 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: TypeAheadField<PredictionModel>(
-                                              controller: _controller,
+                                            child: TypeAheadField(
+                                              textFieldConfiguration: TextFieldConfiguration(
+                                                controller: _controller,
+                                                textInputAction:
+                                                    TextInputAction.search,
+                                                textCapitalization:
+                                                    TextCapitalization.words,
+                                                keyboardType:
+                                                    TextInputType.streetAddress,
+                                                decoration: InputDecoration(
+                                                  hintText:
+                                                      'search_location'.tr,
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                    borderSide: BorderSide(
+                                                      color: Theme.of(context)
+                                                          .primaryColor
+                                                          .withOpacity(0.3),
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              10,
+                                                            ),
+                                                        borderSide: BorderSide(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .primaryColor
+                                                                  .withOpacity(
+                                                                    0.3,
+                                                                  ),
+                                                          width: 1,
+                                                        ),
+                                                      ),
+                                                  hintStyle: Theme.of(context)
+                                                      .textTheme
+                                                      .displayMedium!
+                                                      .copyWith(
+                                                        fontSize: Dimensions
+                                                            .fontSizeDefault,
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).disabledColor,
+                                                      ),
+                                                  filled: true,
+                                                  fillColor: Theme.of(
+                                                    context,
+                                                  ).cardColor,
+                                                  suffixIcon: IconButton(
+                                                    onPressed: () async {
+                                                      Get.dialog(
+                                                        const CustomLoader(),
+                                                        barrierDismissible:
+                                                            false,
+                                                      );
+                                                      _address =
+                                                          await Get.find<
+                                                                LocationController
+                                                              >()
+                                                              .getCurrentLocation(
+                                                                true,
+                                                              );
+                                                      _controller.text =
+                                                          _address!.address ??
+                                                          '';
+                                                      Get.back();
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.my_location,
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).primaryColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .displayMedium!
+                                                    .copyWith(
+                                                      color: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyLarge!
+                                                          .color,
+                                                      fontSize: Dimensions
+                                                          .fontSizeLarge,
+                                                    ),
+                                              ),
                                               suggestionsCallback:
                                                   (pattern) async {
                                                     return await Get.find<
@@ -251,97 +342,6 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                           pattern,
                                                         );
                                                   },
-                                              builder: (context, controller, focusNode) {
-                                                return TextField(
-                                                  controller: controller,
-                                                  focusNode: focusNode,
-                                                  textInputAction:
-                                                      TextInputAction.search,
-                                                  textCapitalization:
-                                                      TextCapitalization.words,
-                                                  keyboardType: TextInputType
-                                                      .streetAddress,
-                                                  decoration: InputDecoration(
-                                                    hintText:
-                                                        'search_location'.tr,
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10,
-                                                          ),
-                                                      borderSide: BorderSide(
-                                                        color: Theme.of(context)
-                                                            .primaryColor
-                                                            .withOpacity(0.3),
-                                                        width: 1,
-                                                      ),
-                                                    ),
-                                                    enabledBorder: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10,
-                                                          ),
-                                                      borderSide: BorderSide(
-                                                        color: Theme.of(context)
-                                                            .primaryColor
-                                                            .withOpacity(0.3),
-                                                        width: 1,
-                                                      ),
-                                                    ),
-                                                    hintStyle: Theme.of(context)
-                                                        .textTheme
-                                                        .displayMedium!
-                                                        .copyWith(
-                                                          fontSize: Dimensions
-                                                              .fontSizeDefault,
-                                                          color: Theme.of(
-                                                            context,
-                                                          ).disabledColor,
-                                                        ),
-                                                    filled: true,
-                                                    fillColor: Theme.of(
-                                                      context,
-                                                    ).cardColor,
-                                                    suffixIcon: IconButton(
-                                                      onPressed: () async {
-                                                        Get.dialog(
-                                                          const CustomLoader(),
-                                                          barrierDismissible:
-                                                              false,
-                                                        );
-                                                        _address =
-                                                            await Get.find<
-                                                                  LocationController
-                                                                >()
-                                                                .getCurrentLocation(
-                                                                  true,
-                                                                );
-                                                        _controller.text =
-                                                            _address!.address ??
-                                                            '';
-                                                        Get.back();
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.my_location,
-                                                        color: Theme.of(
-                                                          context,
-                                                        ).primaryColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .displayMedium!
-                                                      .copyWith(
-                                                        color: Theme.of(context)
-                                                            .textTheme
-                                                            .bodyLarge!
-                                                            .color,
-                                                        fontSize: Dimensions
-                                                            .fontSizeLarge,
-                                                      ),
-                                                );
-                                              },
                                               itemBuilder:
                                                   (
                                                     context,
@@ -385,7 +385,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                       ),
                                                     );
                                                   },
-                                              onSelected:
+                                              onSuggestionSelected:
                                                   (
                                                     PredictionModel suggestion,
                                                   ) async {
@@ -671,6 +671,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                               onLinkTap:
                                                                   (
                                                                     url,
+                                                                    context,
                                                                     attributes,
                                                                     element,
                                                                   ) {

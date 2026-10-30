@@ -4,11 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommerce/features/chat/controllers/chat_controller.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
-import 'package:ecommerce/features/dashboard/screens/dashboard_screen.dart';
+import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
-import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
-import 'package:ecommerce/features/notification/presentation/bloc/notification_event.dart';
-import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -18,6 +15,7 @@ import 'package:ecommerce/util/app_constants.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:ecommerce/features/dashboard/screens/dashboard_screen.dart';
 import 'package:ecommerce/features/notification/widgets/notifiation_popup_dialog_widget.dart';
 
 class NotificationHelper {
@@ -35,10 +33,10 @@ class NotificationHelper {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+        >()!
+        .requestNotificationsPermission();
     flutterLocalNotificationsPlugin.initialize(
-      settings: initializationsSettings,
+      initializationsSettings,
       onDidReceiveNotificationResponse: (NotificationResponse load) async {
         try {
           NotificationBodyModel payload;
@@ -136,7 +134,7 @@ class NotificationHelper {
         if (AuthHelper.isLoggedIn()) {
           Get.find<OrderController>().getRunningOrders(1);
           Get.find<OrderController>().getHistoryOrders(1);
-          getIt<NotificationBloc>().add(const NotificationListFetched());
+          Get.find<NotificationController>().getNotificationList(true);
         }
       }
 
@@ -293,10 +291,10 @@ class NotificationHelper {
       android: androidPlatformChannelSpecifics,
     );
     await fln.show(
-      id: 0,
-      title: title,
-      body: body,
-      notificationDetails: platformChannelSpecifics,
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
       payload: notificationBody != null
           ? jsonEncode(notificationBody.toJson())
           : null,
@@ -330,10 +328,10 @@ class NotificationHelper {
       android: androidPlatformChannelSpecifics,
     );
     await fln.show(
-      id: 0,
-      title: title,
-      body: body,
-      notificationDetails: platformChannelSpecifics,
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
       payload: notificationBody != null
           ? jsonEncode(notificationBody.toJson())
           : null,
@@ -377,10 +375,10 @@ class NotificationHelper {
       android: androidPlatformChannelSpecifics,
     );
     await fln.show(
-      id: 0,
-      title: title,
-      body: body,
-      notificationDetails: platformChannelSpecifics,
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
       payload: notificationBody != null
           ? jsonEncode(notificationBody.toJson())
           : null,

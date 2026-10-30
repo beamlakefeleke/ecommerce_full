@@ -1,19 +1,31 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:ecommerce/core/network/failure.dart';
+import 'package:ecommerce/core/error/failure.dart';
+import 'package:ecommerce/core/usecase/usecase.dart';
 import 'package:ecommerce/features/auth/domain/entities/auth_response.dart';
-import 'package:ecommerce/features/auth/domain/entities/signup_body.dart';
+import 'package:ecommerce/features/auth/domain/entities/sign_up_params.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 
-/// Registers a new customer account.
-///
-/// On success with verification disabled, saves the token and clears
-/// the guest ID automatically through the repository.
-class RegisterUseCase {
-  final AuthRepository _repository;
+class RegisterParams extends Equatable {
+  final SignUpParams signUp;
+  final bool isCustomerVerificationOn;
 
-  const RegisterUseCase(this._repository);
+  const RegisterParams({
+    required this.signUp,
+    required this.isCustomerVerificationOn,
+  });
 
-  Future<Either<Failure, AuthResponse>> call(SignupBody body) {
-    return _repository.register(body);
+  @override
+  List<Object?> get props => [signUp, isCustomerVerificationOn];
+}
+
+class RegisterUseCase implements UseCase<AuthResponse, RegisterParams> {
+  final AuthRepository repository;
+
+  RegisterUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, AuthResponse>> call(RegisterParams params) {
+    return repository.register(params.signUp, params.isCustomerVerificationOn);
   }
 }

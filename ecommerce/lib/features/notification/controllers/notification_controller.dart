@@ -1,40 +1,49 @@
-import 'package:get/get.dart';
-import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_model.dart';
+import 'package:ecommerce/helper/date_converter.dart';
+import 'package:get/get.dart';
 import 'package:ecommerce/features/notification/domain/service/notification_service_interface.dart';
-import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
-import 'package:ecommerce/features/notification/presentation/bloc/notification_event.dart';
-import 'package:ecommerce/features/notification/presentation/bloc/notification_state.dart';
 
-/// Thin GetX adapter — delegates to [NotificationBloc].
 class NotificationController extends GetxController implements GetxService {
-  // ignore: unused_field
   final NotificationServiceInterface notificationServiceInterface;
   NotificationController({required this.notificationServiceInterface});
 
-  NotificationBloc get _bloc => getIt<NotificationBloc>();
-  NotificationState get _state => _bloc.state;
+  List<NotificationModel>? _notificationList;
+  List<NotificationModel>? get notificationList => _notificationList;
 
-  List<NotificationModel>? get notificationList => _state.notifications;
-  bool get hasNotification => _state.hasUnread;
+  bool _hasNotification = false;
+  bool get hasNotification => _hasNotification;
 
   Future<int> getNotificationList(bool reload) async {
-    if (_state.notifications == null || reload) {
-      _bloc.add(const NotificationListFetched());
-      await Future.delayed(Duration.zero);
+    if (_notificationList == null || reload) {
+      List<NotificationModel>? notificationList =
+          await notificationServiceInterface.getNotificationList();
+      if (notificationList != null) {
+        _notificationList = [];
+        _notificationList!.addAll(notificationList);
+        _notificationList!.sort((a, b) {
+          return DateConverter.isoStringToLocalDate(
+            a.updatedAt!,
+          ).compareTo(DateConverter.isoStringToLocalDate(b.updatedAt!));
+        });
+        Iterable iterable = _notificationList!.reversed;
+        _notificationList = iterable.toList() as List<NotificationModel>?;
+        _hasNotification =
+            _notificationList!.length != getSeenNotificationCount();
+      }
       update();
     }
-    return _state.notifications?.length ?? 0;
+    return _notificationList!.length;
   }
 
   void saveSeenNotificationCount(int count) {
-    _bloc.add(NotificationSeenCountSaved(count));
-    update();
+    notificationServiceInterface.saveSeenNotificationCount(count);
   }
 
-  int? getSeenNotificationCount() => _state.notifications?.length;
+  int? getSeenNotificationCount() {
+    return notificationServiceInterface.getSeenNotificationCount();
+  }
 
   void clearNotification() {
-    _bloc.add(const NotificationCleared());
+    _notificationList = null;
   }
 }

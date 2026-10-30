@@ -11,12 +11,22 @@ class CardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: context.width,
-      padding: showCard ? const EdgeInsets.all(Dimensions.paddingSizeSmall) : null,
-      decoration: showCard ? BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-        boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 200]!, spreadRadius: 1, blurRadius: 5)],
-      ) : null,
+      padding: showCard
+          ? const EdgeInsets.all(Dimensions.paddingSizeSmall)
+          : null,
+      decoration: showCard
+          ? BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey[Get.isDarkMode ? 700 : 200]!,
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                ),
+              ],
+            )
+          : null,
       child: child,
     );
   }

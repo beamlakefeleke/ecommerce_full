@@ -1,89 +1,185 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/models/transaction_model.dart';
-import 'package:ecommerce/features/wallet/domain/entities/fund_bonus.dart';
-import 'package:ecommerce/core/di/injection.dart';
-import 'package:ecommerce/features/wallet/presentation/bloc/wallet_bloc.dart';
-import 'package:ecommerce/features/wallet/presentation/bloc/wallet_event.dart';
-import 'package:ecommerce/features/wallet/domain/usecases/manage_wallet_token_usecase.dart';
+import 'package:ecommerce/features/wallet/domain/models/wallet_filter_body_model.dart';
+import 'package:ecommerce/features/wallet/domain/models/fund_bonus_model.dart';
+import 'package:ecommerce/helper/route_helper.dart';
+import 'package:ecommerce/util/app_constants.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:ecommerce/features/wallet/domain/services/wallet_service_interface.dart';
 
 class WalletController extends GetxController implements GetxService {
-  final ManageWalletTokenUseCase manageWalletTokenUseCase;
+  final WalletServiceInterface walletServiceInterface;
+  WalletController({required this.walletServiceInterface});
 
-  WalletController({required this.manageWalletTokenUseCase});
+  List<Transaction>? _transactionList;
+  List<Transaction>? get transactionList => _transactionList;
 
-  // Backward compatibility getters (these might throw if context is not available when called, 
-  // but typically they are only called from UI where BLoC state is accessible).
-  // Ideally, widgets should use BlocBuilder directly instead of accessing state through the controller.
-  
-  BuildContext? get _context => Get.context;
-  WalletBloc? get _bloc => _context != null ? BlocProvider.of<WalletBloc>(_context!) : getIt<WalletBloc>();
+  List<String> _offsetList = [];
 
-  @override
-  void onInit() {
-    super.onInit();
-    _bloc?.stream.listen((state) {
-      update();
-    });
-  }
+  int _offset = 1;
+  int get offset => _offset;
 
-  List<Transaction>? get transactionList => _bloc?.state.transactionList;
-  int get offset => _bloc?.state.offset ?? 1;
-  int? get popularPageSize => _bloc?.state.popularPageSize;
-  bool get isLoading => _bloc?.state.isLoading ?? false;
-  String? get digitalPaymentName => _bloc?.state.digitalPaymentName;
-  bool get amountEmpty => _bloc?.state.amountEmpty ?? true;
-  List<FundBonus>? get fundBonusList => _bloc?.state.fundBonusList;
-  int get currentIndex => _bloc?.state.currentIndex ?? 0;
-  String get type => _bloc?.state.type ?? 'all';
-  List<dynamic> get walletFilterList => _bloc?.state.walletFilterList ?? [];
+  int? _pageSize;
+  int? get popularPageSize => _pageSize;
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  String? _digitalPaymentName;
+  String? get digitalPaymentName => _digitalPaymentName;
+
+  bool _amountEmpty = true;
+  bool get amountEmpty => _amountEmpty;
+
+  List<FundBonusModel>? _fundBonusList;
+  List<FundBonusModel>? get fundBonusList => _fundBonusList;
+
+  int _currentIndex = 0;
+  int get currentIndex => _currentIndex;
+
+  String _type = 'all';
+  String get type => _type;
+
+  List<WalletFilterBodyModel> _walletFilterList = [];
+  List<WalletFilterBodyModel> get walletFilterList => _walletFilterList;
 
   void setWalletFilerType(String type, {bool isUpdate = true}) {
-    _bloc?.add(SetWalletFilterTypeEvent(type: type));
+    _type = type;
+    if (isUpdate) {
+      update();
+    }
   }
 
   void insertFilterList() {
-    // Handled in BLoC constructor now
+    _walletFilterList = [];
+    for (int i = 0; i < AppConstants.walletTransactionSortingList.length; i++) {
+      _walletFilterList.add(
+        WalletFilterBodyModel.fromJson(
+          AppConstants.walletTransactionSortingList[i],
+        ),
+      );
+    }
   }
 
   void changeDigitalPaymentName(String name, {bool isUpdate = true}) {
-    _bloc?.add(ChangeDigitalPaymentNameEvent(name: name));
+    _digitalPaymentName = name;
+    if (isUpdate) {
+      update();
+    }
   }
 
   void isTextFieldEmpty(String value, {bool isUpdate = true}) {
-    _bloc?.add(CheckTextFieldEmptyEvent(value: value));
+    _amountEmpty = value.isNotEmpty;
+    if (isUpdate) {
+      update();
+    }
   }
 
   void setOffset(int offset) {
-    // Only used internally by BLoC now, no-op here
+    _offset = offset;
   }
 
   void showBottomLoader() {
-    // BLoC handles its own loading state.
+    _isLoading = true;
+    update();
   }
 
-  Future<void> getWalletTransactionList(String offset, bool reload, String walletType) async {
-    _bloc?.add(GetWalletTransactionsEvent(offset: offset, reload: reload, walletType: walletType));
+  Future<void> getWalletTransactionList(
+    String offset,
+    bool reload,
+    String walletType,
+  ) async {
+    if (offset == '1' || reload) {
+      _offsetList = [];
+      _offset = 1;
+      _transactionList = null;
+      if (reload) {
+        update();
+      }
+    }
+    if (!_offsetList.contains(offset)) {
+      _offsetList.add(offset);
+      TransactionModel? transactionModel = await walletServiceInterface
+          .getWalletTransactionList(offset, walletType);
+
+      if (transactionModel != null) {
+        if (offset == '1') {
+          _transactionList = [];
+        }
+        _transactionList!.addAll(transactionModel.data!);
+        _pageSize = transactionModel.totalSize;
+
+        _isLoading = false;
+        update();
+      }
+    } else {
+      if (isLoading) {
+        _isLoading = false;
+        update();
+      }
+    }
   }
 
   Future<void> addFundToWallet(double amount, String paymentMethod) async {
-    _bloc?.add(AddFundToWalletEvent(amount: amount, paymentMethod: paymentMethod));
+    _isLoading = true;
+    update();
+    Response response = await walletServiceInterface.addFundToWallet(
+      amount,
+      paymentMethod,
+    );
+    if (response.statusCode == 200) {
+      String redirectUrl = response.body['redirect_link'];
+      Get.back();
+      if (GetPlatform.isWeb) {
+        html.window.open(redirectUrl, "_self");
+      } else {
+        Get.toNamed(
+          RouteHelper.getPaymentRoute(
+            '0',
+            0,
+            '',
+            0,
+            false,
+            '',
+            addFundUrl: redirectUrl,
+            guestId: '',
+          ),
+        );
+      }
+    }
+    _isLoading = false;
+    update();
   }
 
   Future<void> getWalletBonusList({bool isUpdate = true}) async {
-    _bloc?.add(GetWalletBonusListEvent(isUpdate: isUpdate));
+    _isLoading = true;
+    if (isUpdate) {
+      update();
+    }
+
+    List<FundBonusModel>? bonuses = await walletServiceInterface
+        .getWalletBonusList();
+    if (bonuses != null) {
+      _fundBonusList = [];
+      _fundBonusList!.addAll(bonuses);
+
+      _isLoading = false;
+      update();
+    }
   }
 
   void setCurrentIndex(int index, bool notify) {
-    _bloc?.add(SetCurrentIndexEvent(index: index));
+    _currentIndex = index;
+    if (notify) {
+      update();
+    }
   }
 
-  void setWalletAccessToken(String accessToken){
-    manageWalletTokenUseCase.setWalletAccessToken(accessToken);
+  void setWalletAccessToken(String accessToken) {
+    walletServiceInterface.setWalletAccessToken(accessToken);
   }
 
-  String getWalletAccessToken (){
-    return manageWalletTokenUseCase.getWalletAccessToken();
+  String getWalletAccessToken() {
+    return walletServiceInterface.getWalletAccessToken();
   }
 }

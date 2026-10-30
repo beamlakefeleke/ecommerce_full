@@ -1,65 +1,68 @@
-import 'package:ecommerce/features/auth/domain/entities/signup_body.dart';
-import 'package:ecommerce/features/auth/domain/entities/social_login_body.dart';
+import 'package:equatable/equatable.dart';
+import 'package:ecommerce/features/auth/domain/entities/sign_up_params.dart';
+import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 
-/// Events dispatched to [AuthBloc] from the presentation layer.
-///
-/// Named as imperative verb + noun per RULES.md §3.
-sealed class AuthEvent {
+sealed class AuthEvent extends Equatable {
   const AuthEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
-/// User submitted phone + password login form.
 class LoginRequested extends AuthEvent {
-  final String phone;
+  final String? phone;
   final String password;
 
   const LoginRequested({required this.phone, required this.password});
+
+  @override
+  List<Object?> get props => [phone, password];
 }
 
-/// User submitted the registration form.
-class RegisterRequested extends AuthEvent {
-  final SignupBody body;
+class RegistrationRequested extends AuthEvent {
+  final SignUpParams signUp;
 
-  const RegisterRequested({required this.body});
+  const RegistrationRequested(this.signUp);
+
+  @override
+  List<Object?> get props => [signUp];
 }
 
-/// Initiate a guest session (no account needed).
 class GuestLoginRequested extends AuthEvent {
   const GuestLoginRequested();
 }
 
-/// User tapped a social login button (Google/Facebook/Apple).
 class SocialLoginRequested extends AuthEvent {
-  final SocialLoginBody body;
+  final SocialSignInParams social;
 
-  const SocialLoginRequested({required this.body});
+  const SocialLoginRequested(this.social);
+
+  @override
+  List<Object?> get props => [social];
 }
 
-/// User completing social registration (providing missing phone, etc.).
-class SocialRegisterRequested extends AuthEvent {
-  final SocialLoginBody body;
+class SocialRegistrationRequested extends AuthEvent {
+  final SocialSignInParams social;
 
-  const SocialRegisterRequested({required this.body});
+  const SocialRegistrationRequested(this.social);
+
+  @override
+  List<Object?> get props => [social];
 }
 
-/// User requested logout.
-class LogoutRequested extends AuthEvent {
-  const LogoutRequested();
-}
-
-/// Toggle "Remember me" checkbox.
 class RememberMeToggled extends AuthEvent {
   const RememberMeToggled();
 }
 
-/// Toggle "Accept terms & conditions" checkbox.
 class TermsToggled extends AuthEvent {
   const TermsToggled();
 }
 
-/// Save token and update FCM after successful auth (used internally).
-class TokenPersistenceRequested extends AuthEvent {
-  final String token;
+class NotificationToggled extends AuthEvent {
+  final bool isActive;
 
-  const TokenPersistenceRequested({required this.token});
+  const NotificationToggled(this.isActive);
+
+  @override
+  List<Object?> get props => [isActive];
 }

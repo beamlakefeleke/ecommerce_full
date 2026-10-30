@@ -1,68 +1,114 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:ecommerce/api/api_checker.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
-import 'package:ecommerce/features/taxi_booking/domain/models/vehicle_model.dart';
-import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_bloc.dart';
-import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_event.dart';
-import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_state.dart';
-import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
+import 'package:ecommerce/features/taxi_booking/repo/rider_repo.dart';
+import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 
-export 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_state.dart' show PageState, PaymentMethodName;
+enum PageState { orderDetails, payment, complete }
+
+enum PaymentMethodName { digitalPayment, cod }
 
 class BookingCheckoutController extends GetxController implements GetxService {
-  late final BookingCheckoutBloc bookingCheckoutBloc;
+  final RiderRepo riderRepo;
+  BookingCheckoutController({required this.riderRepo});
 
-  BookingCheckoutController() {
-    bookingCheckoutBloc = getIt<BookingCheckoutBloc>();
-    bookingCheckoutBloc.stream.listen((state) {
-      update();
-    });
-  }
-
-  PageState get currentPage => bookingCheckoutBloc.state.currentPage;
-  bool get isLoading => bookingCheckoutBloc.state.isLoading;
-  PaymentMethodName get selectedPaymentMethod => bookingCheckoutBloc.state.selectedPaymentMethod;
-  bool get showCouponSection => bookingCheckoutBloc.state.showCouponSection;
-  bool get cancelPayment => bookingCheckoutBloc.state.cancelPayment;
-  double? get couponDiscount => bookingCheckoutBloc.state.couponDiscount;
-  int get paymentMethodIndex => bookingCheckoutBloc.state.paymentMethodIndex;
-  int? get tripId => bookingCheckoutBloc.state.tripId;
-
-  // Needed for UI that uses it as variable
+  PageState currentPage = PageState.orderDetails;
+  bool _isLoading = false;
+  var selectedPaymentMethod = PaymentMethodName.cod;
   bool showCoupon = false;
+  bool cancelPayment = false;
+
+  bool _showCouponSection = false;
+  double? _couponDiscount = 0;
+  int _paymentMethodIndex = 0;
+  int? _tripId;
+
+  bool get showCouponSection => _showCouponSection;
+  bool get isLoading => _isLoading;
+  double? get couponDiscount => _couponDiscount;
+  int get paymentMethodIndex => _paymentMethodIndex;
+  int? get tripId => _tripId;
 
   void setPaymentMethod(int index, {bool isUpdate = true}) {
-    bookingCheckoutBloc.add(SetPaymentMethodEvent(index: index, isUpdate: isUpdate));
-  }
-
-  void showHideCoupon(){
-    showCoupon = !showCoupon; // Keep local sync if UI uses it directly
-    bookingCheckoutBloc.add(ShowHideCouponEvent());
-  }
-
-  void setCouponDiscount(double? discount){
-    bookingCheckoutBloc.add(SetCouponDiscountEvent(discount: discount));
-  }
-
-  void cancelPaymentOption(){
-    bookingCheckoutBloc.add(CancelPaymentOptionEvent());
-  }
-
-  void updateState(PageState currentPage, {bool shouldUpdate = true}){
-    bookingCheckoutBloc.add(UpdateStateEvent(currentPage: currentPage, shouldUpdate: shouldUpdate));
-  }
-
-  void updateDigitalPaymentOption(PaymentMethodName paymentMethodName, {bool shouldUpdate = true}){
-    bookingCheckoutBloc.add(UpdateDigitalPaymentOptionEvent(paymentMethodName: paymentMethodName, shouldUpdate: shouldUpdate));
-  }
-
-  Future<bool> placeTrip({required UserInformationBody filterBody, required Vehicles vehicle}) async {
-    bookingCheckoutBloc.add(PlaceTripEvent(filterBody: filterBody, vehicle: vehicle));
-    // Wait for the state to stop loading
-    await for (final state in bookingCheckoutBloc.stream) {
-      if (!state.isLoading) {
-        return state is! BookingCheckoutError;
-      }
+    _paymentMethodIndex = index;
+    if (isUpdate) {
+      update();
     }
-    return false;
+  }
+
+  void showHideCoupon() {
+    _showCouponSection = !_showCouponSection;
+    update();
+  }
+
+  void setCouponDiscount(double? discount) {
+    _couponDiscount = discount;
+    update();
+  }
+
+  void cancelPaymentOption() {
+    cancelPayment = true;
+    update();
+  }
+
+  void updateState(PageState currentPage, {bool shouldUpdate = true}) {
+    if (kDebugMode) {
+      print('--------------$currentPage');
+    }
+    currentPage = currentPage;
+    if (shouldUpdate) {
+      update();
+    }
+  }
+
+  void updateDigitalPaymentOption(
+    PaymentMethodName paymentMethodName, {
+    bool shouldUpdate = true,
+  }) {
+    selectedPaymentMethod = paymentMethodName;
+    if (shouldUpdate) {
+      update();
+    }
+  }
+
+  Future<bool> placeTrip({
+    required UserInformationBody filterBody,
+    required Vehicles vehicle,
+  }) async {
+    _tripId = null;
+    bool success = false;
+    _isLoading = true;
+    update();
+    Map<String, String?> body = {
+      'start_latitude': filterBody.from!.latitude,
+      'start_longitude': filterBody.from!.longitude,
+      'end_latitude': filterBody.to!.latitude,
+      'end_longitude': filterBody.to!.longitude,
+      'fare_category': filterBody.fareCategory,
+      'schedule_at': filterBody.rentTime,
+      'distance': filterBody.distance.toString(),
+      'filter_type': filterBody.filterType,
+      'payment_method': _paymentMethodIndex == 0
+          ? 'cash_on_delivery'
+          : _paymentMethodIndex == 1
+          ? 'digital_payment'
+          : 'wallet',
+      'vehicle_id': vehicle.id.toString(),
+      'provider_id': vehicle.providerId.toString(),
+    };
+
+    Response response = await riderRepo.placeTrip(body);
+    _isLoading = false;
+    if (response.statusCode == 200) {
+      success = true;
+      showCustomSnackBar(response.body['message'], isError: false);
+      _tripId = response.body['trip_id'];
+    } else {
+      ApiChecker.checkApi(response);
+    }
+    update();
+    return success;
   }
 }

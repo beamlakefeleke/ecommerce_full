@@ -1,6 +1,6 @@
-import 'package:ecommerce/features/address/domain/models/address_model.dart';
+import 'package:ecommerce/features/address/data/models/address_model.dart';
 
-class UserInformationBody{
+class UserInformationBody {
   AddressModel? from;
   AddressModel? to;
   String? fareCategory;
@@ -12,7 +12,18 @@ class UserInformationBody{
   int? brandModelId;
   String? rentTime;
 
-  UserInformationBody({this.from, this.to, this.fareCategory, this.distance, this.duration, this.filterType, this.minPrice, this.maxPrice, this.brandModelId, this.rentTime});
+  UserInformationBody({
+    this.from,
+    this.to,
+    this.fareCategory,
+    this.distance,
+    this.duration,
+    this.filterType,
+    this.minPrice,
+    this.maxPrice,
+    this.brandModelId,
+    this.rentTime,
+  });
 
   UserInformationBody.fromJson(Map<String, dynamic> json) {
     from = json['from'] != null ? AddressModel.fromJson(json['from']) : null;

@@ -1,48 +1,52 @@
-import 'package:ecommerce/features/wallet/domain/entities/fund_bonus.dart';
-
-class FundBonusModel extends FundBonus {
+class FundBonusModel {
+  int? id;
+  String? title;
+  String? description;
+  String? bonusType;
+  double? bonusAmount;
+  double? minimumAddAmount;
+  double? maximumBonusAmount;
+  String? startDate;
+  String? endDate;
+  int? status;
+  String? createdAt;
+  String? updatedAt;
   List<Translations>? translations;
 
-  FundBonusModel({
-    super.id,
-    super.title,
-    super.description,
-    super.bonusType,
-    super.bonusAmount,
-    super.minimumAddAmount,
-    super.maximumBonusAmount,
-    super.startDate,
-    super.endDate,
-    super.status,
-    super.createdAt,
-    super.updatedAt,
-    this.translations,
-  });
+  FundBonusModel(
+      {this.id,
+        this.title,
+        this.description,
+        this.bonusType,
+        this.bonusAmount,
+        this.minimumAddAmount,
+        this.maximumBonusAmount,
+        this.startDate,
+        this.endDate,
+        this.status,
+        this.createdAt,
+        this.updatedAt,
+        this.translations});
 
-  factory FundBonusModel.fromJson(Map<String, dynamic> json) {
-    List<Translations>? translations;
+  FundBonusModel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    title = json['title'];
+    description = json['description'];
+    bonusType = json['bonus_type'];
+    bonusAmount = json['bonus_amount']?.toDouble();
+    minimumAddAmount = json['minimum_add_amount']?.toDouble();
+    maximumBonusAmount = json['maximum_bonus_amount']?.toDouble();
+    startDate = json['start_date'];
+    endDate = json['end_date'];
+    status = json['status'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
     if (json['translations'] != null) {
       translations = <Translations>[];
       json['translations'].forEach((v) {
         translations!.add(Translations.fromJson(v));
       });
     }
-
-    return FundBonusModel(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      bonusType: json['bonus_type'],
-      bonusAmount: json['bonus_amount']?.toDouble(),
-      minimumAddAmount: json['minimum_add_amount']?.toDouble(),
-      maximumBonusAmount: json['maximum_bonus_amount']?.toDouble(),
-      startDate: json['start_date'],
-      endDate: json['end_date'],
-      status: json['status'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      translations: translations,
-    );
   }
 
   Map<String, dynamic> toJson() {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ecommerce/features/address/domain/models/address_model.dart';
+import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/interfaces/repository_interface.dart';
 
 abstract class LanguageRepositoryInterface extends RepositoryInterface {

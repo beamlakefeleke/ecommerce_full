@@ -14,17 +14,17 @@ ThemeData light({Color color = const Color(0xFF039D55)}) => ThemeData(
     style: TextButton.styleFrom(foregroundColor: color),
   ),
   colorScheme: ColorScheme.light(primary: color, secondary: color)
-      .copyWith(surface: const Color(0xFFFCFCFC))
+      .copyWith(background: const Color(0xFFFCFCFC))
       .copyWith(error: const Color(0xFFE84D4F)),
   popupMenuTheme: const PopupMenuThemeData(
     color: Colors.white,
     surfaceTintColor: Colors.white,
   ),
-  dialogTheme: const DialogThemeData(surfaceTintColor: Colors.white),
+  dialogTheme: const DialogTheme(surfaceTintColor: Colors.white),
   floatingActionButtonTheme: FloatingActionButtonThemeData(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(500)),
   ),
-  bottomAppBarTheme: const BottomAppBarThemeData(
+  bottomAppBarTheme: const BottomAppBarTheme(
     surfaceTintColor: Colors.white,
     height: 60,
     padding: EdgeInsets.symmetric(vertical: 5),

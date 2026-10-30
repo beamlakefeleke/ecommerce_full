@@ -1,16 +1,15 @@
-import 'package:get/get.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 
+/// App-wide session query helper. Session state (logged-in / guest / token) is
+/// infra, not UI state, so it is read straight from the migrated
+/// [AuthRepository] via get_it — not from a Bloc.
 class AuthHelper {
-  static bool isGuestLoggedIn() {
-    return Get.find<AuthController>().isGuestLoggedIn();
-  }
+  static AuthRepository get _repo => getIt<AuthRepository>();
 
-  static String getGuestId() {
-    return Get.find<AuthController>().getGuestId();
-  }
+  static bool isGuestLoggedIn() => _repo.isGuestLoggedIn();
 
-  static bool isLoggedIn() {
-    return Get.find<AuthController>().isLoggedIn();
-  }
+  static String getGuestId() => _repo.getGuestId();
+
+  static bool isLoggedIn() => _repo.isLoggedIn();
 }

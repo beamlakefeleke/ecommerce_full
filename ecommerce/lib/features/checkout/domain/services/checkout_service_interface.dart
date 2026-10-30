@@ -12,11 +12,34 @@ abstract class CheckoutServiceInterface {
   Future<int> getDmTipMostTapped();
   String getSharedPrefDmTipIndex();
   Future<bool> saveSharedPrefDmTipIndex(String index);
-  Future<List<TimeSlotModel>?> initializeTimeSlot(Store store, int? scheduleOrderSlotDuration);
-  List<TimeSlotModel>? validateTimeSlot(List<TimeSlotModel> slots, int dateIndex, int? interval, bool? orderPlaceToScheduleInterval);
-  Future<Response> getDistanceInMeter(LatLng originLatLng, LatLng destinationLatLng);
+  Future<List<TimeSlotModel>?> initializeTimeSlot(
+    Store store,
+    int? scheduleOrderSlotDuration,
+  );
+  List<TimeSlotModel>? validateTimeSlot(
+    List<TimeSlotModel> slots,
+    int dateIndex,
+    int? interval,
+    bool? orderPlaceToScheduleInterval,
+  );
+  Future<Response> getDistanceInMeter(
+    LatLng originLatLng,
+    LatLng destinationLatLng,
+  );
   Future<double> getExtraCharge(double? distance);
-  Future<Response> placeOrder(PlaceOrderBodyModel orderBody, XFile? orderAttachment);
-  Future<Response> placePrescriptionOrder(int? storeId, double? distance, String address, String longitude, String latitude, String note,
-      List<MultipartBody> orderAttachment, String dmTips, String deliveryInstruction);
+  Future<Response> placeOrder(
+    PlaceOrderBodyModel orderBody,
+    XFile? orderAttachment,
+  );
+  Future<Response> placePrescriptionOrder(
+    int? storeId,
+    double? distance,
+    String address,
+    String longitude,
+    String latitude,
+    String note,
+    List<MultipartBody> orderAttachment,
+    String dmTips,
+    String deliveryInstruction,
+  );
 }

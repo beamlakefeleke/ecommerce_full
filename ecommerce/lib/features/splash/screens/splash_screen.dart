@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
-
+import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_state.dart';
+import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -16,7 +14,7 @@ import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/common/widgets/no_internet_screen.dart';
-import 'package:ecommerce/core/di/injection.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -29,7 +27,7 @@ class SplashScreen extends StatefulWidget {
 
 class SplashScreenState extends State<SplashScreen> {
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey();
-  late StreamSubscription<List<ConnectivityResult>> _onConnectivityChanged;
+  late StreamSubscription<ConnectivityResult> _onConnectivityChanged;
 
   @override
   void initState() {
@@ -37,16 +35,12 @@ class SplashScreenState extends State<SplashScreen> {
 
     bool firstTime = true;
     _onConnectivityChanged = Connectivity().onConnectivityChanged.listen((
-      List<ConnectivityResult> results,
+      ConnectivityResult result,
     ) {
       if (!firstTime) {
         bool isNotConnected =
-            results.isEmpty ||
-            results.every(
-              (r) =>
-                  r != ConnectivityResult.wifi &&
-                  r != ConnectivityResult.mobile,
-            );
+            result != ConnectivityResult.wifi &&
+            result != ConnectivityResult.mobile;
         isNotConnected
             ? const SizedBox()
             : ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -70,7 +64,7 @@ class SplashScreenState extends State<SplashScreen> {
     Get.find<SplashController>().initSharedData();
     if ((AuthHelper.getGuestId().isNotEmpty || AuthHelper.isLoggedIn()) &&
         Get.find<SplashController>().cacheModule != null) {
-      getIt<CartBloc>().add(GetCartDataEvent());
+      Get.find<CartController>().getCartDataOnline();
     }
     _route();
   }
@@ -130,7 +124,7 @@ class SplashScreenState extends State<SplashScreen> {
                 Get.find<AuthController>().updateToken();
                 if (AddressHelper.getUserAddressFromSharedPref() != null) {
                   if (Get.find<SplashController>().module != null) {
-                    getIt<FavouriteBloc>().add(const FavouriteListFetched());
+                    await Get.find<FavouriteController>().getFavouriteList();
                   }
                   Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
                 } else {

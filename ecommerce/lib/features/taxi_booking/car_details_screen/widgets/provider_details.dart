@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
-import 'package:ecommerce/features/taxi_booking/domain/models/vehicle_model.dart';
+import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 
@@ -15,14 +15,24 @@ class ProviderDetails extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
-        boxShadow: [BoxShadow(color: Colors.grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!, blurRadius: 5, spreadRadius: 1,)],
+        boxShadow: [
+          BoxShadow(
+            color:
+                Colors.grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!,
+            blurRadius: 5,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('provider_details'.tr,style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
+            Text(
+              'provider_details'.tr,
+              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+            ),
             const SizedBox(height: Dimensions.paddingSizeDefault),
 
             _providerDetailsItem("name".tr, vehicle.provider!.name!),
@@ -37,22 +47,29 @@ class ProviderDetails extends StatelessWidget {
             _providerDetailsItem("address".tr, vehicle.provider!.address!),
             const SizedBox(height: Dimensions.paddingSizeDefault),
 
-            _providerDetailsItem("completed_trip".tr, vehicle.provider!.completedTrip.toString()),
+            _providerDetailsItem(
+              "completed_trip".tr,
+              vehicle.provider!.completedTrip.toString(),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _providerDetailsItem(String title,String subTitle,){
+  Widget _providerDetailsItem(String title, String subTitle) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title,style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault),),
-        Text(subTitle,style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault),),
+        Text(
+          title,
+          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault),
+        ),
+        Text(
+          subTitle,
+          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault),
+        ),
       ],
     );
-
   }
-
 }

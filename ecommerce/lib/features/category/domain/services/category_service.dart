@@ -11,32 +11,65 @@ class CategoryService implements CategoryServiceInterface {
 
   @override
   Future<List<CategoryModel>?> getCategoryList(bool allCategory) async {
-    return await categoryRepositoryInterface.getList(allCategory: allCategory, categoryList: true);
+    return await categoryRepositoryInterface.getList(
+      allCategory: allCategory,
+      categoryList: true,
+    );
   }
 
   @override
   Future<List<CategoryModel>?> getSubCategoryList(String? parentID) async {
-    return await categoryRepositoryInterface.getList(id: parentID, subCategoryList: true);
+    return await categoryRepositoryInterface.getList(
+      id: parentID,
+      subCategoryList: true,
+    );
   }
 
   @override
-  Future<ItemModel?> getCategoryItemList(String? categoryID, int offset, String type) async {
-    return await categoryRepositoryInterface.getList(id: categoryID, offset: offset, type: type, categoryItemList: true);
+  Future<ItemModel?> getCategoryItemList(
+    String? categoryID,
+    int offset,
+    String type,
+  ) async {
+    return await categoryRepositoryInterface.getList(
+      id: categoryID,
+      offset: offset,
+      type: type,
+      categoryItemList: true,
+    );
   }
 
   @override
-  Future<StoreModel?> getCategoryStoreList(String? categoryID, int offset, String type) async {
-    return await categoryRepositoryInterface.getList(id: categoryID, offset: offset, type: type, categoryStoreList: true);
+  Future<StoreModel?> getCategoryStoreList(
+    String? categoryID,
+    int offset,
+    String type,
+  ) async {
+    return await categoryRepositoryInterface.getList(
+      id: categoryID,
+      offset: offset,
+      type: type,
+      categoryStoreList: true,
+    );
   }
 
   @override
-  Future<Response> getSearchData(String? query, String? categoryID, bool isStore, String type) async {
-    return await categoryRepositoryInterface.getSearchData(query, categoryID, isStore, type);
+  Future<Response> getSearchData(
+    String? query,
+    String? categoryID,
+    bool isStore,
+    String type,
+  ) async {
+    return await categoryRepositoryInterface.getSearchData(
+      query,
+      categoryID,
+      isStore,
+      type,
+    );
   }
 
   @override
   Future<bool> saveUserInterests(List<int?> interests) async {
     return await categoryRepositoryInterface.saveUserInterests(interests);
   }
-
 }

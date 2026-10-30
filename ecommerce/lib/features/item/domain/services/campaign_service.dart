@@ -21,5 +21,4 @@ class CampaignService implements CampaignServiceInterface {
   Future<List<Item>?> getItemCampaignList() async {
     return await campaignRepositoryInterface.getList(isItemCampaign: true);
   }
-
 }

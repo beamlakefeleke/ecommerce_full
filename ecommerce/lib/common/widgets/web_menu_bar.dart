@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ecommerce/common/widgets/hover/text_hover.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
-import 'package:ecommerce/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -13,10 +14,6 @@ import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
-import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
-import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/common/widgets/custom_dropdown.dart';
 
 class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
@@ -417,7 +414,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                             Get.toNamed(RouteHelper.getProfileRoute());
                           } else {
                             Get.dialog(
-                              const SignInPage(
+                              const SignInScreen(
                                 exitFromApp: true,
                                 backFromThis: true,
                               ),
@@ -524,9 +521,8 @@ class MenuIconButton extends StatelessWidget {
       builder: (hovered) {
         return IconButton(
           onPressed: onTap as void Function()?,
-          icon: BlocBuilder<CartBloc, CartState>(
-            bloc: getIt<CartBloc>(),
-            builder: (context, cartState) {
+          icon: GetBuilder<CartController>(
+            builder: (cartController) {
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -536,7 +532,7 @@ class MenuIconButton extends StatelessWidget {
                         ? Theme.of(context).primaryColor
                         : Theme.of(context).textTheme.bodyLarge!.color,
                   ),
-                  (isCart && cartState.cartList.isNotEmpty)
+                  (isCart && cartController.cartList.isNotEmpty)
                       ? Positioned(
                           top: -5,
                           right: -5,
@@ -549,7 +545,7 @@ class MenuIconButton extends StatelessWidget {
                               color: Theme.of(context).primaryColor,
                             ),
                             child: Text(
-                              cartState.cartList.length.toString(),
+                              cartController.cartList.length.toString(),
                               style: robotoRegular.copyWith(
                                 fontSize: 12,
                                 color: Theme.of(context).cardColor,

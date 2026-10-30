@@ -1,17 +1,34 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:ecommerce/core/network/failure.dart';
-import 'package:ecommerce/features/auth/domain/entities/auth_response.dart';
-import 'package:ecommerce/features/auth/domain/entities/social_login_body.dart';
+import 'package:ecommerce/core/error/failure.dart';
+import 'package:ecommerce/core/usecase/usecase.dart';
+import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 
-/// Completes social registration when the social login indicates the
-/// user needs to provide additional details (e.g. phone number).
-class SocialRegisterUseCase {
-  final AuthRepository _repository;
+class SocialRegisterParams extends Equatable {
+  final SocialSignInParams social;
+  final bool isCustomerVerificationOn;
 
-  const SocialRegisterUseCase(this._repository);
+  const SocialRegisterParams({
+    required this.social,
+    required this.isCustomerVerificationOn,
+  });
 
-  Future<Either<Failure, AuthResponse>> call(SocialLoginBody body) {
-    return _repository.registerWithSocialMedia(body);
+  @override
+  List<Object?> get props => [social, isCustomerVerificationOn];
+}
+
+class SocialRegisterUseCase
+    implements UseCase<SocialAuthResult, SocialRegisterParams> {
+  final AuthRepository repository;
+
+  SocialRegisterUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, SocialAuthResult>> call(SocialRegisterParams params) {
+    return repository.registerWithSocialMedia(
+      params.social,
+      params.isCustomerVerificationOn,
+    );
   }
 }

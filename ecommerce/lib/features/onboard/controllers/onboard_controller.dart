@@ -25,5 +25,4 @@ class OnBoardingController extends GetxController implements GetxService {
     }
     update();
   }
-
 }

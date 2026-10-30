@@ -1,6 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
-
+import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/category/controllers/category_controller.dart';
 import 'package:ecommerce/features/home/widgets/components/review_item_card_widget.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
@@ -18,12 +18,6 @@ import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/features/checkout/screens/checkout_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
-import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
-import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
-import 'package:ecommerce/features/cart/domain/services/cart_service_interface.dart';
-import 'package:ecommerce/core/di/injection.dart';
 import 'package:get/get.dart';
 
 import '../widgets/bottom_cart_widget.dart';
@@ -32,11 +26,12 @@ class StoreScreen extends StatefulWidget {
   final Store? store;
   final bool fromModule;
   final String slug;
-  const StoreScreen(
-      {super.key,
-      required this.store,
-      required this.fromModule,
-      this.slug = ''});
+  const StoreScreen({
+    super.key,
+    required this.store,
+    required this.fromModule,
+    this.slug = '',
+  });
 
   @override
   State<StoreScreen> createState() => _StoreScreenState();
@@ -65,23 +60,30 @@ class _StoreScreenState extends State<StoreScreen> {
     }
     Get.find<StoreController>().hideAnimation();
     await Get.find<StoreController>()
-        .getStoreDetails(Store(id: widget.store!.id), widget.fromModule,
-            slug: widget.slug)
+        .getStoreDetails(
+          Store(id: widget.store!.id),
+          widget.fromModule,
+          slug: widget.slug,
+        )
         .then((value) {
-      Get.find<StoreController>().showButtonAnimation();
-    });
+          Get.find<StoreController>().showButtonAnimation();
+        });
     if (Get.find<CategoryController>().categoryList == null) {
       Get.find<CategoryController>().getCategoryList(true);
     }
     Get.find<StoreController>().getStoreBannerList(
-        widget.store!.id ?? Get.find<StoreController>().store!.id);
+      widget.store!.id ?? Get.find<StoreController>().store!.id,
+    );
     Get.find<StoreController>().getRestaurantRecommendedItemList(
-        widget.store!.id ?? Get.find<StoreController>().store!.id, false);
+      widget.store!.id ?? Get.find<StoreController>().store!.id,
+      false,
+    );
     Get.find<StoreController>().getStoreItemList(
-        widget.store!.id ?? Get.find<StoreController>().store!.id,
-        1,
-        'all',
-        false);
+      widget.store!.id ?? Get.find<StoreController>().store!.id,
+      1,
+      'all',
+      false,
+    );
 
     scrollController.addListener(() {
       if (scrollController.position.userScrollDirection ==
@@ -102,87 +104,99 @@ class _StoreScreenState extends State<StoreScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
-        body: SafeArea(
-          child: GetBuilder<StoreController>(builder: (storeController) {
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: SafeArea(
+        child: GetBuilder<StoreController>(
+          builder: (storeController) {
             return GetBuilder<CategoryController>(
-                builder: (categoryController) {
-              Store? store;
+              builder: (categoryController) {
+                Store? store;
 
-              if (storeController.store != null &&
-                  storeController.store!.name != null &&
-                  categoryController.categoryList != null) {
-                store = storeController.store;
-                storeController.setCategoryList();
-              }
+                if (storeController.store != null &&
+                    storeController.store!.name != null &&
+                    categoryController.categoryList != null) {
+                  store = storeController.store;
+                  storeController.setCategoryList();
+                }
 
-              return (storeController.store != null &&
-                      storeController.store!.name != null &&
-                      categoryController.categoryList != null)
-                  ? GetBuilder<ItemController>(builder: (itemController) {
-                      List<Item>? products = [];
-                      List<Categories> categoryList = [];
-                      if (itemController.featuredCategoriesItem != null) {
-                        for (Categories category in itemController
-                            .featuredCategoriesItem!.categories!) {
-                          categoryList.add(category);
-                        }
+                return (storeController.store != null &&
+                        storeController.store!.name != null &&
+                        categoryController.categoryList != null)
+                    ? GetBuilder<ItemController>(
+                        builder: (itemController) {
+                          List<Item>? products = [];
+                          List<Categories> categoryList = [];
+                          if (itemController.featuredCategoriesItem != null) {
+                            for (Categories category
+                                in itemController
+                                    .featuredCategoriesItem!
+                                    .categories!) {
+                              categoryList.add(category);
+                            }
 
-                        for (Item product
-                            in itemController.featuredCategoriesItem!.items!) {
-                          if (itemController.selectedCategory == 0) {
-                            products.add(product);
+                            for (Item product
+                                in itemController
+                                    .featuredCategoriesItem!
+                                    .items!) {
+                              if (itemController.selectedCategory == 0) {
+                                products.add(product);
+                              }
+                              if (categoryList[itemController.selectedCategory]
+                                      .id ==
+                                  product.categoryId) {
+                                products.add(product);
+                              }
+                            }
                           }
-                          if (categoryList[itemController.selectedCategory]
-                                  .id ==
-                              product.categoryId) {
-                            products.add(product);
-                          }
-                        }
-                      }
 
-                      return products.isEmpty
-                          ? const Center(
-                              child: Text("No Products for this category"),
-                            )
-                          : CustomScrollView(
-                              slivers: [
-                                SliverPadding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 20),
-                                  sliver: SliverGrid(
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing:
-                                          Dimensions.paddingSizeDefault,
-                                      mainAxisSpacing:
-                                          Dimensions.paddingSizeDefault,
-                                      mainAxisExtent: 257,
+                          return products.isEmpty
+                              ? const Center(
+                                  child: Text("No Products for this category"),
+                                )
+                              : CustomScrollView(
+                                  slivers: [
+                                    SliverPadding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 20,
+                                      ),
+                                      sliver: SliverGrid(
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 2,
+                                              crossAxisSpacing:
+                                                  Dimensions.paddingSizeDefault,
+                                              mainAxisSpacing:
+                                                  Dimensions.paddingSizeDefault,
+                                              mainAxisExtent: 257,
+                                            ),
+                                        delegate: SliverChildBuilderDelegate((
+                                          context,
+                                          index,
+                                        ) {
+                                          return ReviewItemCard(
+                                            key: ValueKey(products[index].id),
+                                            isFeatured: true,
+                                            item: products[index],
+                                          );
+                                        }, childCount: products.length),
+                                      ),
                                     ),
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) {
-                                        return ReviewItemCard(
-                                          key: ValueKey(products[index].id),
-                                          isFeatured: true,
-                                          item: products[index],
-                                        );
-                                      },
-                                      childCount: products.length,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                    })
-                  : const Center(child: CircularProgressIndicator());
-            });
-          }),
+                                  ],
+                                );
+                        },
+                      )
+                    : const Center(child: CircularProgressIndicator());
+              },
+            );
+          },
         ),
-        floatingActionButton:
-            GetBuilder<StoreController>(builder: (storeController) {
+      ),
+      floatingActionButton: GetBuilder<StoreController>(
+        builder: (storeController) {
           return Visibility(
-            visible: storeController.showFavButton &&
+            visible:
+                storeController.showFavButton &&
                 Get.find<SplashController>()
                     .configModel!
                     .moduleConfig!
@@ -198,63 +212,80 @@ class _StoreScreenState extends State<StoreScreen> {
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                 boxShadow: [
                   BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.5),
-                      blurRadius: 10,
-                      offset: const Offset(2, 2))
+                    color: Theme.of(context).primaryColor.withOpacity(0.5),
+                    blurRadius: 10,
+                    offset: const Offset(2, 2),
+                  ),
                 ],
               ),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 800),
-                  width: storeController.currentState == true
-                      ? 0
-                      : ResponsiveHelper.isDesktop(context)
-                          ? 180
-                          : 150,
-                  height: 30,
-                  curve: Curves.linear,
-                  child: Center(
-                    child: Text(
-                      'prescription_order'.tr,
-                      textAlign: TextAlign.center,
-                      style: robotoMedium.copyWith(
-                          color: Theme.of(context).primaryColor),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 800),
+                    width: storeController.currentState == true
+                        ? 0
+                        : ResponsiveHelper.isDesktop(context)
+                        ? 180
+                        : 150,
+                    height: 30,
+                    curve: Curves.linear,
+                    child: Center(
+                      child: Text(
+                        'prescription_order'.tr,
+                        textAlign: TextAlign.center,
+                        style: robotoMedium.copyWith(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
-                ),
-                InkWell(
-                  onTap: () => Get.toNamed(
-                    RouteHelper.getCheckoutRoute('prescription',
-                        storeId: storeController.store!.id),
-                    arguments: CheckoutScreen(
+                  InkWell(
+                    onTap: () => Get.toNamed(
+                      RouteHelper.getCheckoutRoute(
+                        'prescription',
+                        storeId: storeController.store!.id,
+                      ),
+                      arguments: CheckoutScreen(
                         fromCart: false,
                         cartList: null,
-                        storeId: storeController.store!.id),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius:
-                          BorderRadius.circular(Dimensions.radiusSmall),
+                        storeId: storeController.store!.id,
+                      ),
                     ),
-                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                    child: Image.asset(Images.prescriptionIcon,
-                        height: 25, width: 25),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(
+                          Dimensions.radiusSmall,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(
+                        Dimensions.paddingSizeSmall,
+                      ),
+                      child: Image.asset(
+                        Images.prescriptionIcon,
+                        height: 25,
+                        width: 25,
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
           );
-        }),
-        bottomNavigationBar:
-            BlocBuilder<CartBloc, CartState>(bloc: getIt<CartBloc>(), builder: (context, cartState) {
-          return cartState.cartList.isNotEmpty &&
+        },
+      ),
+      bottomNavigationBar: GetBuilder<CartController>(
+        builder: (cartController) {
+          return cartController.cartList.isNotEmpty &&
                   !ResponsiveHelper.isDesktop(context)
               ? const BottomCartWidget()
               : const SizedBox();
-        }));
+        },
+      ),
+    );
   }
 }
 
@@ -266,7 +297,10 @@ class SliverDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return child;
   }
 

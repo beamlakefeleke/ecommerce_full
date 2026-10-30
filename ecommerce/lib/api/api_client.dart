@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:ecommerce/api/api_checker.dart';
-import 'package:ecommerce/features/address/domain/models/address_model.dart';
+import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/common/models/error_response.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -29,36 +29,39 @@ class ApiClient extends GetxService {
     AddressModel? addressModel;
     try {
       addressModel = AddressModel.fromJson(
-          jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
+        jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!),
+      );
     } catch (_) {}
     int? moduleID;
     if (GetPlatform.isWeb &&
         sharedPreferences.containsKey(AppConstants.moduleId)) {
       try {
         moduleID = ModuleModel.fromJson(
-                jsonDecode(sharedPreferences.getString(AppConstants.moduleId)!))
-            .id;
+          jsonDecode(sharedPreferences.getString(AppConstants.moduleId)!),
+        ).id;
       } catch (_) {}
     }
     updateHeader(
-        token,
-        addressModel?.zoneIds,
-        addressModel?.areaIds,
-        sharedPreferences.getString(AppConstants.languageCode),
-        moduleID,
-        addressModel?.latitude,
-        addressModel?.longitude);
+      token,
+      addressModel?.zoneIds,
+      addressModel?.areaIds,
+      sharedPreferences.getString(AppConstants.languageCode),
+      moduleID,
+      addressModel?.latitude,
+      addressModel?.longitude,
+    );
   }
 
   Map<String, String> updateHeader(
-      String? token,
-      List<int>? zoneIDs,
-      List<int>? operationIds,
-      String? languageCode,
-      int? moduleID,
-      String? latitude,
-      String? longitude,
-      {bool setHeader = true}) {
+    String? token,
+    List<int>? zoneIDs,
+    List<int>? operationIds,
+    String? languageCode,
+    int? moduleID,
+    String? latitude,
+    String? longitude, {
+    bool setHeader = true,
+  }) {
     Map<String, String> header = {};
     if (moduleID != null) {
       header.addAll({AppConstants.moduleId: moduleID.toString()});
@@ -73,7 +76,7 @@ class ApiClient extends GetxService {
           languageCode ?? AppConstants.languages[0].languageCode!,
       AppConstants.latitude: latitude != null ? jsonEncode(latitude) : '',
       AppConstants.longitude: longitude != null ? jsonEncode(longitude) : '',
-      'Authorization': 'Bearer $token'
+      'Authorization': 'Bearer $token',
     });
     if (setHeader) {
       _mainHeaders = header;
@@ -81,21 +84,20 @@ class ApiClient extends GetxService {
     return header;
   }
 
-  Future<Response> getData(String uri,
-      {Map<String, dynamic>? query,
-      Map<String, String>? headers,
-      bool handleError = true}) async {
+  Future<Response> getData(
+    String uri, {
+    Map<String, dynamic>? query,
+    Map<String, String>? headers,
+    bool handleError = true,
+  }) async {
     try {
       if (kDebugMode) {
         print('====> API Call: $uri\nHeader: $_mainHeaders');
       }
       //* To solve this problem check this: https://stackoverflow.com/questions/59561655/connection-terminated-during-handshake-flutter
       http.Response response = await http
-          .get(
-            Uri.parse(appBaseUrl + uri),
-            headers: headers ?? _mainHeaders,
-          )
-            .timeout(Duration(seconds: timeoutInSeconds));
+          .get(Uri.parse(appBaseUrl + uri), headers: headers ?? _mainHeaders)
+          .timeout(Duration(seconds: timeoutInSeconds));
       return handleResponse(response, uri, handleError);
     } catch (e) {
       if (kDebugMode) {
@@ -105,10 +107,13 @@ class ApiClient extends GetxService {
     }
   }
 
-  Future<Response> postData(String uri, dynamic body,
-      {Map<String, String>? headers,
-      int? timeout,
-      bool handleError = true}) async {
+  Future<Response> postData(
+    String uri,
+    dynamic body, {
+    Map<String, String>? headers,
+    int? timeout,
+    bool handleError = true,
+  }) async {
     try {
       if (kDebugMode) {
         print('====> API Call: $uri\nHeader: $_mainHeaders');
@@ -128,38 +133,51 @@ class ApiClient extends GetxService {
   }
 
   Future<Response> postMultipartData(
-      String uri, Map<String, String> body, List<MultipartBody> multipartBody,
-      {Map<String, String>? headers, bool handleError = true}) async {
+    String uri,
+    Map<String, String> body,
+    List<MultipartBody> multipartBody, {
+    Map<String, String>? headers,
+    bool handleError = true,
+  }) async {
     try {
       if (kDebugMode) {
         print('====> API Call: $uri\nHeader: $_mainHeaders');
         print('====> API Body: $body with ${multipartBody.length} picture');
       }
-      http.MultipartRequest request =
-          http.MultipartRequest('POST', Uri.parse(appBaseUrl + uri));
+      http.MultipartRequest request = http.MultipartRequest(
+        'POST',
+        Uri.parse(appBaseUrl + uri),
+      );
       request.headers.addAll(headers ?? _mainHeaders);
       for (MultipartBody multipart in multipartBody) {
         if (multipart.file != null) {
           Uint8List list = await multipart.file!.readAsBytes();
-          request.files.add(http.MultipartFile(
-            multipart.key,
-            multipart.file!.readAsBytes().asStream(),
-            list.length,
-            filename: '${DateTime.now().toString()}.png',
-          ));
+          request.files.add(
+            http.MultipartFile(
+              multipart.key,
+              multipart.file!.readAsBytes().asStream(),
+              list.length,
+              filename: '${DateTime.now().toString()}.png',
+            ),
+          );
         }
       }
       request.fields.addAll(body);
-      http.Response response =
-          await http.Response.fromStream(await request.send());
+      http.Response response = await http.Response.fromStream(
+        await request.send(),
+      );
       return handleResponse(response, uri, handleError);
     } catch (e) {
       return Response(statusCode: 1, statusText: noInternetMessage);
     }
   }
 
-  Future<Response> putData(String uri, dynamic body,
-      {Map<String, String>? headers, bool handleError = true}) async {
+  Future<Response> putData(
+    String uri,
+    dynamic body, {
+    Map<String, String>? headers,
+    bool handleError = true,
+  }) async {
     try {
       if (kDebugMode) {
         print('====> API Call: $uri\nHeader: $_mainHeaders');
@@ -178,17 +196,17 @@ class ApiClient extends GetxService {
     }
   }
 
-  Future<Response> deleteData(String uri,
-      {Map<String, String>? headers, bool handleError = true}) async {
+  Future<Response> deleteData(
+    String uri, {
+    Map<String, String>? headers,
+    bool handleError = true,
+  }) async {
     try {
       if (kDebugMode) {
         print('====> API Call: $uri\nHeader: $_mainHeaders');
       }
       http.Response response = await http
-          .delete(
-            Uri.parse(appBaseUrl + uri),
-            headers: headers ?? _mainHeaders,
-          )
+          .delete(Uri.parse(appBaseUrl + uri), headers: headers ?? _mainHeaders)
           .timeout(Duration(seconds: timeoutInSeconds));
       return handleResponse(response, uri, handleError);
     } catch (e) {
@@ -197,7 +215,10 @@ class ApiClient extends GetxService {
   }
 
   Response handleResponse(
-      http.Response response, String uri, bool handleError) {
+    http.Response response,
+    String uri,
+    bool handleError,
+  ) {
     dynamic body;
     try {
       body = jsonDecode(response.body);
@@ -206,9 +227,10 @@ class ApiClient extends GetxService {
       body: body ?? response.body,
       bodyString: response.body.toString(),
       request: Request(
-          headers: response.request!.headers,
-          method: response.request!.method,
-          url: response.request!.url),
+        headers: response.request!.headers,
+        method: response.request!.method,
+        url: response.request!.url,
+      ),
       headers: response.headers,
       statusCode: response.statusCode,
       statusText: response.reasonPhrase,
@@ -219,14 +241,16 @@ class ApiClient extends GetxService {
       if (response0.body.toString().startsWith('{errors: [{code:')) {
         ErrorResponse errorResponse = ErrorResponse.fromJson(response0.body);
         response0 = Response(
-            statusCode: response0.statusCode,
-            body: response0.body,
-            statusText: errorResponse.errors![0].message);
+          statusCode: response0.statusCode,
+          body: response0.body,
+          statusText: errorResponse.errors![0].message,
+        );
       } else if (response0.body.toString().startsWith('{message')) {
         response0 = Response(
-            statusCode: response0.statusCode,
-            body: response0.body,
-            statusText: response0.body['message']);
+          statusCode: response0.statusCode,
+          body: response0.body,
+          statusText: response0.body['message'],
+        );
       }
     } else if (response0.statusCode != 200 && response0.body == null) {
       response0 = Response(statusCode: 0, statusText: noInternetMessage);

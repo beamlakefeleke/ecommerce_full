@@ -1,12 +1,14 @@
-import 'package:ecommerce/features/cart/domain/entities/cart.dart';
-import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:equatable/equatable.dart';
+import 'package:ecommerce/features/cart/data/models/cart_model.dart';
+import 'package:ecommerce/features/item/domain/models/item_model.dart';
 
-enum CartStatus { initial, loading, success, failure }
+enum CartStatus { initial, loading, loaded, error }
 
 class CartState extends Equatable {
   final CartStatus status;
-  final List<Cart> cartList;
+  final List<CartModel> cartList;
+
+  // computed totals
   final double subTotal;
   final double itemPrice;
   final double itemDiscountPrice;
@@ -14,11 +16,13 @@ class CartState extends Equatable {
   final double variationPrice;
   final List<List<AddOns>> addOnsList;
   final List<bool> availableList;
-  final List<String> notAvailableList;
+
+  // ui flags
   final bool addCutlery;
   final int notAvailableIndex;
   final int currentIndex;
   final bool isLoading;
+
   final String? errorMessage;
 
   const CartState({
@@ -31,7 +35,6 @@ class CartState extends Equatable {
     this.variationPrice = 0,
     this.addOnsList = const [],
     this.availableList = const [],
-    this.notAvailableList = const ['Remove it from my cart', 'I’ll wait until it’s restocked', 'Please cancel the order', 'Call me ASAP', 'Notify me when it’s back'],
     this.addCutlery = false,
     this.notAvailableIndex = -1,
     this.currentIndex = 0,
@@ -41,7 +44,7 @@ class CartState extends Equatable {
 
   CartState copyWith({
     CartStatus? status,
-    List<Cart>? cartList,
+    List<CartModel>? cartList,
     double? subTotal,
     double? itemPrice,
     double? itemDiscountPrice,
@@ -49,7 +52,6 @@ class CartState extends Equatable {
     double? variationPrice,
     List<List<AddOns>>? addOnsList,
     List<bool>? availableList,
-    List<String>? notAvailableList,
     bool? addCutlery,
     int? notAvailableIndex,
     int? currentIndex,
@@ -66,31 +68,29 @@ class CartState extends Equatable {
       variationPrice: variationPrice ?? this.variationPrice,
       addOnsList: addOnsList ?? this.addOnsList,
       availableList: availableList ?? this.availableList,
-      notAvailableList: notAvailableList ?? this.notAvailableList,
       addCutlery: addCutlery ?? this.addCutlery,
       notAvailableIndex: notAvailableIndex ?? this.notAvailableIndex,
       currentIndex: currentIndex ?? this.currentIndex,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: errorMessage,
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        cartList,
-        subTotal,
-        itemPrice,
-        itemDiscountPrice,
-        addOns,
-        variationPrice,
-        addOnsList,
-        availableList,
-        notAvailableList,
-        addCutlery,
-        notAvailableIndex,
-        currentIndex,
-        isLoading,
-        errorMessage,
-      ];
+    status,
+    cartList,
+    subTotal,
+    itemPrice,
+    itemDiscountPrice,
+    addOns,
+    variationPrice,
+    addOnsList,
+    availableList,
+    addCutlery,
+    notAvailableIndex,
+    currentIndex,
+    isLoading,
+    errorMessage,
+  ];
 }

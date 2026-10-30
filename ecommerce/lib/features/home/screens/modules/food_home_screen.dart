@@ -19,35 +19,37 @@ class FoodHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isLoggedIn = AuthHelper.isLoggedIn();
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(Images.foodModuleBannerBg),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: const Column(
+            children: [
+              BadWeatherWidget(),
 
-      Container(
-        width: MediaQuery.of(context).size.width,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(Images.foodModuleBannerBg),
-            fit: BoxFit.cover,
+              BannerView(isFeatured: false),
+              SizedBox(height: 12),
+            ],
           ),
         ),
-        child: const Column(
-          children: [
-            BadWeatherWidget(),
 
-            BannerView(isFeatured: false),
-            SizedBox(height: 12),
-          ],
-        ),
-      ),
-
-      const CategoryView(),
-      isLoggedIn ? const VisitAgainView(fromFood: true) : const SizedBox(),
-      const SpecialOfferView(isFood: true, isShop: false),
-      const BestReviewItemView(),
-      const BestStoreNearbyView(),
-      const ItemThatYouLoveView(forShop: false),
-      const MostPopularItemView(isFood: true, isShop: false),
-      const JustForYouView(),
-      const NewOnMartView(isNewStore: true, isPharmacy: false, isShop: false),
-    ]);
+        const CategoryView(),
+        isLoggedIn ? const VisitAgainView(fromFood: true) : const SizedBox(),
+        const SpecialOfferView(isFood: true, isShop: false),
+        const BestReviewItemView(),
+        const BestStoreNearbyView(),
+        const ItemThatYouLoveView(forShop: false),
+        const MostPopularItemView(isFood: true, isShop: false),
+        const JustForYouView(),
+        const NewOnMartView(isNewStore: true, isPharmacy: false, isShop: false),
+      ],
+    );
   }
 }

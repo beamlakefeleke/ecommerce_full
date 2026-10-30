@@ -10,10 +10,14 @@ class CampaignRepository implements CampaignRepositoryInterface {
   CampaignRepository({required this.apiClient});
 
   @override
-  Future getList({int? offset, bool isBasicCampaign = false, bool isItemCampaign = false}) async {
-    if(isBasicCampaign) {
+  Future getList({
+    int? offset,
+    bool isBasicCampaign = false,
+    bool isItemCampaign = false,
+  }) async {
+    if (isBasicCampaign) {
       return await _getBasicCampaignList();
-    } else if(isItemCampaign) {
+    } else if (isItemCampaign) {
       return await _getItemCampaignList();
     }
   }
@@ -23,7 +27,10 @@ class CampaignRepository implements CampaignRepositoryInterface {
     Response response = await apiClient.getData(AppConstants.basicCampaignUri);
     if (response.statusCode == 200) {
       basicCampaignList = [];
-      response.body.forEach((campaign) => basicCampaignList!.add(BasicCampaignModel.fromJson(campaign)));
+      response.body.forEach(
+        (campaign) =>
+            basicCampaignList!.add(BasicCampaignModel.fromJson(campaign)),
+      );
     }
     return basicCampaignList;
   }
@@ -33,7 +40,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
     Response response = await apiClient.getData(AppConstants.itemCampaignUri);
     if (response.statusCode == 200) {
       itemCampaignList = [];
-      response.body.forEach((camp) => itemCampaignList!.add(Item.fromJson(camp)));
+      response.body.forEach(
+        (camp) => itemCampaignList!.add(Item.fromJson(camp)),
+      );
     }
     return itemCampaignList;
   }
@@ -41,7 +50,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
   @override
   Future<BasicCampaignModel?> get(String? id) async {
     BasicCampaignModel? basicCampaign;
-    Response response = await apiClient.getData('${AppConstants.basicCampaignDetailsUri}$id');
+    Response response = await apiClient.getData(
+      '${AppConstants.basicCampaignDetailsUri}$id',
+    );
     if (response.statusCode == 200) {
       basicCampaign = BasicCampaignModel.fromJson(response.body);
     }
@@ -62,5 +73,4 @@ class CampaignRepository implements CampaignRepositoryInterface {
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-
 }

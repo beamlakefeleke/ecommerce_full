@@ -1,13 +1,12 @@
-import 'package:ecommerce/features/wallet/domain/entities/wallet_filter_body.dart';
+class WalletFilterBodyModel {
+  String? title;
+  String? value;
 
-class WalletFilterBodyModel extends WalletFilterBody {
-  WalletFilterBodyModel({required super.title, required super.value});
+  WalletFilterBodyModel({this.title, this.value});
 
-  factory WalletFilterBodyModel.fromJson(Map<String, dynamic> json) {
-    return WalletFilterBodyModel(
-      title: json['title'] ?? '',
-      value: json['value'] ?? '',
-    );
+  WalletFilterBodyModel.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    value = json['value'];
   }
 
   Map<String, dynamic> toJson() {

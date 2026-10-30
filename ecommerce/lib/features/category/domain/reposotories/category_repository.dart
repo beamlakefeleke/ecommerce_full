@@ -12,8 +12,16 @@ class CategoryRepository implements CategoryRepositoryInterface {
   CategoryRepository({required this.apiClient});
 
   @override
-  Future getList({int? offset, bool categoryList = false, bool subCategoryList = false, bool categoryItemList = false, bool categoryStoreList = false,
-    bool? allCategory, String? id, String? type}) async {
+  Future getList({
+    int? offset,
+    bool categoryList = false,
+    bool subCategoryList = false,
+    bool categoryItemList = false,
+    bool categoryStoreList = false,
+    bool? allCategory,
+    String? id,
+    String? type,
+  }) async {
     if (categoryList) {
       return await _getCategoryList(allCategory!);
     } else if (subCategoryList) {
@@ -27,9 +35,16 @@ class CategoryRepository implements CategoryRepositoryInterface {
 
   Future<List<CategoryModel>?> _getCategoryList(bool allCategory) async {
     List<CategoryModel>? categoryList;
-    Response response = await apiClient.getData(AppConstants.categoryUri, headers: allCategory ? {
-      'Content-Type': 'application/json; charset=UTF-8',
-      AppConstants.localizationKey: Get.find<LocalizationController>().locale.languageCode} : null);
+    Response response = await apiClient.getData(
+      AppConstants.categoryUri,
+      headers: allCategory
+          ? {
+              'Content-Type': 'application/json; charset=UTF-8',
+              AppConstants.localizationKey:
+                  Get.find<LocalizationController>().locale.languageCode,
+            }
+          : null,
+    );
     if (response.statusCode == 200) {
       categoryList = [];
       response.body.forEach((category) {
@@ -41,26 +56,42 @@ class CategoryRepository implements CategoryRepositoryInterface {
 
   Future<List<CategoryModel>?> _getSubCategoryList(String? parentID) async {
     List<CategoryModel>? subCategoryList;
-    Response response = await apiClient.getData('${AppConstants.subCategoryUri}$parentID');
+    Response response = await apiClient.getData(
+      '${AppConstants.subCategoryUri}$parentID',
+    );
     if (response.statusCode == 200) {
-      subCategoryList= [];
-      response.body.forEach((category) => subCategoryList!.add(CategoryModel.fromJson(category)));
+      subCategoryList = [];
+      response.body.forEach(
+        (category) => subCategoryList!.add(CategoryModel.fromJson(category)),
+      );
     }
     return subCategoryList;
   }
 
-  Future<ItemModel?> _getCategoryItemList(String? categoryID, int offset, String type) async {
+  Future<ItemModel?> _getCategoryItemList(
+    String? categoryID,
+    int offset,
+    String type,
+  ) async {
     ItemModel? categoryItem;
-    Response response = await apiClient.getData('${AppConstants.categoryItemUri}$categoryID?limit=10&offset=$offset&type=$type');
+    Response response = await apiClient.getData(
+      '${AppConstants.categoryItemUri}$categoryID?limit=10&offset=$offset&type=$type',
+    );
     if (response.statusCode == 200) {
       categoryItem = ItemModel.fromJson(response.body);
     }
     return categoryItem;
   }
 
-  Future<StoreModel?> _getCategoryStoreList(String? categoryID, int offset, String type) async {
+  Future<StoreModel?> _getCategoryStoreList(
+    String? categoryID,
+    int offset,
+    String type,
+  ) async {
     StoreModel? categoryStore;
-    Response response = await apiClient.getData('${AppConstants.categoryStoreUri}$categoryID?limit=10&offset=$offset&type=$type');
+    Response response = await apiClient.getData(
+      '${AppConstants.categoryStoreUri}$categoryID?limit=10&offset=$offset&type=$type',
+    );
     if (response.statusCode == 200) {
       categoryStore = StoreModel.fromJson(response.body);
     }
@@ -68,7 +99,12 @@ class CategoryRepository implements CategoryRepositoryInterface {
   }
 
   @override
-  Future<Response> getSearchData(String? query, String? categoryID, bool isStore, String type) async {
+  Future<Response> getSearchData(
+    String? query,
+    String? categoryID,
+    bool isStore,
+    String type,
+  ) async {
     return await apiClient.getData(
       '${AppConstants.searchUri}${isStore ? 'stores' : 'items'}/search?name=$query&category_id=$categoryID&type=$type&offset=1&limit=50',
     );
@@ -76,7 +112,9 @@ class CategoryRepository implements CategoryRepositoryInterface {
 
   @override
   Future<bool> saveUserInterests(List<int?> interests) async {
-    Response response = await apiClient.postData(AppConstants.interestUri, {"interest": interests});
+    Response response = await apiClient.postData(AppConstants.interestUri, {
+      "interest": interests,
+    });
     return (response.statusCode == 200);
   }
 
@@ -99,5 +137,4 @@ class CategoryRepository implements CategoryRepositoryInterface {
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-
 }

@@ -1,23 +1,38 @@
-import 'package:ecommerce/features/cart/domain/entities/online_cart.dart';
-import 'package:ecommerce/features/item/domain/models/item_model.dart' as product_variation;
+import 'package:ecommerce/features/item/domain/models/item_model.dart'
+    as product_variation;
 
-class OnlineCartModel extends OnlineCart {
+class OnlineCartModel {
+  int? id;
+  int? userId;
+  int? moduleId;
+  int? itemId;
+  bool? isGuest;
+  List<int>? addOnIds;
+  List<int>? addOnQtys;
+  String? itemType;
+  double? price;
+  int? quantity;
+  List<Variation>? foodVariation;
+  List<product_variation.Variation>? productVariation;
+  String? createdAt;
+  String? updatedAt;
+  product_variation.Item? item;
+
   OnlineCartModel({
-    super.id,
-    super.userId,
-    super.moduleId,
-    super.itemId,
-    super.isGuest,
-    super.addOnIds,
-    super.addOnQtys,
-    super.itemType,
-    super.price,
-    super.quantity,
-    super.foodVariation,
-    super.productVariation,
-    super.createdAt,
-    super.updatedAt,
-    super.item,
+    this.id,
+    this.userId,
+    this.moduleId,
+    this.itemId,
+    this.isGuest,
+    this.addOnIds,
+    this.addOnQtys,
+    this.itemType,
+    this.price,
+    this.quantity,
+    this.foodVariation,
+    this.createdAt,
+    this.updatedAt,
+    this.item,
   });
 
   OnlineCartModel.fromJson(Map<String, dynamic> json) {
@@ -26,8 +41,8 @@ class OnlineCartModel extends OnlineCart {
     moduleId = json['module_id'];
     itemId = json['item_id'];
     isGuest = json['is_guest'];
-    addOnIds = json['add_on_ids']?.cast<int>();
-    addOnQtys = json['add_on_qtys']?.cast<int>();
+    addOnIds = json['add_on_ids'].cast<int>();
+    addOnQtys = json['add_on_qtys'].cast<int>();
     itemType = json['item_type'];
     price = json['price']?.toDouble();
     quantity = json['quantity'];
@@ -44,7 +59,9 @@ class OnlineCartModel extends OnlineCart {
     }
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    item = json['item'] != null ? product_variation.Item.fromJson(json['item']) : null;
+    item = json['item'] != null
+        ? product_variation.Item.fromJson(json['item'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -60,7 +77,7 @@ class OnlineCartModel extends OnlineCart {
     data['price'] = price;
     data['quantity'] = quantity;
     if (foodVariation != null) {
-      data['variation'] = foodVariation!.map((v) => (v as Variation).toJson()).toList();
+      data['variation'] = foodVariation!.map((v) => v.toJson()).toList();
     }
     if (productVariation != null) {
       data['variation'] = productVariation!.map((v) => v.toJson()).toList();
@@ -74,8 +91,11 @@ class OnlineCartModel extends OnlineCart {
   }
 }
 
-class Variation extends OnlineCartVariation {
-  Variation({super.name, super.values});
+class Variation {
+  String? name;
+  Value? values;
+
+  Variation({this.name, this.values});
 
   Variation.fromJson(Map<String, dynamic> json) {
     name = json['name'];
@@ -86,14 +106,16 @@ class Variation extends OnlineCartVariation {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['name'] = name;
     if (values != null) {
-      data['values'] = (values as Value).toJson();
+      data['values'] = values!.toJson();
     }
     return data;
   }
 }
 
-class Value extends OnlineCartVariationValue {
-  Value({super.label});
+class Value {
+  List<String>? label;
+
+  Value({this.label});
 
   Value.fromJson(Map<String, dynamic> json) {
     label = json['label'].cast<String>();

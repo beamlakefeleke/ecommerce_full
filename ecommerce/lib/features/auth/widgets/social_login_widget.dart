@@ -1,17 +1,19 @@
-import 'package:ecommerce/features/auth/domain/entities/social_login_body.dart';
-import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/auth_state.dart';
+import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
+import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-
-import 'package:flutter_facebook_auth_platform_interface/flutter_facebook_auth_platform_interface.dart' show ClassicToken;
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -20,8 +22,21 @@ class SocialLoginWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+    final GoogleSignIn googleSignIn = GoogleSignIn();
 
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (prev, curr) =>
+          prev.actionStatus != curr.actionStatus &&
+          (curr.actionType == AuthActionType.socialLogin ||
+              curr.actionType == AuthActionType.socialRegister) &&
+          (curr.actionStatus == AuthActionStatus.success ||
+              curr.actionStatus == AuthActionStatus.failure),
+      listener: (context, state) => _handleSocialResult(context, state),
+      child: _buildBody(context, googleSignIn),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, GoogleSignIn googleSignIn) {
     return Get.find<SplashController>().configModel != null &&
             Get.find<SplashController>().configModel!.socialLogin!.isNotEmpty &&
             (Get.find<SplashController>()
@@ -57,17 +72,20 @@ class SocialLoginWidget extends StatelessWidget {
                           .status!
                       ? InkWell(
                           onTap: () async {
-                            GoogleSignInAccount? googleAccount =
-                                await googleSignIn.authenticate();
-                            GoogleSignInAuthentication auth = googleAccount!.authentication;
-                            if (!context.mounted) return;
-                            context.read<AuthBloc>().add(SocialLoginRequested(
-                                body: SocialLoginBody(
-                              email: googleAccount.email,
-                              token: auth.idToken,
-                              uniqueId: googleAccount.id,
-                              medium: 'google',
-                            )));
+                            GoogleSignInAccount googleAccount =
+                                (await googleSignIn.signIn())!;
+                            GoogleSignInAuthentication auth =
+                                await googleAccount.authentication;
+                            context.read<AuthBloc>().add(
+                              SocialLoginRequested(
+                                SocialSignInParams(
+                                  email: googleAccount.email,
+                                  token: auth.idToken,
+                                  uniqueId: googleAccount.id,
+                                  medium: 'google',
+                                ),
+                              ),
+                            );
                           },
                           child: Container(
                             height: 40,
@@ -96,13 +114,14 @@ class SocialLoginWidget extends StatelessWidget {
                   SizedBox(
                     width:
                         Get.find<SplashController>()
-                                .configModel!
-                                .socialLogin![0]
-                                .status!
-                            ? Dimensions.paddingSizeSmall
-                            : 0,
+                            .configModel!
+                            .socialLogin![0]
+                            .status!
+                        ? Dimensions.paddingSizeSmall
+                        : 0,
                   ),
 
+                  // SizedBox(width: Dimensions.PADDING_SIZE_SMALL),
                   Get.find<SplashController>()
                           .configModel!
                           .socialLogin![1]
@@ -114,14 +133,16 @@ class SocialLoginWidget extends StatelessWidget {
                             if (result.status == LoginStatus.success) {
                               Map userData = await FacebookAuth.instance
                                   .getUserData();
-                              if (!context.mounted) return;
-                              context.read<AuthBloc>().add(SocialLoginRequested(
-                                  body: SocialLoginBody(
-                                email: userData['email'],
-                                token: result.accessToken!.tokenString,
-                                uniqueId: (result.accessToken! as ClassicToken).userId,
-                                medium: 'facebook',
-                              )));
+                              context.read<AuthBloc>().add(
+                                SocialLoginRequested(
+                                  SocialSignInParams(
+                                    email: userData['email'],
+                                    token: result.accessToken!.token,
+                                    uniqueId: result.accessToken!.userId,
+                                    medium: 'facebook',
+                                  ),
+                                ),
+                              );
                             }
                           },
                           child: Container(
@@ -179,14 +200,16 @@ class SocialLoginWidget extends StatelessWidget {
                                         ),
                                       ),
                                 );
-                            if (!context.mounted) return;
-                            context.read<AuthBloc>().add(SocialLoginRequested(
-                                body: SocialLoginBody(
-                              email: credential.email,
-                              token: credential.authorizationCode,
-                              uniqueId: credential.authorizationCode,
-                              medium: 'apple',
-                            )));
+                            context.read<AuthBloc>().add(
+                              SocialLoginRequested(
+                                SocialSignInParams(
+                                  email: credential.email,
+                                  token: credential.authorizationCode,
+                                  uniqueId: credential.authorizationCode,
+                                  medium: 'apple',
+                                ),
+                              ),
+                            );
                           },
                           child: Container(
                             height: 40,
@@ -218,5 +241,32 @@ class SocialLoginWidget extends StatelessWidget {
             ],
           )
         : const SizedBox();
+  }
+
+  void _handleSocialResult(BuildContext context, AuthState state) {
+    if (state.actionStatus == AuthActionStatus.failure) {
+      showCustomSnackBar(state.message);
+      return;
+    }
+    switch (state.nextStep) {
+      case AuthNextStep.location:
+        Get.find<LocationController>().navigateToLocationScreen('sign-in');
+        break;
+      case AuthNextStep.verification:
+        Get.toNamed(
+          RouteHelper.getVerificationRoute(
+            state.pendingPhone ?? '',
+            state.pendingToken ?? '',
+            RouteHelper.signUp,
+            '',
+          ),
+        );
+        break;
+      case AuthNextStep.registration:
+        showCustomSnackBar('email_not_found'.tr);
+        break;
+      case AuthNextStep.none:
+        break;
+    }
   }
 }

@@ -231,17 +231,16 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                                   ),
 
                                   DottedBorder(
-                                    options: RoundedRectDottedBorderOptions(
-                                      color: Theme.of(context).primaryColor,
-                                      strokeWidth: 1,
-                                      strokeCap: StrokeCap.butt,
-                                      dashPattern: const [8, 5],
-                                      padding: const EdgeInsets.all(0),
-                                      radius: Radius.circular(
-                                        ResponsiveHelper.isDesktop(context)
-                                            ? Dimensions.radiusDefault
-                                            : 50,
-                                      ),
+                                    color: Theme.of(context).primaryColor,
+                                    strokeWidth: 1,
+                                    strokeCap: StrokeCap.butt,
+                                    dashPattern: const [8, 5],
+                                    padding: const EdgeInsets.all(0),
+                                    borderType: BorderType.RRect,
+                                    radius: Radius.circular(
+                                      ResponsiveHelper.isDesktop(context)
+                                          ? Dimensions.radiusDefault
+                                          : 50,
                                     ),
                                     child: SizedBox(
                                       height: 50,

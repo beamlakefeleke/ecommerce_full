@@ -1,13 +1,9 @@
-import 'package:fpdart/fpdart.dart';
-import 'package:ecommerce/core/network/failure.dart';
-import 'package:ecommerce/common/models/transaction_model.dart';
-import 'package:ecommerce/features/wallet/domain/entities/fund_bonus.dart';
+import 'package:ecommerce/interfaces/repository_interface.dart';
 
-abstract class WalletRepositoryInterface {
-  Future<Either<Failure, String>> addFundToWallet(double amount, String paymentMethod);
-  Future<Either<Failure, TransactionModel>> getWalletTransactionList(String offset, String walletType);
-  Future<Either<Failure, List<FundBonus>>> getWalletBonusList();
-  
-  void setWalletAccessToken(String token);
+abstract class WalletRepositoryInterface extends RepositoryInterface {
+  Future<dynamic> addFundToWallet(double amount, String paymentMethod);
+  Future<void> setWalletAccessToken(String token);
   String getWalletAccessToken();
+  @override
+  Future getList({int? offset, String? sortingType, bool isBonusList = false});
 }

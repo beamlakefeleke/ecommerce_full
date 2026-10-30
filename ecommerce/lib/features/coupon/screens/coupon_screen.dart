@@ -22,7 +22,6 @@ class CouponScreen extends StatefulWidget {
 }
 
 class _CouponScreenState extends State<CouponScreen> {
-
   ScrollController scrollController = ScrollController();
   @override
   void initState() {
@@ -31,8 +30,8 @@ class _CouponScreenState extends State<CouponScreen> {
     initCall();
   }
 
-  void initCall(){
-    if(AuthHelper.isLoggedIn()) {
+  void initCall() {
+    if (AuthHelper.isLoggedIn()) {
       Get.find<CouponController>().getCouponList();
     }
   }
@@ -43,50 +42,107 @@ class _CouponScreenState extends State<CouponScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: CustomAppBar(title: 'coupon'.tr),
-      endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
-      body: isLoggedIn ? GetBuilder<CouponController>(builder: (couponController) {
-        return couponController.couponList != null ? couponController.couponList!.isNotEmpty ? RefreshIndicator(
-          onRefresh: () async {
-            await couponController.getCouponList();
-          },
-          child: SingleChildScrollView(
-            controller: scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                WebScreenTitleWidget(title: 'coupon'.tr),
-                Center(child: FooterView(
-                  child: SizedBox(width: Dimensions.webMaxWidth, child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: ResponsiveHelper.isDesktop(context) ? 3 : ResponsiveHelper.isTab(context) ? 2 : 1,
-                      mainAxisSpacing: Dimensions.paddingSizeSmall, crossAxisSpacing: Dimensions.paddingSizeSmall,
-                      childAspectRatio: ResponsiveHelper.isMobile(context) ? 3 : 3,
-                    ),
-                    itemCount: couponController.couponList!.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: couponController.couponList![index].code!));
-                          if(!ResponsiveHelper.isDesktop(context)) {
-                            showCustomSnackBar('coupon_code_copied'.tr, isError: false);
-                          }
-                        },
-                        child: CouponCardWidget(coupon: couponController.couponList![index], index: index),
-                      );
-                    },
-                  )),
-                ))
-              ],
+      endDrawer: const MenuDrawer(),
+      endDrawerEnableOpenDragGesture: false,
+      body: isLoggedIn
+          ? GetBuilder<CouponController>(
+              builder: (couponController) {
+                return couponController.couponList != null
+                    ? couponController.couponList!.isNotEmpty
+                          ? RefreshIndicator(
+                              onRefresh: () async {
+                                await couponController.getCouponList();
+                              },
+                              child: SingleChildScrollView(
+                                controller: scrollController,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: Column(
+                                  children: [
+                                    WebScreenTitleWidget(title: 'coupon'.tr),
+                                    Center(
+                                      child: FooterView(
+                                        child: SizedBox(
+                                          width: Dimensions.webMaxWidth,
+                                          child: GridView.builder(
+                                            gridDelegate:
+                                                SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount:
+                                                      ResponsiveHelper.isDesktop(
+                                                        context,
+                                                      )
+                                                      ? 3
+                                                      : ResponsiveHelper.isTab(
+                                                          context,
+                                                        )
+                                                      ? 2
+                                                      : 1,
+                                                  mainAxisSpacing: Dimensions
+                                                      .paddingSizeSmall,
+                                                  crossAxisSpacing: Dimensions
+                                                      .paddingSizeSmall,
+                                                  childAspectRatio:
+                                                      ResponsiveHelper.isMobile(
+                                                        context,
+                                                      )
+                                                      ? 3
+                                                      : 3,
+                                                ),
+                                            itemCount: couponController
+                                                .couponList!
+                                                .length,
+                                            shrinkWrap: true,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            padding: const EdgeInsets.all(
+                                              Dimensions.paddingSizeLarge,
+                                            ),
+                                            itemBuilder: (context, index) {
+                                              return InkWell(
+                                                onTap: () {
+                                                  Clipboard.setData(
+                                                    ClipboardData(
+                                                      text: couponController
+                                                          .couponList![index]
+                                                          .code!,
+                                                    ),
+                                                  );
+                                                  if (!ResponsiveHelper.isDesktop(
+                                                    context,
+                                                  )) {
+                                                    showCustomSnackBar(
+                                                      'coupon_code_copied'.tr,
+                                                      isError: false,
+                                                    );
+                                                  }
+                                                },
+                                                child: CouponCardWidget(
+                                                  coupon: couponController
+                                                      .couponList![index],
+                                                  index: index,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : NoDataScreen(
+                              text: 'no_coupon_found'.tr,
+                              showFooter: true,
+                            )
+                    : const Center(child: CircularProgressIndicator());
+              },
+            )
+          : NotLoggedInScreen(
+              callBack: (bool value) {
+                initCall();
+                setState(() {});
+              },
             ),
-          ),
-        ) : NoDataScreen(text: 'no_coupon_found'.tr, showFooter: true) : const Center(child: CircularProgressIndicator());
-      }) :  NotLoggedInScreen(callBack: (bool value)  {
-        initCall();
-        setState(() {});
-      }),
     );
   }
 }

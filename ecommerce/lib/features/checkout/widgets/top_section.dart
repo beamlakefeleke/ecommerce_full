@@ -1,12 +1,11 @@
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_compression_flutter/image_compression_flutter.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/address/domain/models/address_model.dart';
-import 'package:ecommerce/features/cart/domain/models/cart_model.dart';
+import 'package:ecommerce/features/address/data/models/address_model.dart';
+import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/checkout/controllers/checkout_controller.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -25,10 +24,6 @@ import 'package:ecommerce/features/checkout/widgets/payment_section.dart';
 import 'package:ecommerce/features/checkout/widgets/time_slot_section.dart';
 import 'package:ecommerce/features/checkout/widgets/web_delivery_instruction_view.dart';
 import 'package:ecommerce/features/store/widgets/camera_button_sheet_widget.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
 
 class TopSection extends StatelessWidget {
@@ -91,28 +86,26 @@ class TopSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool takeAway = (checkoutController.orderType == 'take_away');
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     bool isGuestLoggedIn = AuthHelper.isGuestLoggedIn();
 
-    return BlocBuilder<CheckoutBloc, CheckoutState>(
-      builder: (context, state) {
-        bool takeAway = (state.orderType == 'take_away');
-        return Container(
-          decoration: ResponsiveHelper.isDesktop(context)
-              ? BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                )
-              : null,
-          child: Column(
-            children: [
+    return Container(
+      decoration: ResponsiveHelper.isDesktop(context)
+          ? BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                ),
+              ],
+            )
+          : null,
+      child: Column(
+        children: [
           storeId != null
               ? Container(
                   decoration: BoxDecoration(
@@ -167,21 +160,28 @@ class TopSection extends StatelessWidget {
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           physics: const BouncingScrollPhysics(),
-                          itemCount: state.pickedPrescriptions.length + 1,
+                          itemCount:
+                              checkoutController.pickedPrescriptions.length + 1,
                           itemBuilder: (context, index) {
                             XFile? file =
-                                index == state.pickedPrescriptions.length
+                                index ==
+                                    checkoutController
+                                        .pickedPrescriptions
+                                        .length
                                 ? null
-                                : state.pickedPrescriptions[index];
+                                : checkoutController.pickedPrescriptions[index];
                             if (index < 5 &&
-                                index == state.pickedPrescriptions.length) {
+                                index ==
+                                    checkoutController
+                                        .pickedPrescriptions
+                                        .length) {
                               return InkWell(
-                                onTap: () async {
+                                onTap: () {
                                   if (ResponsiveHelper.isDesktop(context)) {
-                                    XFile? xFile = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 50);
-                                    if(xFile != null) {
-                                      context.read<CheckoutBloc>().add(PrescriptionImagePicked(image: xFile, isRemove: false));
-                                    }
+                                    checkoutController.pickPrescriptionImage(
+                                      isRemove: false,
+                                      isCamera: false,
+                                    );
                                   } else {
                                     Get.bottomSheet(
                                       const CameraButtonSheetWidget(),
@@ -189,15 +189,14 @@ class TopSection extends StatelessWidget {
                                   }
                                 },
                                 child: DottedBorder(
-                                  options: RoundedRectDottedBorderOptions(
-                                    color: Theme.of(context).primaryColor,
-                                    strokeWidth: 1,
-                                    strokeCap: StrokeCap.butt,
-                                    dashPattern: const [5, 5],
-                                    padding: const EdgeInsets.all(0),
-                                    radius: const Radius.circular(
-                                      Dimensions.radiusDefault,
-                                    ),
+                                  color: Theme.of(context).primaryColor,
+                                  strokeWidth: 1,
+                                  strokeCap: StrokeCap.butt,
+                                  dashPattern: const [5, 5],
+                                  padding: const EdgeInsets.all(0),
+                                  borderType: BorderType.RRect,
+                                  radius: const Radius.circular(
+                                    Dimensions.radiusDefault,
                                   ),
                                   child: Container(
                                     height: 98,
@@ -246,15 +245,14 @@ class TopSection extends StatelessWidget {
                                       ),
                                     ),
                                     child: DottedBorder(
-                                      options: RoundedRectDottedBorderOptions(
-                                        color: Theme.of(context).primaryColor,
-                                        strokeWidth: 1,
-                                        strokeCap: StrokeCap.butt,
-                                        dashPattern: const [5, 5],
-                                        padding: const EdgeInsets.all(0),
-                                        radius: const Radius.circular(
-                                          Dimensions.radiusDefault,
-                                        ),
+                                      color: Theme.of(context).primaryColor,
+                                      strokeWidth: 1,
+                                      strokeCap: StrokeCap.butt,
+                                      dashPattern: const [5, 5],
+                                      padding: const EdgeInsets.all(0),
+                                      borderType: BorderType.RRect,
+                                      radius: const Radius.circular(
+                                        Dimensions.radiusDefault,
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(5.0),
@@ -283,7 +281,10 @@ class TopSection extends StatelessWidget {
                                               right: 0,
                                               top: 0,
                                               child: InkWell(
-                                                onTap: () => context.read<CheckoutBloc>().add(PrescriptionImageRemoved(index: index)),
+                                                onTap: () => checkoutController
+                                                    .removePrescriptionImage(
+                                                      index,
+                                                    ),
                                                 child: const Padding(
                                                   padding: EdgeInsets.all(
                                                     Dimensions.paddingSizeSmall,
@@ -337,7 +338,7 @@ class TopSection extends StatelessWidget {
                         value: 'delivery',
                         title: 'home_delivery'.tr,
                         charge: charge,
-                        isFree: state.store!.freeDelivery,
+                        isFree: checkoutController.store!.freeDelivery,
                         fromWeb: true,
                         total: total,
                       )
@@ -349,12 +350,13 @@ class TopSection extends StatelessWidget {
                                             .configModel!
                                             .homeDeliveryStatus ==
                                         1 &&
-                                    state.store!.delivery!
+                                    checkoutController.store!.delivery!
                                 ? DeliveryOptionButtonWidget(
                                     value: 'delivery',
                                     title: 'home_delivery'.tr,
                                     charge: charge,
-                                    isFree: state.store!.freeDelivery,
+                                    isFree:
+                                        checkoutController.store!.freeDelivery,
                                     fromWeb: true,
                                     total: total,
                                   )
@@ -367,7 +369,7 @@ class TopSection extends StatelessWidget {
                                             .configModel!
                                             .takeawayStatus ==
                                         1 &&
-                                    state.store!.takeAway!
+                                    checkoutController.store!.takeAway!
                                 ? DeliveryOptionButtonWidget(
                                     value: 'take_away',
                                     title: 'take_away'.tr,
@@ -393,9 +395,9 @@ class TopSection extends StatelessWidget {
                     children: [
                       Text('${'delivery_charge'.tr}: '),
                       Text(
-                        state.store!.freeDelivery!
+                        checkoutController.store!.freeDelivery!
                             ? 'free'.tr
-                            : state.distance != -1
+                            : checkoutController.distance != -1
                             ? PriceConverter.convertPrice(charge)
                             : 'calculating'.tr,
                         textDirection: TextDirection.ltr,
@@ -454,22 +456,12 @@ class TopSection extends StatelessWidget {
           !isDesktop && !isGuestLoggedIn
               ? CouponSection(
                   storeId: storeId,
-                  couponController: checkoutController.couponController,
+                  checkoutController: checkoutController,
                   total: total,
                   price: price,
                   discount: discount,
                   addOns: addOns,
                   deliveryCharge: deliveryCharge,
-                  onCheckBalanceStatus: (totalPrice, discount) {
-                    if(state.isPartialPay) {
-                      if(totalPrice < Get.find<ProfileController>().userInfoModel!.walletBalance!) {
-                        context.read<CheckoutBloc>().add(const PartialPaymentToggled());
-                        context.read<CheckoutBloc>().add(const PaymentMethodSet(index: 1));
-                      } else {
-                        context.read<CheckoutBloc>().add(const PaymentMethodSet(index: -1));
-                      }
-                    }
-                  },
                 )
               : const SizedBox(),
 
@@ -527,6 +519,5 @@ class TopSection extends StatelessWidget {
         ],
       ),
     );
-  });
-}
+  }
 }

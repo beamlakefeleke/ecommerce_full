@@ -20,8 +20,7 @@ class WebCouponBannerViewWidget extends StatefulWidget {
 }
 
 class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
-  final CarouselSliderController carouselController =
-      CarouselSliderController();
+  final CarouselController carouselController = CarouselController();
 
   @override
   Widget build(BuildContext context) {
@@ -161,14 +160,13 @@ class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
                                     const Spacer(),
 
                                     DottedBorder(
-                                      options: RoundedRectDottedBorderOptions(
-                                        color: Theme.of(context).primaryColor,
-                                        strokeWidth: 1,
-                                        strokeCap: StrokeCap.butt,
-                                        dashPattern: const [5, 5],
-                                        padding: const EdgeInsets.all(0),
-                                        radius: const Radius.circular(50),
-                                      ),
+                                      color: Theme.of(context).primaryColor,
+                                      strokeWidth: 1,
+                                      strokeCap: StrokeCap.butt,
+                                      dashPattern: const [5, 5],
+                                      padding: const EdgeInsets.all(0),
+                                      borderType: BorderType.RRect,
+                                      radius: const Radius.circular(50),
                                       child: InkWell(
                                         onTap: () {
                                           if (couponController

@@ -1,21 +1,19 @@
 import 'dart:typed_data';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
-import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
 import 'package:ecommerce/common/models/response_model.dart';
-import 'package:ecommerce/features/profile/data/models/userinfo_model.dart';
-import 'package:ecommerce/features/profile/domain/repositories/profile_repository.dart';
+import 'package:ecommerce/features/profile/domain/models/userinfo_model.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:ecommerce/helper/network_info.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
+import 'package:ecommerce/features/profile/domain/services/profile_service_interface.dart';
 
 class ProfileController extends GetxController implements GetxService {
-  final ProfileRepository profileRepository;
-  ProfileController({required this.profileRepository});
+  final ProfileServiceInterface profileServiceInterface;
+  ProfileController({required this.profileServiceInterface});
 
   UserInfoModel? _userInfoModel;
   UserInfoModel? get userInfoModel => _userInfoModel;
@@ -32,42 +30,38 @@ class ProfileController extends GetxController implements GetxService {
   Future<void> getUserInfo() async {
     _pickedFile = null;
     _rawFile = null;
-    final result = await profileRepository.getUserInfo();
-    result.fold(
-      (failure) {
-        // Handle failure if necessary
-      },
-      (userInfo) {
-        _userInfoModel = userInfo as UserInfoModel;
-      }
-    );
+    UserInfoModel? userInfoModel = await profileServiceInterface.getUserInfo();
+    if (userInfoModel != null) {
+      _userInfoModel = userInfoModel;
+    }
     update();
   }
 
   void setForceFullyUserEmpty() {
     _userInfoModel = null;
-    update();
   }
 
-  Future<ResponseModel> updateUserInfo(UserInfoModel updateUserModel, String token) async {
+  Future<ResponseModel> updateUserInfo(
+    UserInfoModel updateUserModel,
+    String token,
+  ) async {
     _isLoading = true;
     update();
-    final result = await profileRepository.updateProfile(updateUserModel, _pickedFile, token);
-    
-    late ResponseModel responseModel;
-    result.fold(
-      (failure) {
-        responseModel = ResponseModel(false, failure.message);
-      },
-      (userInfo) {
-        Get.back();
-        responseModel = ResponseModel(true, 'Profile updated successfully');
-        _pickedFile = null;
-        _rawFile = null;
-        getUserInfo();
-      }
+    ResponseModel responseModel = await profileServiceInterface.updateProfile(
+      updateUserModel,
+      _pickedFile,
+      token,
     );
     _isLoading = false;
+    if (responseModel.isSuccess) {
+      Get.back();
+      responseModel = ResponseModel(true, responseModel.message);
+      _pickedFile = null;
+      _rawFile = null;
+      getUserInfo();
+    } else {
+      responseModel = ResponseModel(false, responseModel.message);
+    }
     update();
     return responseModel;
   }
@@ -75,48 +69,26 @@ class ProfileController extends GetxController implements GetxService {
   Future<ResponseModel> changePassword(UserInfoModel updatedUserModel) async {
     _isLoading = true;
     update();
-    final result = await profileRepository.changePassword(updatedUserModel);
-    
-    late ResponseModel responseModel;
-    result.fold(
-      (failure) {
-        responseModel = ResponseModel(false, failure.message);
-      },
-      (_) {
-        responseModel = ResponseModel(true, 'Password changed successfully');
-      }
+    ResponseModel responseModel = await profileServiceInterface.changePassword(
+      updatedUserModel,
     );
     _isLoading = false;
+    if (responseModel.isSuccess) {
+      responseModel = ResponseModel(true, responseModel.message);
+    } else {
+      responseModel = ResponseModel(false, responseModel.message);
+    }
     update();
     return responseModel;
   }
 
   void updateUserWithNewData(User? user) {
-    if (_userInfoModel != null) {
-      _userInfoModel = UserInfoModel(
-        id: _userInfoModel!.id,
-        fName: _userInfoModel!.fName,
-        lName: _userInfoModel!.lName,
-        email: _userInfoModel!.email,
-        image: _userInfoModel!.image,
-        phone: _userInfoModel!.phone,
-        createdAt: _userInfoModel!.createdAt,
-        password: _userInfoModel!.password,
-        orderCount: _userInfoModel!.orderCount,
-        memberSinceDays: _userInfoModel!.memberSinceDays,
-        walletBalance: _userInfoModel!.walletBalance,
-        loyaltyPoint: _userInfoModel!.loyaltyPoint,
-        refCode: _userInfoModel!.refCode,
-        socialId: _userInfoModel!.socialId,
-        userInfo: user,
-      );
-      update();
-    }
+    _userInfoModel!.userInfo = user;
   }
 
   void pickImage() async {
     _pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if(_pickedFile != null) {
+    if (_pickedFile != null) {
       _pickedFile = await NetworkInfo.compressImage(_pickedFile!);
       _rawFile = await _pickedFile!.readAsBytes();
     }
@@ -126,7 +98,7 @@ class ProfileController extends GetxController implements GetxService {
   void initData({bool isUpdate = false}) {
     _pickedFile = null;
     _rawFile = null;
-    if(isUpdate){
+    if (isUpdate) {
       update();
     }
   }
@@ -134,23 +106,17 @@ class ProfileController extends GetxController implements GetxService {
   Future deleteUser() async {
     _isLoading = true;
     update();
-    final result = await profileRepository.deleteUser();
-    
-    result.fold(
-      (failure) {
-        Get.back();
-        showCustomSnackBar(failure.message, isError: true);
-      },
-      (_) {
-        showCustomSnackBar('User deleted successfully', isError: false);
-        Get.find<AuthController>().clearSharedData();
-        getIt<FavouriteBloc>().add(const FavouriteLocalCleared());
-        Get.offAllNamed(RouteHelper.getSignInRoute(RouteHelper.splash));
-      }
-    );
-    
+    ResponseModel responseModel = await profileServiceInterface.deleteUser();
     _isLoading = false;
-    update();
+    if (responseModel.isSuccess) {
+      showCustomSnackBar(responseModel.message, isError: false);
+      Get.find<AuthController>().clearSharedData();
+      Get.find<FavouriteController>().removeFavourite();
+      Get.offAllNamed(RouteHelper.getSignInRoute(RouteHelper.splash));
+    } else {
+      Get.back();
+      showCustomSnackBar(responseModel.message, isError: true);
+    }
   }
 
   void clearUserInfo() {

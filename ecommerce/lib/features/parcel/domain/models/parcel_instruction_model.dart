@@ -1,5 +1,3 @@
-import 'package:ecommerce/features/parcel/domain/entities/parcel_instruction.dart';
-
 class ParcelInstructionModel {
   int? totalSize;
   String? limit;
@@ -32,35 +30,34 @@ class ParcelInstructionModel {
   }
 }
 
-class Data extends ParcelInstruction {
+class Data {
+  int? id;
+  String? instruction;
+  int? status;
+  String? createdAt;
+  String? updatedAt;
   List<Translations>? translations;
 
-  Data({
-    super.id,
-    super.instruction,
-    super.status,
-    super.createdAt,
-    super.updatedAt,
-    this.translations,
-  });
+  Data(
+      {this.id,
+        this.instruction,
+        this.status,
+        this.createdAt,
+        this.updatedAt,
+        this.translations});
 
-  factory Data.fromJson(Map<String, dynamic> json) {
-    List<Translations>? translations;
+  Data.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    instruction = json['instruction'];
+    status = json['status'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
     if (json['translations'] != null) {
       translations = <Translations>[];
       json['translations'].forEach((v) {
         translations!.add(Translations.fromJson(v));
       });
     }
-
-    return Data(
-      id: json['id'],
-      instruction: json['instruction'],
-      status: json['status'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      translations: translations,
-    );
   }
 
   Map<String, dynamic> toJson() {

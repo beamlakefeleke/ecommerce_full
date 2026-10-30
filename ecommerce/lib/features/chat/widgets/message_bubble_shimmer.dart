@@ -11,10 +11,14 @@ class MessageBubbleShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: isMe ? const EdgeInsets.fromLTRB(50, 5, 10, 5) : const EdgeInsets.fromLTRB(10, 5, 50, 5),
+      padding: isMe
+          ? const EdgeInsets.fromLTRB(50, 5, 10, 5)
+          : const EdgeInsets.fromLTRB(10, 5, 50, 5),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           Flexible(
             child: Shimmer(
@@ -26,11 +30,17 @@ class MessageBubbleShimmer extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(Dimensions.radiusDefault),
-                    bottomLeft: isMe ? const Radius.circular(Dimensions.radiusDefault) : const Radius.circular(0),
-                    bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(Dimensions.radiusDefault),
+                    bottomLeft: isMe
+                        ? const Radius.circular(Dimensions.radiusDefault)
+                        : const Radius.circular(0),
+                    bottomRight: isMe
+                        ? const Radius.circular(0)
+                        : const Radius.circular(Dimensions.radiusDefault),
                     topRight: const Radius.circular(Dimensions.radiusDefault),
                   ),
-                  color: isMe ? Theme.of(context).hintColor : Theme.of(context).disabledColor,
+                  color: isMe
+                      ? Theme.of(context).hintColor
+                      : Theme.of(context).disabledColor,
                 ),
               ),
             ),

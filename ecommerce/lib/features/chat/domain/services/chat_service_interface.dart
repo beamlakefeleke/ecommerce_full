@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_compression_flutter/image_compression_flutter.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
 

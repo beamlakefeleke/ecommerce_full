@@ -4,7 +4,6 @@ import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 
 class ModuleHelper {
-
   static ModuleModel? getModule() {
     return Get.find<SplashController>().module;
   }
@@ -16,5 +15,4 @@ class ModuleHelper {
   static Module getModuleConfig(String? moduleType) {
     return Get.find<SplashController>().getModuleConfig(moduleType);
   }
-
 }

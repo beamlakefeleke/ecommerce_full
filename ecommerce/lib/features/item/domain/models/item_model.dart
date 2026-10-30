@@ -9,17 +9,28 @@ class ItemModel {
   List<Item>? items;
   List<Categories>? categories;
 
-  ItemModel({this.totalSize, this.limit, this.offset, this.items, this.categories});
+  ItemModel({
+    this.totalSize,
+    this.limit,
+    this.offset,
+    this.items,
+    this.categories,
+  });
 
   ItemModel.fromJson(Map<String, dynamic> json) {
     totalSize = json['total_size'];
     limit = json['limit'].toString();
-    offset = (json['offset'] != null && json['offset'].toString().trim().isNotEmpty) ? int.parse(json['offset'].toString()) : null;
+    offset =
+        (json['offset'] != null && json['offset'].toString().trim().isNotEmpty)
+        ? int.parse(json['offset'].toString())
+        : null;
     if (json['products'] != null) {
       items = [];
       json['products'].forEach((v) {
         if (v['module_type'] == null ||
-            !Get.find<SplashController>().getModuleConfig(v['module_type']).newVariation! ||
+            !Get.find<SplashController>()
+                .getModuleConfig(v['module_type'])
+                .newVariation! ||
             v['variations'] == null ||
             v['variations'].isEmpty ||
             (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {
@@ -31,7 +42,9 @@ class ItemModel {
       items = [];
       json['items'].forEach((v) {
         if (v['module_type'] == null ||
-            !Get.find<SplashController>().getModuleConfig(v['module_type']).newVariation! ||
+            !Get.find<SplashController>()
+                .getModuleConfig(v['module_type'])
+                .newVariation! ||
             v['variations'] == null ||
             v['variations'].isEmpty ||
             (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {
@@ -291,11 +304,7 @@ class AddOns {
   String? name;
   double? price;
 
-  AddOns({
-    this.id,
-    this.name,
-    this.price,
-  });
+  AddOns({this.id, this.name, this.price});
 
   AddOns.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -342,7 +351,14 @@ class FoodVariation {
   bool? required;
   List<VariationValue>? variationValues;
 
-  FoodVariation({this.name, this.multiSelect, this.min, this.max, this.required, this.variationValues});
+  FoodVariation({
+    this.name,
+    this.multiSelect,
+    this.min,
+    this.max,
+    this.required,
+    this.variationValues,
+  });
 
   FoodVariation.fromJson(Map<String, dynamic> json) {
     if (json['max'] != null) {

@@ -1,7 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_compression_flutter/image_compression_flutter.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,21 +10,16 @@ class NetworkInfo {
   NetworkInfo(this.connectivity);
 
   Future<bool> get isConnected async {
-    List<ConnectivityResult> result = await connectivity.checkConnectivity();
-    return result.contains(ConnectivityResult.none) == false &&
-        result.isNotEmpty;
+    ConnectivityResult result = await connectivity.checkConnectivity();
+    return result != ConnectivityResult.none;
   }
 
   static void checkConnectivity(BuildContext context) {
-    Connectivity().onConnectivityChanged.listen((
-      List<ConnectivityResult> results,
-    ) {
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (Get.find<SplashController>().firstTimeConnectionCheck) {
         Get.find<SplashController>().setFirstTimeConnectionCheck(false);
       } else {
-        bool isNotConnected =
-            results.isEmpty ||
-            results.every((r) => r == ConnectivityResult.none);
+        bool isNotConnected = result == ConnectivityResult.none;
         isNotConnected
             ? const SizedBox()
             : ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -44,24 +38,28 @@ class NetworkInfo {
   }
 
   static Future<XFile> compressImage(XFile file) async {
-    final bytes = await file.readAsBytes();
-    final sizeInMb = bytes.lengthInBytes / 1048576;
-    final int quality = sizeInMb < 2
-        ? 90
-        : sizeInMb < 5
-        ? 50
-        : sizeInMb < 10
-        ? 10
-        : 1;
-    final result = await FlutterImageCompress.compressWithList(
-      bytes,
-      quality: quality,
-      format: CompressFormat.webp,
+    final ImageFile input = ImageFile(
+      filePath: file.path,
+      rawBytes: await file.readAsBytes(),
+    );
+    final Configuration config = Configuration(
+      outputType: ImageOutputType.webpThenPng,
+      useJpgPngNativeCompressor: false,
+      quality: (input.sizeInBytes / 1048576) < 2
+          ? 90
+          : (input.sizeInBytes / 1048576) < 5
+          ? 50
+          : (input.sizeInBytes / 1048576) < 10
+          ? 10
+          : 1,
+    );
+    final ImageFile output = await compressor.compress(
+      ImageFileConfiguration(input: input, config: config),
     );
     if (kDebugMode) {
-      print('Input size : ${bytes.lengthInBytes / 1048576}');
-      print('Output size : ${result.lengthInBytes / 1048576}');
+      print('Input size : ${input.sizeInBytes / 1048576}');
+      print('Output size : ${output.sizeInBytes / 1048576}');
     }
-    return XFile.fromData(result);
+    return XFile.fromData(output.rawBytes);
   }
 }

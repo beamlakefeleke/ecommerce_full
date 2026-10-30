@@ -98,5 +98,4 @@ class SplashService implements SplashServiceInterface {
   Future<void> saveSuggestedLocationStatus(bool data) async {
     return await splashRepositoryInterface.saveSuggestedLocationStatus(data);
   }
-
 }

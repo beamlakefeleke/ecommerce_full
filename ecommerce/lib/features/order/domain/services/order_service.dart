@@ -14,19 +14,27 @@ class OrderService implements OrderServiceInterface {
   final OrderRepositoryInterface orderRepositoryInterface;
   OrderService({required this.orderRepositoryInterface});
 
-
   @override
   Future<PaginatedOrderModel?> getRunningOrderList(int offset) async {
-    return await orderRepositoryInterface.getList(isRunningOrder: true, offset: offset);
+    return await orderRepositoryInterface.getList(
+      isRunningOrder: true,
+      offset: offset,
+    );
   }
 
   @override
   Future<PaginatedOrderModel?> getHistoryOrderList(int offset) async {
-    return await orderRepositoryInterface.getList(isHistoryOrder: true, offset: offset);
+    return await orderRepositoryInterface.getList(
+      isHistoryOrder: true,
+      offset: offset,
+    );
   }
 
   @override
-  Future<List<OrderDetailsModel>?> getOrderDetails(String orderID, String? guestId) async {
+  Future<List<OrderDetailsModel>?> getOrderDetails(
+    String orderID,
+    String? guestId,
+  ) async {
     return await orderRepositoryInterface.get(orderID, guestId: guestId);
   }
 
@@ -41,8 +49,14 @@ class OrderService implements OrderServiceInterface {
   }
 
   @override
-  Future<void> submitRefundRequest(int selectedReasonIndex, List<String?>? refundReasons, String note, String? orderId, XFile? refundImage) async {
-    if(selectedReasonIndex == 0) {
+  Future<void> submitRefundRequest(
+    int selectedReasonIndex,
+    List<String?>? refundReasons,
+    String note,
+    String? orderId,
+    XFile? refundImage,
+  ) async {
+    if (selectedReasonIndex == 0) {
       showCustomSnackBar('please_select_reason'.tr);
     } else {
       Map<String, String> body = {};
@@ -51,7 +65,10 @@ class OrderService implements OrderServiceInterface {
         'order_id': orderId!,
         'customer_note': note,
       });
-      Response response = await orderRepositoryInterface.submitRefundRequest(body, refundImage);
+      Response response = await orderRepositoryInterface.submitRefundRequest(
+        body,
+        refundImage,
+      );
       if (response.statusCode == 200) {
         showCustomSnackBar(response.body['message'], isError: false);
         Get.offAllNamed(RouteHelper.getInitialRoute());
@@ -60,8 +77,16 @@ class OrderService implements OrderServiceInterface {
   }
 
   @override
-  Future<Response> trackOrder(String? orderID, String? guestId, {String? contactNumber}) async {
-    return await orderRepositoryInterface.trackOrder(orderID, guestId, contactNumber: contactNumber);
+  Future<Response> trackOrder(
+    String? orderID,
+    String? guestId, {
+    String? contactNumber,
+  }) async {
+    return await orderRepositoryInterface.trackOrder(
+      orderID,
+      guestId,
+      contactNumber: contactNumber,
+    );
   }
 
   @override
@@ -70,11 +95,14 @@ class OrderService implements OrderServiceInterface {
   }
 
   @override
-  OrderModel? prepareOrderModel(PaginatedOrderModel? runningOrderModel, int? orderID) {
+  OrderModel? prepareOrderModel(
+    PaginatedOrderModel? runningOrderModel,
+    int? orderID,
+  ) {
     OrderModel? orderModel;
-    if(runningOrderModel != null) {
-      for(OrderModel order in runningOrderModel.orders!) {
-        if(order.id == orderID) {
+    if (runningOrderModel != null) {
+      for (OrderModel order in runningOrderModel.orders!) {
+        if (order.id == orderID) {
           orderModel = order;
           break;
         }
@@ -96,40 +124,59 @@ class OrderService implements OrderServiceInterface {
   }
 
   @override
-  void paymentRedirect({required String url, required bool canRedirect, required String? contactNumber,
-    required Function onClose, required final String? addFundUrl, required final String orderID}) {
-
+  void paymentRedirect({
+    required String url,
+    required bool canRedirect,
+    required String? contactNumber,
+    required Function onClose,
+    required final String? addFundUrl,
+    required final String orderID,
+  }) {
     bool forOrder = (addFundUrl == '' && addFundUrl!.isEmpty);
 
-    if(canRedirect) {
-      bool isSuccess = forOrder ? url.startsWith('${AppConstants.baseUrl}/payment-success')
+    if (canRedirect) {
+      bool isSuccess = forOrder
+          ? url.startsWith('${AppConstants.baseUrl}/payment-success')
           : url.contains('success') && url.contains(AppConstants.baseUrl);
-      bool isFailed = forOrder ? url.startsWith('${AppConstants.baseUrl}/payment-fail')
+      bool isFailed = forOrder
+          ? url.startsWith('${AppConstants.baseUrl}/payment-fail')
           : url.contains('fail') && url.contains(AppConstants.baseUrl);
-      bool isCancel = forOrder ? url.startsWith('${AppConstants.baseUrl}/payment-cancel')
+      bool isCancel = forOrder
+          ? url.startsWith('${AppConstants.baseUrl}/payment-cancel')
           : url.contains('cancel') && url.contains(AppConstants.baseUrl);
       if (isSuccess || isFailed || isCancel) {
         canRedirect = false;
         onClose();
       }
 
-      if(forOrder){
+      if (forOrder) {
         if (isSuccess) {
-          Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID, contactNumber));
+          Get.offNamed(
+            RouteHelper.getOrderSuccessRoute(orderID, contactNumber),
+          );
         } else if (isFailed || isCancel) {
-          Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID, contactNumber));
+          Get.offNamed(
+            RouteHelper.getOrderSuccessRoute(orderID, contactNumber),
+          );
         }
-      } else{
-        if(isSuccess || isFailed || isCancel) {
-          if(Get.currentRoute.contains(RouteHelper.payment)) {
+      } else {
+        if (isSuccess || isFailed || isCancel) {
+          if (Get.currentRoute.contains(RouteHelper.payment)) {
             Get.back();
           }
           Get.back();
-          Get.toNamed(RouteHelper.getWalletRoute(fundStatus: isSuccess ? 'success' : isFailed ? 'fail' : 'cancel', token: UniqueKey().toString()));
+          Get.toNamed(
+            RouteHelper.getWalletRoute(
+              fundStatus: isSuccess
+                  ? 'success'
+                  : isFailed
+                  ? 'fail'
+                  : 'cancel',
+              token: UniqueKey().toString(),
+            ),
+          );
         }
       }
-
     }
   }
-
 }

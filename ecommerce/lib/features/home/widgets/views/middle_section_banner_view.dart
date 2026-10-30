@@ -18,8 +18,7 @@ class MiddleSectionBannerView extends StatefulWidget {
 }
 
 class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
-  final CarouselSliderController carouselController =
-      CarouselSliderController();
+  final CarouselController carouselController = CarouselController();
 
   @override
   Widget build(BuildContext context) {

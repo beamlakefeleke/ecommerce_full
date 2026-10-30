@@ -1,4 +1,3 @@
-
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 
 class RecommendedItemModel {

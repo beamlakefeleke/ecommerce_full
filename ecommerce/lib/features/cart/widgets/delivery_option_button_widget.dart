@@ -4,11 +4,6 @@ import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
-import 'package:ecommerce/core/di/injection.dart';
 
 class DeliveryOptionButtonWidget extends StatefulWidget {
   final String value;
@@ -17,76 +12,120 @@ class DeliveryOptionButtonWidget extends StatefulWidget {
   final bool? isFree;
   final bool fromWeb;
   final double total;
-  const DeliveryOptionButtonWidget({super.key, required this.value, required this.title, required this.charge, required this.isFree,
-    this.fromWeb = false, required this.total});
+  const DeliveryOptionButtonWidget({
+    super.key,
+    required this.value,
+    required this.title,
+    required this.charge,
+    required this.isFree,
+    this.fromWeb = false,
+    required this.total,
+  });
 
   @override
-  State<DeliveryOptionButtonWidget> createState() => _DeliveryOptionButtonWidgetState();
+  State<DeliveryOptionButtonWidget> createState() =>
+      _DeliveryOptionButtonWidgetState();
 }
 
-class _DeliveryOptionButtonWidgetState extends State<DeliveryOptionButtonWidget> {
+class _DeliveryOptionButtonWidgetState
+    extends State<DeliveryOptionButtonWidget> {
   @override
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(milliseconds: 200), (){
-      getIt<CheckoutBloc>().add(OrderTypeSet(type: Get.find<SplashController>().configModel!.homeDeliveryStatus == 1
-          && getIt<CheckoutBloc>().state.store!.delivery! ? 'delivery' : 'take_away'));
+    Future.delayed(const Duration(milliseconds: 200), () {
+      Get.find<CheckoutController>().setOrderType(
+        Get.find<SplashController>().configModel!.homeDeliveryStatus == 1 &&
+                Get.find<CheckoutController>().store!.delivery!
+            ? 'delivery'
+            : 'take_away',
+        notify: true,
+      );
     });
   }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CheckoutBloc, CheckoutState>(
-      builder: (context, checkoutState) {
-        bool select = checkoutState.orderType == widget.value;
+    return GetBuilder<CheckoutController>(
+      builder: (checkoutController) {
+        bool select = checkoutController.orderType == widget.value;
 
         return InkWell(
           onTap: () {
-            getIt<CheckoutBloc>().add(OrderTypeSet(type: widget.value));
-            getIt<CheckoutBloc>().add(const InstructionSelected(index: -1));
+            checkoutController.setOrderType(widget.value);
+            checkoutController.setInstruction(-1);
 
-            if(widget.value == 'take_away') {
-              if(checkoutState.isPartialPay) {
+            if (checkoutController.orderType == 'take_away') {
+              if (checkoutController.isPartialPay) {
                 double tips = 0;
-                try{
-                  tips = double.parse(Get.find<CheckoutController>().tipController.text);
-                } catch(_) {}
-                Get.find<CheckoutController>().checkBalanceStatus(widget.total, widget.charge! + tips);
+                try {
+                  tips = double.parse(checkoutController.tipController.text);
+                } catch (_) {}
+                checkoutController.checkBalanceStatus(
+                  widget.total,
+                  widget.charge! + tips,
+                );
               }
             } else {
-              if(checkoutState.isPartialPay){
-                getIt<CheckoutBloc>().add(const PartialPaymentToggled());
+              if (checkoutController.isPartialPay) {
+                checkoutController.changePartialPayment();
               } else {
-                getIt<CheckoutBloc>().add(const PaymentMethodSet(index: -1));
+                checkoutController.setPaymentMethod(-1);
               }
-
             }
           },
           child: Container(
             decoration: BoxDecoration(
-              color: select  ? widget.fromWeb ? Theme.of(context).primaryColor.withValues(alpha: 0.05) : Theme.of(context).cardColor : Colors.transparent,
+              color: select
+                  ? widget.fromWeb
+                        ? Theme.of(context).primaryColor.withOpacity(0.05)
+                        : Theme.of(context).cardColor
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-              border: Border.all(color: select ? Theme.of(context).primaryColor : Colors.transparent),
-              boxShadow: [BoxShadow(color: select ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent, blurRadius: 10)]
+              border: Border.all(
+                color: select
+                    ? Theme.of(context).primaryColor
+                    : Colors.transparent,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: select
+                      ? Theme.of(context).primaryColor.withOpacity(0.1)
+                      : Colors.transparent,
+                  blurRadius: 10,
+                ),
+              ],
             ),
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Dimensions.paddingSizeSmall,
+              vertical: Dimensions.paddingSizeExtraSmall,
+            ),
             child: Row(
               children: [
                 Radio(
                   value: widget.value,
-                  groupValue: checkoutState.orderType,
+                  groupValue: checkoutController.orderType,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   onChanged: (String? value) {
-                    getIt<CheckoutBloc>().add(OrderTypeSet(type: value));
+                    checkoutController.setOrderType(value);
                   },
                   activeColor: Theme.of(context).primaryColor,
-                  visualDensity: const VisualDensity(horizontal: -3, vertical: -3),
+                  visualDensity: const VisualDensity(
+                    horizontal: -3,
+                    vertical: -3,
+                  ),
                 ),
                 const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                Text(widget.title, style: robotoMedium.copyWith(color: select ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium!.color)),
+                Text(
+                  widget.title,
+                  style: robotoMedium.copyWith(
+                    color: select
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).textTheme.bodyMedium!.color,
+                  ),
+                ),
                 const SizedBox(width: 5),
-
               ],
             ),
           ),

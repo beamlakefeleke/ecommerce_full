@@ -1,52 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecommerce/api/api_checker.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
-import 'package:ecommerce/features/taxi_booking/domain/models/brand_model.dart';
-import 'package:ecommerce/features/taxi_booking/domain/models/vehicle_model.dart';
-import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_bloc.dart';
-import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_event.dart';
-import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/taxi_booking/models/brand_model.dart';
+import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
+import 'package:ecommerce/features/taxi_booking/repo/car_selection_repo.dart';
 
+/*receive car list based on hourly and km , also filter car and select car function will be placed here*/
 class CarSelectionController extends GetxController implements GetxService {
-  late final CarSelectionBloc carSelectionBloc;
-  
-  CarSelectionController() {
-    carSelectionBloc = getIt<CarSelectionBloc>();
-    carSelectionBloc.stream.listen((state) {
+  final CarSelectionRepo carSelectionRepo;
+  CarSelectionController({required this.carSelectionRepo});
+
+  bool _isCarFilterActive = false;
+  RangeValues _selectedPriceRange = const RangeValues(0.2, 2.0);
+  double _startingPrice = 0.0;
+  double _endingPrice = 2000.0;
+
+  VehicleModel? _vehicleModel;
+  List<BrandModel>? _brandModels;
+  int _selectedBrand = 0;
+  int _sortByIndex = 0;
+
+  bool get isCarFilterActive => _isCarFilterActive;
+  VehicleModel? get vehicleModel => _vehicleModel;
+  RangeValues get selectedPriceRange => _selectedPriceRange;
+  double get startingPrice => _startingPrice;
+  double get endingPrice => _endingPrice;
+  List<BrandModel>? get brandModels => _brandModels;
+  int get selectedBrand => _selectedBrand;
+  int get sortByIndex => _sortByIndex;
+
+  void carFilter() {
+    _isCarFilterActive = !_isCarFilterActive;
+    update();
+  }
+
+  void setBrandModel(int index) {
+    _selectedBrand = index;
+    update();
+  }
+
+  void setSortBy(int index) {
+    _sortByIndex = index;
+    update();
+  }
+
+  void selectPriceRange(RangeValues newRange) {
+    _selectedPriceRange = newRange;
+    _startingPrice = _selectedPriceRange.start * 1000;
+    _endingPrice = _selectedPriceRange.end * 1000;
+    update();
+  }
+
+  Future<void> getVehiclesList(
+    UserInformationBody body,
+    int offset, {
+    bool isUpdate = false,
+  }) async {
+    if (offset == 1) {
+      _vehicleModel = null;
+      if (isUpdate) {
+        update();
+      }
+    }
+    Response response = await carSelectionRepo.getVehiclesList(body, offset);
+    if (response.statusCode == 200) {
+      if (offset == 1) {
+        _vehicleModel = VehicleModel.fromJson(response.body);
+      } else {
+        _vehicleModel = VehicleModel.fromJson(response.body);
+      }
       update();
-    });
-  }
-
-  bool get isCarFilterActive => carSelectionBloc.state.isCarFilterActive;
-  VehicleModel? get vehicleModel => carSelectionBloc.state.vehicleModel;
-  RangeValues get selectedPriceRange => carSelectionBloc.state.selectedPriceRange;
-  double get startingPrice => carSelectionBloc.state.startingPrice;
-  double get endingPrice => carSelectionBloc.state.endingPrice;
-  List<BrandModel>? get brandModels => carSelectionBloc.state.brandModels;
-  int get selectedBrand => carSelectionBloc.state.selectedBrand;
-  int get sortByIndex => carSelectionBloc.state.sortByIndex;
-
-  void carFilter(){
-    carSelectionBloc.add(ToggleCarFilterEvent());
-  }
-
-  void setBrandModel(int index){
-    carSelectionBloc.add(SetBrandModelEvent(index: index));
-  }
-
-  void setSortBy(int index){
-    carSelectionBloc.add(SetSortByEvent(index: index));
-  }
-
-  void selectPriceRange(RangeValues newRange){
-    carSelectionBloc.add(SelectPriceRangeEvent(newRange: newRange));
-  }
-
-  Future<void> getVehiclesList(UserInformationBody body, int offset, {bool isUpdate = false}) async{
-    carSelectionBloc.add(GetVehiclesListEvent(body: body, offset: offset, isUpdate: isUpdate));
+    } else {
+      ApiChecker.checkApi(response);
+    }
   }
 
   Future<void> getBrandList() async {
-    carSelectionBloc.add(GetBrandListEvent());
+    Response response = await carSelectionRepo.getBrandList();
+    if (response.statusCode == 200) {
+      if (response.body != null) {
+        _brandModels = [];
+        response.body.forEach((body) {
+          _brandModels!.add(BrandModel.fromJson(body));
+        });
+      }
+    } else {
+      ApiChecker.checkApi(response);
+    }
+    update();
   }
 }

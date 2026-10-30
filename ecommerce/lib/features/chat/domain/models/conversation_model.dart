@@ -6,7 +6,12 @@ class ConversationsModel {
   int? offset;
   List<Conversation?>? conversations;
 
-  ConversationsModel({this.totalSize, this.limit, this.offset, this.conversations});
+  ConversationsModel({
+    this.totalSize,
+    this.limit,
+    this.offset,
+    this.conversations,
+  });
 
   ConversationsModel.fromJson(Map<String, dynamic> json) {
     totalSize = json['total_size'];
@@ -75,8 +80,12 @@ class Conversation {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     sender = json['sender'] != null ? User.fromJson(json['sender']) : null;
-    receiver = json['receiver'] != null ? User.fromJson(json['receiver']) : null;
-    lastMessage = json['last_message'] != null ? Message.fromJson(json['last_message']) : null;
+    receiver = json['receiver'] != null
+        ? User.fromJson(json['receiver'])
+        : null;
+    lastMessage = json['last_message'] != null
+        ? Message.fromJson(json['last_message'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -114,7 +123,16 @@ class User {
   String? createdAt;
   String? updatedAt;
 
-  User({this.id, this.fName, this.lName, this.phone, this.email, this.image, this.createdAt, this.updatedAt});
+  User({
+    this.id,
+    this.fName,
+    this.lName,
+    this.phone,
+    this.email,
+    this.image,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];

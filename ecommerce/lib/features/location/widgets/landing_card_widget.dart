@@ -11,23 +11,26 @@ class LandingCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 150, alignment: Alignment.center,
+      height: 150,
+      alignment: Alignment.center,
       padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
         color: Theme.of(context).primaryColor.withOpacity(0.05),
       ),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CustomImage(image: icon, height: 45, width: 45),
+          const SizedBox(height: Dimensions.paddingSizeDefault),
 
-        CustomImage(
-          image: icon,
-          height: 45, width: 45,
-        ),
-        const SizedBox(height: Dimensions.paddingSizeDefault),
-
-        Text(title, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center),
-
-      ]),
+          Text(
+            title,
+            style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

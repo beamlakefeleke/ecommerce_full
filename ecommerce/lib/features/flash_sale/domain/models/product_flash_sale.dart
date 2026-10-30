@@ -8,13 +8,21 @@ class ProductFlashSale {
   FlashSaleModel? flashSale;
   List<Products>? products;
 
-  ProductFlashSale({this.totalSize, this.limit, this.offset, this.flashSale, this.products});
+  ProductFlashSale({
+    this.totalSize,
+    this.limit,
+    this.offset,
+    this.flashSale,
+    this.products,
+  });
 
   ProductFlashSale.fromJson(Map<String, dynamic> json) {
     totalSize = json['total_size'];
     limit = int.parse(json['limit'].toString());
     offset = int.parse(json['offset'].toString());
-    flashSale = json['flash_sale'] != null ? FlashSaleModel.fromJson(json['flash_sale']) : null;
+    flashSale = json['flash_sale'] != null
+        ? FlashSaleModel.fromJson(json['flash_sale'])
+        : null;
     if (json['products'] != null) {
       products = <Products>[];
       json['products'].forEach((v) {

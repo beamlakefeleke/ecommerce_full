@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_compression_flutter/image_compression_flutter.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
 import 'package:ecommerce/features/chat/domain/repositories/chat_repository_interface.dart';
@@ -110,21 +109,25 @@ class ChatService implements ChatServiceInterface {
 
   @override
   Future<XFile> compressImage(XFile file) async {
-    final bytes = await file.readAsBytes();
-    final sizeInMb = bytes.lengthInBytes / 1048576;
-    final int quality = sizeInMb < 2
-        ? 50
-        : sizeInMb < 5
-        ? 30
-        : sizeInMb < 10
-        ? 2
-        : 1;
-    final result = await FlutterImageCompress.compressWithList(
-      bytes,
-      quality: quality,
-      format: CompressFormat.webp,
+    final ImageFile input = ImageFile(
+      filePath: file.path,
+      rawBytes: await file.readAsBytes(),
     );
-    return XFile.fromData(result);
+    final Configuration config = Configuration(
+      outputType: ImageOutputType.webpThenPng,
+      useJpgPngNativeCompressor: false,
+      quality: (input.sizeInBytes / 1048576) < 2
+          ? 50
+          : (input.sizeInBytes / 1048576) < 5
+          ? 30
+          : (input.sizeInBytes / 1048576) < 10
+          ? 2
+          : 1,
+    );
+    final ImageFile output = await compressor.compress(
+      ImageFileConfiguration(input: input, config: config),
+    );
+    return XFile.fromData(output.rawBytes);
   }
 
   @override

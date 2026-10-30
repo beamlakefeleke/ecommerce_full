@@ -4,7 +4,7 @@ import 'package:ecommerce/common/models/response_model.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/features/splash/domain/models/landing_model.dart';
 import 'dart:convert';
-import 'package:ecommerce/features/address/domain/models/address_model.dart';
+import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:get/get.dart';
@@ -24,7 +24,7 @@ class SplashRepository implements SplashRepositoryInterface {
   Future<LandingModel?> getLandingPageData() async {
     LandingModel? landingModel;
     Response response = await apiClient.getData(AppConstants.landingPageUri);
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       landingModel = LandingModel.fromJson(response.body);
     }
     return landingModel;
@@ -32,39 +32,47 @@ class SplashRepository implements SplashRepositoryInterface {
 
   @override
   Future<ModuleModel?> initSharedData() async {
-    if(!sharedPreferences.containsKey(AppConstants.theme)) {
+    if (!sharedPreferences.containsKey(AppConstants.theme)) {
       sharedPreferences.setBool(AppConstants.theme, false);
     }
-    if(!sharedPreferences.containsKey(AppConstants.countryCode)) {
-      sharedPreferences.setString(AppConstants.countryCode, AppConstants.languages[0].countryCode!);
+    if (!sharedPreferences.containsKey(AppConstants.countryCode)) {
+      sharedPreferences.setString(
+        AppConstants.countryCode,
+        AppConstants.languages[0].countryCode!,
+      );
     }
-    if(!sharedPreferences.containsKey(AppConstants.languageCode)) {
-      sharedPreferences.setString(AppConstants.languageCode, AppConstants.languages[0].languageCode!);
+    if (!sharedPreferences.containsKey(AppConstants.languageCode)) {
+      sharedPreferences.setString(
+        AppConstants.languageCode,
+        AppConstants.languages[0].languageCode!,
+      );
     }
-    if(!sharedPreferences.containsKey(AppConstants.cartList)) {
+    if (!sharedPreferences.containsKey(AppConstants.cartList)) {
       sharedPreferences.setStringList(AppConstants.cartList, []);
     }
-    if(!sharedPreferences.containsKey(AppConstants.searchHistory)) {
+    if (!sharedPreferences.containsKey(AppConstants.searchHistory)) {
       sharedPreferences.setStringList(AppConstants.searchHistory, []);
     }
-    if(!sharedPreferences.containsKey(AppConstants.notification)) {
+    if (!sharedPreferences.containsKey(AppConstants.notification)) {
       sharedPreferences.setBool(AppConstants.notification, true);
     }
-    if(!sharedPreferences.containsKey(AppConstants.intro)) {
+    if (!sharedPreferences.containsKey(AppConstants.intro)) {
       sharedPreferences.setBool(AppConstants.intro, true);
     }
-    if(!sharedPreferences.containsKey(AppConstants.notificationCount)) {
+    if (!sharedPreferences.containsKey(AppConstants.notificationCount)) {
       sharedPreferences.setInt(AppConstants.notificationCount, 0);
     }
-    if(!sharedPreferences.containsKey(AppConstants.suggestedLocation)) {
+    if (!sharedPreferences.containsKey(AppConstants.suggestedLocation)) {
       sharedPreferences.setBool(AppConstants.suggestedLocation, false);
     }
 
     ModuleModel? module;
-    if(sharedPreferences.containsKey(AppConstants.moduleId)) {
+    if (sharedPreferences.containsKey(AppConstants.moduleId)) {
       try {
-        module = ModuleModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.moduleId)!));
-      }catch(e) {
+        module = ModuleModel.fromJson(
+          jsonDecode(sharedPreferences.getString(AppConstants.moduleId)!),
+        );
+      } catch (e) {
         debugPrint('Did not get shared Preferences module. Note: $e');
       }
     }
@@ -85,24 +93,35 @@ class SplashRepository implements SplashRepositoryInterface {
   Future<void> setStoreCategory(int storeCategoryID) async {
     AddressModel? addressModel;
     try {
-      addressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
-    }catch(e) {
+      addressModel = AddressModel.fromJson(
+        jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!),
+      );
+    } catch (e) {
       debugPrint('Did not get shared Preferences address . Note: $e');
     }
     apiClient.updateHeader(
-      sharedPreferences.getString(AppConstants.token), addressModel?.zoneIds,
-      addressModel?.areaIds, sharedPreferences.getString(AppConstants.languageCode),
-      storeCategoryID, addressModel?.latitude, addressModel?.longitude,
+      sharedPreferences.getString(AppConstants.token),
+      addressModel?.zoneIds,
+      addressModel?.areaIds,
+      sharedPreferences.getString(AppConstants.languageCode),
+      storeCategoryID,
+      addressModel?.latitude,
+      addressModel?.longitude,
     );
   }
 
   @override
   Future<List<ModuleModel>?> getModules({Map<String, String>? headers}) async {
     List<ModuleModel>? moduleList;
-    Response response = await apiClient.getData(AppConstants.moduleUri, headers: headers);
+    Response response = await apiClient.getData(
+      AppConstants.moduleUri,
+      headers: headers,
+    );
     if (response.statusCode == 200) {
       moduleList = [];
-      response.body.forEach((storeCategory) => moduleList!.add(ModuleModel.fromJson(storeCategory)));
+      response.body.forEach(
+        (storeCategory) => moduleList!.add(ModuleModel.fromJson(storeCategory)),
+      );
     }
     return moduleList;
   }
@@ -111,27 +130,39 @@ class SplashRepository implements SplashRepositoryInterface {
   Future<void> setModule(ModuleModel? module) async {
     AddressModel? addressModel;
     try {
-      addressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
-    }catch(e) {
+      addressModel = AddressModel.fromJson(
+        jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!),
+      );
+    } catch (e) {
       debugPrint('Did not get shared Preferences address . Note: $e');
     }
     apiClient.updateHeader(
-      sharedPreferences.getString(AppConstants.token), addressModel?.zoneIds, addressModel?.areaIds,
-      sharedPreferences.getString(AppConstants.languageCode), module?.id,
-      addressModel?.latitude, addressModel?.longitude,
+      sharedPreferences.getString(AppConstants.token),
+      addressModel?.zoneIds,
+      addressModel?.areaIds,
+      sharedPreferences.getString(AppConstants.languageCode),
+      module?.id,
+      addressModel?.latitude,
+      addressModel?.longitude,
     );
-    if(module != null) {
-      await sharedPreferences.setString(AppConstants.moduleId, jsonEncode(module.toJson()));
-    }else {
+    if (module != null) {
+      await sharedPreferences.setString(
+        AppConstants.moduleId,
+        jsonEncode(module.toJson()),
+      );
+    } else {
       await sharedPreferences.remove(AppConstants.moduleId);
     }
   }
 
   @override
   Future<void> setCacheModule(ModuleModel? module) async {
-    if(module != null) {
-      await sharedPreferences.setString(AppConstants.cacheModuleId, jsonEncode(module.toJson()));
-    }else {
+    if (module != null) {
+      await sharedPreferences.setString(
+        AppConstants.cacheModuleId,
+        jsonEncode(module.toJson()),
+      );
+    } else {
       await sharedPreferences.remove(AppConstants.cacheModuleId);
     }
   }
@@ -139,10 +170,12 @@ class SplashRepository implements SplashRepositoryInterface {
   @override
   ModuleModel? getCacheModule() {
     ModuleModel? module;
-    if(sharedPreferences.containsKey(AppConstants.cacheModuleId)) {
+    if (sharedPreferences.containsKey(AppConstants.cacheModuleId)) {
       try {
-        module = ModuleModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.cacheModuleId)!));
-      }catch(e) {
+        module = ModuleModel.fromJson(
+          jsonDecode(sharedPreferences.getString(AppConstants.cacheModuleId)!),
+        );
+      } catch (e) {
         debugPrint('Did not get shared Preferences cache module. Note: $e');
       }
     }
@@ -152,10 +185,12 @@ class SplashRepository implements SplashRepositoryInterface {
   @override
   ModuleModel? getModule() {
     ModuleModel? module;
-    if(sharedPreferences.containsKey(AppConstants.moduleId)) {
+    if (sharedPreferences.containsKey(AppConstants.moduleId)) {
       try {
-        module = ModuleModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.moduleId)!));
-      }catch(e) {
+        module = ModuleModel.fromJson(
+          jsonDecode(sharedPreferences.getString(AppConstants.moduleId)!),
+        );
+      } catch (e) {
         debugPrint('Did not get shared Preferences module. Note: $e');
       }
     }
@@ -165,10 +200,12 @@ class SplashRepository implements SplashRepositoryInterface {
   @override
   Future<ResponseModel> subscribeEmail(String email) async {
     ResponseModel responseModel;
-    Response response = await apiClient.postData(AppConstants.subscriptionUri, {'email': email}, handleError: false);
-    if(response.statusCode == 200) {
+    Response response = await apiClient.postData(AppConstants.subscriptionUri, {
+      'email': email,
+    }, handleError: false);
+    if (response.statusCode == 200) {
       responseModel = ResponseModel(true, 'subscribed_successfully'.tr);
-    }else {
+    } else {
       responseModel = ResponseModel(false, response.statusText);
     }
     return responseModel;
@@ -190,14 +227,16 @@ class SplashRepository implements SplashRepositoryInterface {
 
   @override
   void cookiesStatusChange(String? data) {
-    if(data != null){
+    if (data != null) {
       sharedPreferences.setString(AppConstants.cookiesManagement, data);
     }
   }
 
   @override
   bool getAcceptCookiesStatus(String data) {
-    return sharedPreferences.getString(AppConstants.cookiesManagement) != null && sharedPreferences.getString(AppConstants.cookiesManagement) == data;
+    return sharedPreferences.getString(AppConstants.cookiesManagement) !=
+            null &&
+        sharedPreferences.getString(AppConstants.cookiesManagement) == data;
   }
 
   @override
@@ -238,5 +277,4 @@ class SplashRepository implements SplashRepositoryInterface {
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-
 }

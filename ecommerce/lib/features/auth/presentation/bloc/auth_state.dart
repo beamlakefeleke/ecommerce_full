@@ -1,104 +1,102 @@
-import 'package:ecommerce/features/auth/domain/entities/auth_response.dart';
-import 'package:ecommerce/features/auth/domain/entities/social_login_body.dart';
+import 'package:equatable/equatable.dart';
 
-/// Immutable states emitted by [AuthBloc].
-///
-/// Named with past-tense / descriptive convention per RULES.md §3.
-/// No mutable fields, no side effects.
-sealed class AuthState {
-  const AuthState();
+/// One-shot status of the last auth action (login / register / social / guest).
+/// The UI reacts via BlocListener and dispatches navigation/snackbars.
+enum AuthActionStatus { none, inProgress, success, failure }
+
+/// Which action produced the current [AuthActionStatus] — lets the UI route
+/// the result correctly (e.g. login success -> location, register success with
+/// verification on -> verification screen).
+enum AuthActionType {
+  none,
+  login,
+  register,
+  guestLogin,
+  socialLogin,
+  socialRegister,
 }
 
-/// Initial state — loaded with remembered credentials if available.
-class AuthInitial extends AuthState {
-  final bool isRememberMeActive;
-  final bool acceptTerms;
-  final String savedNumber;
-  final String savedPassword;
-  final String savedCountryCode;
-  final bool isNotificationActive;
+/// What the UI should do next after a (social) auth attempt.
+enum AuthNextStep { none, location, verification, registration }
 
-  const AuthInitial({
-    this.isRememberMeActive = false,
+class AuthState extends Equatable {
+  final bool isLoading;
+  final bool guestLoading;
+  final bool acceptTerms;
+  final bool rememberMe;
+  final bool notification;
+
+  final AuthActionStatus actionStatus;
+  final AuthActionType actionType;
+  final AuthNextStep nextStep;
+  final String? message;
+
+  /// For login/register success: whether the phone is verified (drives whether
+  /// the UI goes to the verification screen).
+  final bool isPhoneVerified;
+
+  /// Carried from a social attempt that needs verification.
+  final String? pendingToken;
+  final String? pendingPhone;
+
+  const AuthState({
+    this.isLoading = false,
+    this.guestLoading = false,
     this.acceptTerms = true,
-    this.savedNumber = '',
-    this.savedPassword = '',
-    this.savedCountryCode = '',
-    this.isNotificationActive = true,
+    this.rememberMe = false,
+    this.notification = true,
+    this.actionStatus = AuthActionStatus.none,
+    this.actionType = AuthActionType.none,
+    this.nextStep = AuthNextStep.none,
+    this.message,
+    this.isPhoneVerified = false,
+    this.pendingToken,
+    this.pendingPhone,
   });
 
-  AuthInitial copyWith({
-    bool? isRememberMeActive,
+  AuthState copyWith({
+    bool? isLoading,
+    bool? guestLoading,
     bool? acceptTerms,
-    String? savedNumber,
-    String? savedPassword,
-    String? savedCountryCode,
-    bool? isNotificationActive,
+    bool? rememberMe,
+    bool? notification,
+    AuthActionStatus? actionStatus,
+    AuthActionType? actionType,
+    AuthNextStep? nextStep,
+    String? message,
+    bool? isPhoneVerified,
+    String? pendingToken,
+    String? pendingPhone,
   }) {
-    return AuthInitial(
-      isRememberMeActive: isRememberMeActive ?? this.isRememberMeActive,
+    return AuthState(
+      isLoading: isLoading ?? this.isLoading,
+      guestLoading: guestLoading ?? this.guestLoading,
       acceptTerms: acceptTerms ?? this.acceptTerms,
-      savedNumber: savedNumber ?? this.savedNumber,
-      savedPassword: savedPassword ?? this.savedPassword,
-      savedCountryCode: savedCountryCode ?? this.savedCountryCode,
-      isNotificationActive: isNotificationActive ?? this.isNotificationActive,
+      rememberMe: rememberMe ?? this.rememberMe,
+      notification: notification ?? this.notification,
+      actionStatus: actionStatus ?? this.actionStatus,
+      actionType: actionType ?? this.actionType,
+      nextStep: nextStep ?? this.nextStep,
+      message: message,
+      isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
+      pendingToken: pendingToken ?? this.pendingToken,
+      pendingPhone: pendingPhone ?? this.pendingPhone,
     );
   }
-}
 
-/// An auth operation is in progress.
-class AuthLoading extends AuthState {
-  const AuthLoading();
-}
-
-/// Guest login is specifically in progress (separate loading indicator).
-class AuthGuestLoading extends AuthState {
-  const AuthGuestLoading();
-}
-
-/// Login / registration / social auth succeeded.
-class AuthSuccess extends AuthState {
-  final AuthResponse response;
-
-  const AuthSuccess({required this.response});
-}
-
-/// Guest login succeeded.
-class AuthGuestSuccess extends AuthState {
-  final String guestId;
-
-  const AuthGuestSuccess({required this.guestId});
-}
-
-/// Social login returned a user whose phone is not verified.
-/// Presentation layer should navigate to the verification screen.
-class AuthSocialNeedsVerification extends AuthState {
-  final String phone;
-  final String token;
-
-  const AuthSocialNeedsVerification({
-    required this.phone,
-    required this.token,
-  });
-}
-
-/// Social login returned a user who needs to complete registration.
-/// Presentation layer should navigate to the "forgot password" / social
-/// registration screen.
-class AuthSocialNeedsRegistration extends AuthState {
-  final SocialLoginBody body;
-
-  const AuthSocialNeedsRegistration({required this.body});
-}
-
-/// Logout completed successfully.
-class AuthLoggedOut extends AuthState {
-  const AuthLoggedOut();
-}
-
-/// An auth operation failed.
-class AuthError extends AuthState {
-  final String message;
-
-  const AuthError({required this.message});
+  @override
+  List<Object?> get props => [
+    isLoading,
+    guestLoading,
+    acceptTerms,
+    rememberMe,
+    notification,
+    actionStatus,
+    actionType,
+    nextStep,
+    message,
+    isPhoneVerified,
+    pendingToken,
+    pendingPhone,
+  ];
 }

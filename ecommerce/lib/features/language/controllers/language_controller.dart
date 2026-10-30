@@ -9,11 +9,14 @@ import 'package:ecommerce/features/language/domain/service/language_service_inte
 
 class LocalizationController extends GetxController implements GetxService {
   final LanguageServiceInterface languageServiceInterface;
-  LocalizationController({required this.languageServiceInterface}){
+  LocalizationController({required this.languageServiceInterface}) {
     loadCurrentLanguage();
   }
 
-  Locale _locale = Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode);
+  Locale _locale = Locale(
+    AppConstants.languages[0].languageCode!,
+    AppConstants.languages[0].countryCode,
+  );
   Locale get locale => _locale;
 
   bool _isLtr = true;
@@ -29,10 +32,13 @@ class LocalizationController extends GetxController implements GetxService {
     Get.updateLocale(locale);
     _locale = locale;
     _isLtr = languageServiceInterface.setLTR(_locale);
-    languageServiceInterface.updateHeader(_locale, Get.find<SplashController>().module?.id);
+    languageServiceInterface.updateHeader(
+      _locale,
+      Get.find<SplashController>().module?.id,
+    );
 
     saveLanguage(_locale);
-    if(AddressHelper.getUserAddressFromSharedPref() != null) {
+    if (AddressHelper.getUserAddressFromSharedPref() != null) {
       HomeScreen.loadData(true);
     } else {
       Get.find<SplashController>().getLandingPageData();
@@ -43,7 +49,10 @@ class LocalizationController extends GetxController implements GetxService {
   void loadCurrentLanguage() async {
     _locale = languageServiceInterface.getLocaleFromSharedPref();
     _isLtr = _locale.languageCode != 'ar';
-    _selectedIndex = languageServiceInterface.setselectedIndex(AppConstants.languages, _locale);
+    _selectedIndex = languageServiceInterface.setselectedIndex(
+      AppConstants.languages,
+      _locale,
+    );
     _languages = [];
     _languages.addAll(AppConstants.languages);
     update();
@@ -60,18 +69,19 @@ class LocalizationController extends GetxController implements GetxService {
 
   void searchLanguage(String query) {
     if (query.isEmpty) {
-      _languages  = [];
+      _languages = [];
       _languages = AppConstants.languages;
     } else {
       _selectedIndex = -1;
       _languages = [];
       for (var language in AppConstants.languages) {
-        if (language.languageName!.toLowerCase().contains(query.toLowerCase())) {
+        if (language.languageName!.toLowerCase().contains(
+          query.toLowerCase(),
+        )) {
           _languages.add(language);
         }
       }
     }
     update();
   }
-
 }

@@ -20,5 +20,4 @@ class NotificationService implements NotificationServiceInterface {
   int? getSeenNotificationCount() {
     return notificationRepositoryInterface.getSeenNotificationCount();
   }
-
 }

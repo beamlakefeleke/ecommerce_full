@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
-import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
-import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/common/widgets/hover/on_hover.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_state.dart';
-import 'package:ecommerce/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -227,9 +223,9 @@ class MenuDrawerState extends State<MenuDrawer>
                 onYesPressed: () {
                   Get.find<ProfileController>().clearUserInfo();
                   Get.find<AuthController>().clearSharedData();
-                  getIt<CartBloc>().add(ClearCartEvent());
+                  Get.find<CartController>().clearCartList();
                   Get.find<AuthController>().socialLogout();
-                  getIt<FavouriteBloc>().add(const FavouriteLocalCleared());
+                  Get.find<FavouriteController>().removeFavourite();
                   if (ResponsiveHelper.isDesktop(Get.context)) {
                     Get.offAllNamed(RouteHelper.getInitialRoute());
                   } else {
@@ -242,10 +238,10 @@ class MenuDrawerState extends State<MenuDrawer>
               useSafeArea: false,
             );
           } else {
-            getIt<FavouriteBloc>().add(const FavouriteLocalCleared());
+            Get.find<FavouriteController>().removeFavourite();
             if (ResponsiveHelper.isDesktop(context)) {
               Get.dialog(
-                const SignInPage(exitFromApp: false, backFromThis: false),
+                const SignInScreen(exitFromApp: false, backFromThis: false),
               );
             } else {
               Get.toNamed(RouteHelper.getSignInRoute(RouteHelper.main));

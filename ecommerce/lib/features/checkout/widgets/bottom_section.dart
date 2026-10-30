@@ -14,10 +14,6 @@ import 'package:ecommerce/features/checkout/widgets/condition_check_box.dart';
 import 'package:ecommerce/features/checkout/widgets/coupon_section.dart';
 import 'package:ecommerce/features/checkout/widgets/note_prescription_section.dart';
 import 'package:ecommerce/features/checkout/widgets/partial_pay_view.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
-import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BottomSection extends StatelessWidget {
   final CheckoutController checkoutController;
@@ -38,7 +34,6 @@ class BottomSection extends StatelessWidget {
   final double price;
   final double addOns;
   final Widget? checkoutButton;
-
   const BottomSection({
     super.key,
     required this.checkoutController,
@@ -63,155 +58,106 @@ class BottomSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool takeAway = checkoutController.orderType == 'take_away';
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     bool isGuestLoggedIn = AuthHelper.isGuestLoggedIn();
+    return Container(
+      decoration: ResponsiveHelper.isDesktop(context)
+          ? BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                ),
+              ],
+            )
+          : null,
+      padding: const EdgeInsets.symmetric(
+        vertical: Dimensions.paddingSizeSmall,
+      ),
+      child: Column(
+        children: [
+          isDesktop
+              ? pricingView(context: context, takeAway: takeAway)
+              : const SizedBox(),
 
-    return BlocBuilder<CheckoutBloc, CheckoutState>(
-      builder: (context, state) {
-        bool takeAway = state.orderType == 'take_away';
+          const SizedBox(height: Dimensions.paddingSizeSmall),
 
-        return Container(
-          decoration: isDesktop
-              ? BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                  ],
+          /// Coupon
+          isDesktop && !isGuestLoggedIn
+              ? CouponSection(
+                  storeId: storeId,
+                  checkoutController: checkoutController,
+                  total: total,
+                  price: price,
+                  discount: discount,
+                  addOns: addOns,
+                  deliveryCharge: deliveryCharge,
                 )
-              : null,
-          padding: const EdgeInsets.symmetric(
-            vertical: Dimensions.paddingSizeSmall,
-          ),
-          child: Column(
-            children: [
-              isDesktop
-                  ? pricingView(
-                      context: context,
-                      takeAway: takeAway,
-                      state: state,
-                    )
-                  : const SizedBox(),
+              : const SizedBox(),
 
-              const SizedBox(height: Dimensions.paddingSizeSmall),
-
-              /// Coupon
-              isDesktop && !isGuestLoggedIn
-                  ? CouponSection(
-                      storeId: storeId,
-                      couponController: checkoutController.couponController,
-                      total: total,
-                      price: price,
-                      discount: discount,
-                      addOns: addOns,
-                      deliveryCharge: deliveryCharge,
-                      onCheckBalanceStatus: (totalPrice, discount) {
-                        if (state.isPartialPay) {
-                          final walletBalance =
-                              Get.find<ProfileController>()
-                                  .userInfoModel
-                                  ?.walletBalance ??
-                              0;
-                          if (totalPrice < walletBalance) {
-                            context.read<CheckoutBloc>().add(
-                              const PartialPaymentToggled(),
-                            );
-                            context.read<CheckoutBloc>().add(
-                              const PaymentMethodSet(index: 1),
-                            );
-                          } else {
-                            context.read<CheckoutBloc>().add(
-                              const PaymentMethodSet(index: -1),
-                            );
-                          }
-                        }
-                      },
-                    )
-                  : const SizedBox(),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.05),
-                      blurRadius: 10,
-                    ),
-                  ],
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).primaryColor.withOpacity(0.05),
+                  blurRadius: 10,
                 ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: Dimensions.paddingSizeDefault,
-                  horizontal: Dimensions.paddingSizeLarge,
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: Dimensions.paddingSizeDefault,
+              horizontal: Dimensions.paddingSizeLarge,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ///Additional Note & prescription..
+                NoteAndPrescriptionSection(
+                  checkoutController: checkoutController,
+                  storeId: storeId,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// Additional Note & prescription
-                    NoteAndPrescriptionSection(
-                      noteController: checkoutController.noteController,
-                      storeId: storeId,
-                    ),
 
-                    isDesktop && !isGuestLoggedIn
-                        ? PartialPayView(
-                            totalPrice: total,
-                            isPrescription: storeId != null,
-                          )
-                        : const SizedBox(),
+                isDesktop && !isGuestLoggedIn
+                    ? PartialPayView(
+                        totalPrice: total,
+                        isPrescription: storeId != null,
+                      )
+                    : const SizedBox(),
 
-                    !isDesktop
-                        ? pricingView(
-                            context: context,
-                            takeAway: takeAway,
-                            state: state,
-                          )
-                        : const SizedBox(),
-                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                !isDesktop
+                    ? pricingView(context: context, takeAway: takeAway)
+                    : const SizedBox(),
+                const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                    const CheckoutCondition(),
+                const CheckoutCondition(),
 
-                    const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                    isDesktop
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(height: Dimensions.paddingSizeLarge),
+                ResponsiveHelper.isDesktop(context)
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'total_amount'.tr,
-                                        style: robotoMedium.copyWith(
-                                          fontSize: Dimensions.fontSizeLarge,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                      ),
-                                      storeId == null
-                                          ? const SizedBox()
-                                          : Text(
-                                              'Once_your_order_is_confirmed_you_will_receive'
-                                                  .tr,
-                                              style: robotoRegular.copyWith(
-                                                fontSize: Dimensions
-                                                    .fontSizeOverSmall,
-                                                color: Theme.of(
-                                                  context,
-                                                ).disabledColor,
-                                              ),
-                                            ),
-                                    ],
+                                  Text(
+                                    'total_amount'.tr,
+                                    style: robotoMedium.copyWith(
+                                      fontSize: Dimensions.fontSizeLarge,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
                                   ),
                                   storeId == null
                                       ? const SizedBox()
                                       : Text(
-                                          'a_notification_with_your_bill_total'
+                                          'Once_your_order_is_confirmed_you_will_receive'
                                               .tr,
                                           style: robotoRegular.copyWith(
                                             fontSize:
@@ -223,52 +169,49 @@ class BottomSection extends StatelessWidget {
                                         ),
                                 ],
                               ),
-                              PriceConverter.convertAnimationPrice(
-                                state.viewTotalPrice,
-                                textStyle: robotoMedium.copyWith(
-                                  fontSize: Dimensions.fontSizeLarge,
-                                  color: state.isPartialPay
-                                      ? Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium!.color
-                                      : Theme.of(context).primaryColor,
-                                ),
-                              ),
+                              storeId == null
+                                  ? const SizedBox()
+                                  : Text(
+                                      'a_notification_with_your_bill_total'.tr,
+                                      style: robotoRegular.copyWith(
+                                        fontSize: Dimensions.fontSizeOverSmall,
+                                        color: Theme.of(context).disabledColor,
+                                      ),
+                                    ),
                             ],
-                          )
-                        : const SizedBox(),
-                  ],
-                ),
-              ),
-
-              isDesktop
-                  ? Padding(
-                      padding: const EdgeInsets.only(
-                        top: Dimensions.paddingSizeLarge,
-                      ),
-                      child: checkoutButton,
-                    )
-                  : const SizedBox(),
-            ],
+                          ),
+                          PriceConverter.convertAnimationPrice(
+                            checkoutController.viewTotalPrice,
+                            textStyle: robotoMedium.copyWith(
+                              fontSize: Dimensions.fontSizeLarge,
+                              color: checkoutController.isPartialPay
+                                  ? Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium!.color
+                                  : Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ],
+                      )
+                    : const SizedBox(),
+              ],
+            ),
           ),
-        );
-      },
+
+          ResponsiveHelper.isDesktop(context)
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    top: Dimensions.paddingSizeLarge,
+                  ),
+                  child: checkoutButton,
+                )
+              : const SizedBox(),
+        ],
+      ),
     );
   }
 
-  Widget pricingView({
-    required BuildContext context,
-    required bool takeAway,
-    required CheckoutState state,
-  }) {
-    // Cached once instead of calling Get.find() repeatedly below.
-    final configModel = Get.find<SplashController>().configModel;
-    final dmTipsEnabled = !takeAway && (configModel?.dmTipsStatus == 1);
-    final additionalChargeEnabled =
-        configModel?.additionalChargeStatus ?? false;
-    final showDeliveryFee =
-        !(AuthHelper.isGuestLoggedIn() && state.guestAddress == null);
-
+  Widget pricingView({required BuildContext context, required bool takeAway}) {
     return Column(
       children: [
         ResponsiveHelper.isDesktop(context)
@@ -365,7 +308,7 @@ class BottomSection extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${'vat_tax'.tr} ${taxIncluded ? 'tax_included'.tr : ''} (${taxPercent ?? 0}%)',
+                          '${'vat_tax'.tr} ${taxIncluded ? 'tax_included'.tr : ''} ($taxPercent%)',
                           style: robotoRegular,
                         ),
                         Text(
@@ -381,13 +324,15 @@ class BottomSection extends StatelessWidget {
                 height: storeId == null ? Dimensions.paddingSizeSmall : 0,
               ),
 
-              dmTipsEnabled
+              (!takeAway &&
+                      Get.find<SplashController>().configModel!.dmTipsStatus ==
+                          1)
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('delivery_man_tips'.tr, style: robotoRegular),
                         Text(
-                          '(+) ${PriceConverter.convertPrice(state.tips)}',
+                          '(+) ${PriceConverter.convertPrice(checkoutController.tips)}',
                           style: robotoRegular,
                           textDirection: TextDirection.ltr,
                         ),
@@ -395,16 +340,24 @@ class BottomSection extends StatelessWidget {
                     )
                   : const SizedBox.shrink(),
               SizedBox(
-                height: dmTipsEnabled ? Dimensions.paddingSizeSmall : 0.0,
+                height:
+                    !takeAway &&
+                        Get.find<SplashController>()
+                                .configModel!
+                                .dmTipsStatus ==
+                            1
+                    ? Dimensions.paddingSizeSmall
+                    : 0.0,
               ),
 
-              !showDeliveryFee
+              (AuthHelper.isGuestLoggedIn() &&
+                      checkoutController.guestAddress == null)
                   ? const SizedBox()
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('delivery_fee'.tr, style: robotoRegular),
-                        state.distance == -1
+                        checkoutController.distance == -1
                             ? Text(
                                 'calculating'.tr,
                                 style: robotoRegular.copyWith(
@@ -430,21 +383,28 @@ class BottomSection extends StatelessWidget {
                     ),
 
               SizedBox(
-                height: additionalChargeEnabled && showDeliveryFee
+                height:
+                    Get.find<SplashController>()
+                            .configModel!
+                            .additionalChargeStatus! &&
+                        !(AuthHelper.isGuestLoggedIn() &&
+                            checkoutController.guestAddress == null)
                     ? Dimensions.paddingSizeSmall
                     : 0,
               ),
 
-              additionalChargeEnabled
+              Get.find<SplashController>().configModel!.additionalChargeStatus!
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          configModel?.additionalChargeName ?? '',
+                          Get.find<SplashController>()
+                              .configModel!
+                              .additionalChargeName!,
                           style: robotoRegular,
                         ),
                         Text(
-                          '(+) ${PriceConverter.convertPrice(configModel?.additionCharge ?? 0)}',
+                          '(+) ${PriceConverter.convertPrice(Get.find<SplashController>().configModel!.additionCharge)}',
                           style: robotoRegular,
                           textDirection: TextDirection.ltr,
                         ),
@@ -452,16 +412,18 @@ class BottomSection extends StatelessWidget {
                     )
                   : const SizedBox(),
               SizedBox(
-                height: state.isPartialPay ? Dimensions.paddingSizeSmall : 0,
+                height: checkoutController.isPartialPay
+                    ? Dimensions.paddingSizeSmall
+                    : 0,
               ),
 
-              state.isPartialPay
+              checkoutController.isPartialPay
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('paid_by_wallet'.tr, style: robotoRegular),
                         Text(
-                          '(-) ${PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel?.walletBalance ?? 0)}',
+                          '(-) ${PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance!)}',
                           style: robotoRegular,
                           textDirection: TextDirection.ltr,
                         ),
@@ -469,10 +431,12 @@ class BottomSection extends StatelessWidget {
                     )
                   : const SizedBox(),
               SizedBox(
-                height: state.isPartialPay ? Dimensions.paddingSizeSmall : 0,
+                height: checkoutController.isPartialPay
+                    ? Dimensions.paddingSizeSmall
+                    : 0,
               ),
 
-              state.isPartialPay
+              checkoutController.isPartialPay
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -486,7 +450,7 @@ class BottomSection extends StatelessWidget {
                           ),
                         ),
                         PriceConverter.convertAnimationPrice(
-                          state.viewTotalPrice,
+                          checkoutController.viewTotalPrice,
                           textStyle: robotoMedium.copyWith(
                             fontSize: Dimensions.fontSizeLarge,
                             color: !ResponsiveHelper.isDesktop(context)

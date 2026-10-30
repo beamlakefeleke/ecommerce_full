@@ -13,11 +13,36 @@ abstract class StoreServiceInterface {
   Future<List<Store>?> getLatestStoreList(String type);
   Future<Response> getFeaturedStoreList();
   Future<Response> getVisitAgainStoreList();
-  Future<Store?> getStoreDetails(String storeID, bool fromCart, String slug, String languageCode, ModuleModel? module, int? cacheModuleId, int? moduleId);
-  Future<ItemModel?> getStoreItemList(int? storeID, int offset, int? categoryID, String type);
-  Future<ItemModel?> getStoreSearchItemList(String searchText, String? storeID, int offset, String type, int? categoryID);
+  Future<Store?> getStoreDetails(
+    String storeID,
+    bool fromCart,
+    String slug,
+    String languageCode,
+    ModuleModel? module,
+    int? cacheModuleId,
+    int? moduleId,
+  );
+  Future<ItemModel?> getStoreItemList(
+    int? storeID,
+    int offset,
+    int? categoryID,
+    String type,
+  );
+  Future<ItemModel?> getStoreSearchItemList(
+    String searchText,
+    String? storeID,
+    int offset,
+    String type,
+    int? categoryID,
+  );
   Future<RecommendedItemModel?> getStoreRecommendedItemList(int? storeId);
-  Future<CartSuggestItemModel?> getCartStoreSuggestedItemList(int? storeId, String languageCode, ModuleModel? module, int? cacheModuleId, int? moduleId);
+  Future<CartSuggestItemModel?> getCartStoreSuggestedItemList(
+    int? storeId,
+    String languageCode,
+    ModuleModel? module,
+    int? cacheModuleId,
+    int? moduleId,
+  );
   Future<List<StoreBannerModel>?> getStoreBannerList(int? storeId);
   Future<List<Store>?> getRecommendedStoreList();
   List<Modules> moduleList();

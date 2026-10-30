@@ -11,7 +11,17 @@ class SearchFieldWidget extends StatefulWidget {
   final Color? iconColor;
   final Function? onSubmit;
   final Function? onChanged;
-  const SearchFieldWidget({super.key, required this.controller, required this.hint, required this.suffixIcon, required this.iconPressed, this.filledColor, this.onSubmit, this.onChanged, this.iconColor});
+  const SearchFieldWidget({
+    super.key,
+    required this.controller,
+    required this.hint,
+    required this.suffixIcon,
+    required this.iconPressed,
+    this.filledColor,
+    this.onSubmit,
+    this.onChanged,
+    this.iconColor,
+  });
 
   @override
   State<SearchFieldWidget> createState() => _SearchFieldWidgetState();
@@ -25,13 +35,25 @@ class _SearchFieldWidgetState extends State<SearchFieldWidget> {
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: widget.hint,
-        hintStyle: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), borderSide: BorderSide.none),
-        filled: true, fillColor: widget.filledColor ?? Theme.of(context).cardColor,
+        hintStyle: robotoRegular.copyWith(
+          fontSize: Dimensions.fontSizeSmall,
+          color: Theme.of(context).disabledColor,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: widget.filledColor ?? Theme.of(context).cardColor,
         isDense: true,
         suffixIcon: IconButton(
           onPressed: widget.iconPressed as void Function()?,
-          icon: Icon(widget.suffixIcon, color: widget.iconColor ?? Theme.of(context).textTheme.bodyLarge!.color),
+          icon: Icon(
+            widget.suffixIcon,
+            color:
+                widget.iconColor ??
+                Theme.of(context).textTheme.bodyLarge!.color,
+          ),
         ),
       ),
       onSubmitted: widget.onSubmit as void Function(String)?,

@@ -1,18 +1,36 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:ecommerce/core/network/failure.dart';
+import 'package:ecommerce/core/error/failure.dart';
+import 'package:ecommerce/core/usecase/usecase.dart';
 import 'package:ecommerce/features/auth/domain/entities/auth_response.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 
-/// Authenticates a user via phone number and password.
-class LoginUseCase {
-  final AuthRepository _repository;
+class LoginParams extends Equatable {
+  final String? phone;
+  final String? password;
+  final bool isCustomerVerificationOn;
 
-  const LoginUseCase(this._repository);
+  const LoginParams({
+    required this.phone,
+    required this.password,
+    required this.isCustomerVerificationOn,
+  });
 
-  Future<Either<Failure, AuthResponse>> call({
-    required String phone,
-    required String password,
-  }) {
-    return _repository.login(phone: phone, password: password);
+  @override
+  List<Object?> get props => [phone, password, isCustomerVerificationOn];
+}
+
+class LoginUseCase implements UseCase<AuthResponse, LoginParams> {
+  final AuthRepository repository;
+
+  LoginUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, AuthResponse>> call(LoginParams params) {
+    return repository.login(
+      phone: params.phone,
+      password: params.password,
+      isCustomerVerificationOn: params.isCustomerVerificationOn,
+    );
   }
 }

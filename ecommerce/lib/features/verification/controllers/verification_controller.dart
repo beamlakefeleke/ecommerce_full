@@ -22,16 +22,23 @@ class VerificationController extends GetxController implements GetxService {
   Future<ResponseModel> forgetPassword(String? email) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await verificationServiceInterface.forgetPassword(email);
+    ResponseModel responseModel = await verificationServiceInterface
+        .forgetPassword(email);
     _isLoading = false;
     update();
     return responseModel;
   }
 
-  Future<ResponseModel> resetPassword(String? resetToken, String number, String password, String confirmPassword) async {
+  Future<ResponseModel> resetPassword(
+    String? resetToken,
+    String number,
+    String password,
+    String confirmPassword,
+  ) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await verificationServiceInterface.resetPassword(resetToken, number, password, confirmPassword);
+    ResponseModel responseModel = await verificationServiceInterface
+        .resetPassword(resetToken, number, password, confirmPassword);
     _isLoading = false;
     update();
     return responseModel;
@@ -40,7 +47,8 @@ class VerificationController extends GetxController implements GetxService {
   Future<ResponseModel> verifyPhone(String? phone, String? token) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await verificationServiceInterface.verifyPhone(phone, _verificationCode, token);
+    ResponseModel responseModel = await verificationServiceInterface
+        .verifyPhone(phone, _verificationCode, token);
     if (responseModel.isSuccess) {
       Get.find<ProfileController>().getUserInfo();
     }
@@ -52,10 +60,10 @@ class VerificationController extends GetxController implements GetxService {
   Future<ResponseModel> verifyToken(String? email) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await verificationServiceInterface.verifyToken(email, _verificationCode);
+    ResponseModel responseModel = await verificationServiceInterface
+        .verifyToken(email, _verificationCode);
     _isLoading = false;
     update();
     return responseModel;
   }
-
 }

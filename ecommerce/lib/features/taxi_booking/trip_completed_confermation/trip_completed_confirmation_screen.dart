@@ -14,33 +14,54 @@ class TripCompletedConfirmationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'trip_completed'.tr,),
+      appBar: CustomAppBar(title: 'trip_completed'.tr),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: Dimensions.paddingSizeDefault,),
-              Text('trip_completed'.tr,style: robotoBold.copyWith(
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+              Text(
+                'trip_completed'.tr,
+                style: robotoBold.copyWith(
                   fontSize: Dimensions.fontSizeExtraLarge,
-                color: Theme.of(context).primaryColor,
-              ),),
-              const SizedBox(height: Dimensions.paddingSizeDefault,),
-              Image.asset(Images.tripCompletedCar,scale: 3,),
-              const SizedBox(height: Dimensions.paddingSizeExtraLarge,),
-              Text('your_trip_has_been_complete'.tr,textAlign: TextAlign.center,style: robotoRegular.copyWith(
-                  color: Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(.5),
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+              Image.asset(Images.tripCompletedCar, scale: 3),
+              const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+              Text(
+                'your_trip_has_been_complete'.tr,
+                textAlign: TextAlign.center,
+                style: robotoRegular.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge!.color!.withOpacity(.5),
                   fontSize: Dimensions.fontSizeDefault,
-              ),),
+                ),
+              ),
 
-              const SizedBox(height: 40,),
-              Text('how_was_your_service'.tr,style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge,color: Theme.of(context).primaryColor),),
+              const SizedBox(height: 40),
+              Text(
+                'how_was_your_service'.tr,
+                style: robotoMedium.copyWith(
+                  fontSize: Dimensions.fontSizeLarge,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('give_us_your_valuable_review'.tr,style: robotoRegular.copyWith(
-                  color: Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(.5),
-                  fontSize: Dimensions.fontSizeSmall),),
-              const SizedBox(height: Dimensions.paddingSizeExtraLarge,),
+              Text(
+                'give_us_your_valuable_review'.tr,
+                style: robotoRegular.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge!.color!.withOpacity(.5),
+                  fontSize: Dimensions.fontSizeSmall,
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
               SizedBox(
                 height: 30,
@@ -51,21 +72,23 @@ class TripCompletedConfirmationScreen extends StatelessWidget {
                   itemBuilder: (context, i) {
                     return InkWell(
                       child: Icon(
-                        i != 0  ? Icons.star_border : Icons.star,
+                        i != 0 ? Icons.star_border : Icons.star,
                         size: 30,
-                        color:Theme.of(context).primaryColor,
+                        color: Theme.of(context).primaryColor,
                       ),
-                      onTap: () {
-
-                      },
+                      onTap: () {},
                     );
                   },
                 ),
               ),
-              const SizedBox(height: Dimensions.paddingSizeLarge,),
+              const SizedBox(height: Dimensions.paddingSizeLarge),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(.1)),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge!.color!.withOpacity(.1),
+                  ),
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
                 ),
                 child: MyTextField(
@@ -79,14 +102,20 @@ class TripCompletedConfirmationScreen extends StatelessWidget {
               const SizedBox(height: 50),
 
               CustomButton(
-                  onPressed: (){
-                    Get.toNamed(RouteHelper.getTripHistoryScreen());
-                  },
-                  buttonText: 'submit'.tr),
+                onPressed: () {
+                  Get.toNamed(RouteHelper.getTripHistoryScreen());
+                },
+                buttonText: 'submit'.tr,
+              ),
               TextButton(
-                  onPressed: (){},
-                  child: Text('not_now'.tr,style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),))
-
+                onPressed: () {},
+                child: Text(
+                  'not_now'.tr,
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeDefault,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

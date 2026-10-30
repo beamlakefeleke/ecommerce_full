@@ -7,7 +7,7 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/core/di/injection.dart';
 
-import 'package:ecommerce/features/cart/domain/models/cart_model.dart';
+import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -55,7 +55,7 @@ class WebCardItemsWidget extends StatelessWidget {
                     padding: const EdgeInsets.only(left: Dimensions.paddingSizeExtraSmall),
                     child: TextButton.icon(
                       onPressed: (){
-                        getIt<CartBloc>().forcefullySetModule(cartState.cartList[0].item!.moduleId!);
+                        getIt<CartBloc>().add(ForcefullySetModuleEvent(cartState.cartList[0].item!.moduleId!);
                         Get.toNamed(
                           RouteHelper.getStoreRoute(id: cartState.cartList[0].item!.storeId, page: 'item'),
                           arguments: StoreScreen(store: Store(id: cartState.cartList[0].item!.storeId), fromModule: false),

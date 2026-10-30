@@ -30,5 +30,4 @@ class OnlinePaymentRepo implements OnlinePaymentRepoInterface {
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
   }
-
 }

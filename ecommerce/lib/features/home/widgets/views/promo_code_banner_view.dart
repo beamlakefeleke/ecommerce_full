@@ -20,8 +20,7 @@ class PromoCodeBannerView extends StatefulWidget {
 }
 
 class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
-  final CarouselSliderController carouselController =
-      CarouselSliderController();
+  final CarouselController carouselController = CarouselController();
   @override
   Widget build(BuildContext context) {
     return GetBuilder<CouponController>(
@@ -107,21 +106,15 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                                           ),
 
                                           DottedBorder(
-                                            options:
-                                                RoundedRectDottedBorderOptions(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).primaryColor,
-                                                  strokeWidth: 1,
-                                                  strokeCap: StrokeCap.butt,
-                                                  dashPattern: const [5, 5],
-                                                  padding: const EdgeInsets.all(
-                                                    0,
-                                                  ),
-                                                  radius: const Radius.circular(
-                                                    50,
-                                                  ),
-                                                ),
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor,
+                                            strokeWidth: 1,
+                                            strokeCap: StrokeCap.butt,
+                                            dashPattern: const [5, 5],
+                                            padding: const EdgeInsets.all(0),
+                                            borderType: BorderType.RRect,
+                                            radius: const Radius.circular(50),
                                             child: Container(
                                               height: 35,
                                               width: 130,

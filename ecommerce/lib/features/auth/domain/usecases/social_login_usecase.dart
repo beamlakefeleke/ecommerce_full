@@ -1,23 +1,36 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:ecommerce/core/network/failure.dart';
-import 'package:ecommerce/features/auth/domain/entities/auth_response.dart';
-import 'package:ecommerce/features/auth/domain/entities/social_login_body.dart';
+import 'package:ecommerce/core/error/failure.dart';
+import 'package:ecommerce/core/usecase/usecase.dart';
+import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 
-/// Authenticates a user via a social provider (Google, Facebook, Apple).
-///
-/// Returns an [AuthResponse] — the BLoC decides how to navigate based
-/// on token presence and phone-verification status. No navigation logic
-/// lives in this usecase (unlike the legacy AuthService).
-class SocialLoginUseCase {
-  final AuthRepository _repository;
+class SocialLoginParams extends Equatable {
+  final SocialSignInParams social;
+  final int timeout;
+  final bool isCustomerVerificationOn;
 
-  const SocialLoginUseCase(this._repository);
+  const SocialLoginParams({
+    required this.social,
+    this.timeout = 60,
+    required this.isCustomerVerificationOn,
+  });
 
-  Future<Either<Failure, AuthResponse>> call(
-    SocialLoginBody body, {
-    int timeout = 60,
-  }) {
-    return _repository.loginWithSocialMedia(body, timeout: timeout);
+  @override
+  List<Object?> get props => [social, timeout, isCustomerVerificationOn];
+}
+
+class SocialLoginUseCase implements UseCase<SocialAuthResult, SocialLoginParams> {
+  final AuthRepository repository;
+
+  SocialLoginUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, SocialAuthResult>> call(SocialLoginParams params) {
+    return repository.loginWithSocialMedia(
+      params.social,
+      params.timeout,
+      params.isCustomerVerificationOn,
+    );
   }
 }

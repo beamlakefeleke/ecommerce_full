@@ -34,12 +34,10 @@ class _LoyaltyScreenState extends State<LoyaltyScreen> {
     super.initState();
 
     initCall();
-
   }
 
-  void initCall(){
-    if(AuthHelper.isLoggedIn()){
-
+  void initCall() {
+    if (AuthHelper.isLoggedIn()) {
       Get.find<ProfileController>().getUserInfo();
 
       Get.find<LoyaltyController>().getLoyaltyTransactionList('1', false);
@@ -47,22 +45,30 @@ class _LoyaltyScreenState extends State<LoyaltyScreen> {
       Get.find<LoyaltyController>().setOffset(1);
 
       scrollController.addListener(() {
-        if (scrollController.position.pixels == scrollController.position.maxScrollExtent
-            && Get.find<LoyaltyController>().transactionList != null
-            && !Get.find<LoyaltyController>().isLoading) {
-          int pageSize = (Get.find<LoyaltyController>().popularPageSize! / 10).ceil();
+        if (scrollController.position.pixels ==
+                scrollController.position.maxScrollExtent &&
+            Get.find<LoyaltyController>().transactionList != null &&
+            !Get.find<LoyaltyController>().isLoading) {
+          int pageSize = (Get.find<LoyaltyController>().popularPageSize! / 10)
+              .ceil();
           if (Get.find<LoyaltyController>().offset < pageSize) {
-            Get.find<LoyaltyController>().setOffset(Get.find<LoyaltyController>().offset + 1);
+            Get.find<LoyaltyController>().setOffset(
+              Get.find<LoyaltyController>().offset + 1,
+            );
             if (kDebugMode) {
               print('end of the page');
             }
             Get.find<LoyaltyController>().showBottomLoader();
-            Get.find<LoyaltyController>().getLoyaltyTransactionList(Get.find<LoyaltyController>().offset.toString(), false);
+            Get.find<LoyaltyController>().getLoyaltyTransactionList(
+              Get.find<LoyaltyController>().offset.toString(),
+              false,
+            );
           }
         }
       });
     }
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -76,93 +82,210 @@ class _LoyaltyScreenState extends State<LoyaltyScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).cardColor,
-      endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
+      endDrawer: const MenuDrawer(),
+      endDrawerEnableOpenDragGesture: false,
       appBar: CustomAppBar(title: 'loyalty_points'.tr, backButton: true),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: isLoggedIn && !ResponsiveHelper.isDesktop(context) ? FloatingActionButton.extended(
-        backgroundColor: Theme.of(context).primaryColor,
-        label: Text( 'convert_to_wallet_money'.tr, style: robotoBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault)),
-        onPressed: (){
-          Get.dialog(
-            Dialog(backgroundColor: Colors.transparent, child: LoyaltyBottomSheetWidget(
-                amount: Get.find<ProfileController>().userInfoModel!.loyaltyPoint == null ? '0' : Get.find<ProfileController>().userInfoModel!.loyaltyPoint.toString(),
-            )),
-          );
-        },
-      ) : null,
+      floatingActionButton: isLoggedIn && !ResponsiveHelper.isDesktop(context)
+          ? FloatingActionButton.extended(
+              backgroundColor: Theme.of(context).primaryColor,
+              label: Text(
+                'convert_to_wallet_money'.tr,
+                style: robotoBold.copyWith(
+                  color: Colors.white,
+                  fontSize: Dimensions.fontSizeDefault,
+                ),
+              ),
+              onPressed: () {
+                Get.dialog(
+                  Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: LoyaltyBottomSheetWidget(
+                      amount:
+                          Get.find<ProfileController>()
+                                  .userInfoModel!
+                                  .loyaltyPoint ==
+                              null
+                          ? '0'
+                          : Get.find<ProfileController>()
+                                .userInfoModel!
+                                .loyaltyPoint
+                                .toString(),
+                    ),
+                  ),
+                );
+              },
+            )
+          : null,
       body: GetBuilder<ProfileController>(
-          builder: (profileController) {
-            return isLoggedIn ? profileController.userInfoModel != null ? SafeArea(
-              child: RefreshIndicator(
-                onRefresh: () async{
-                  Get.find<LoyaltyController>().getLoyaltyTransactionList('1', true);
-                  Get.find<ProfileController>().getUserInfo();
-                },
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Column(
-                    children: [
-                      WebScreenTitleWidget(title: 'loyalty_points'.tr),
-                      FooterView(
-                        child: SizedBox(width: Dimensions.webMaxWidth,
-                          child: GetBuilder<LoyaltyController>(
-                              builder: (loyaltyController) {
-                                return ResponsiveHelper.isDesktop(context) ? Padding(
-                                  padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault),
-                                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                      Expanded (flex: 4 , child: Column(children: [
-                                          Container(
-                                            decoration: ResponsiveHelper.isDesktop(context) ? BoxDecoration(
-                                              color: Theme.of(context).cardColor,
-                                              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
-                                            ) : null,
-                                            padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                                            child: LoyaltyCardWidget(tooltipController: tooltipController),
-                                          ),
-                                        ],
-                                      )),
-                                      const SizedBox(width: Dimensions.paddingSizeDefault),
-
-                                      Expanded(flex: 6, child: Column(children: [
-                                        Container(
-                                          decoration: ResponsiveHelper.isDesktop(context) ? BoxDecoration(
-                                            color: Theme.of(context).cardColor,
-                                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
-                                          ) : null,
-                                          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                                          child: const LoyaltyHistoryWidget(),
-                                        ),
-                                      ])),
-                                    ]),
-                                )
-                             : Column(children: [
-
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-                                  child: LoyaltyCardWidget(tooltipController: tooltipController),
+        builder: (profileController) {
+          return isLoggedIn
+              ? profileController.userInfoModel != null
+                    ? SafeArea(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            Get.find<LoyaltyController>()
+                                .getLoyaltyTransactionList('1', true);
+                            Get.find<ProfileController>().getUserInfo();
+                          },
+                          child: SingleChildScrollView(
+                            controller: scrollController,
+                            child: Column(
+                              children: [
+                                WebScreenTitleWidget(
+                                  title: 'loyalty_points'.tr,
                                 ),
+                                FooterView(
+                                  child: SizedBox(
+                                    width: Dimensions.webMaxWidth,
+                                    child: GetBuilder<LoyaltyController>(
+                                      builder: (loyaltyController) {
+                                        return ResponsiveHelper.isDesktop(
+                                              context,
+                                            )
+                                            ? Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: Dimensions
+                                                      .paddingSizeDefault,
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Expanded(
+                                                      flex: 4,
+                                                      child: Column(
+                                                        children: [
+                                                          Container(
+                                                            decoration:
+                                                                ResponsiveHelper.isDesktop(
+                                                                  context,
+                                                                )
+                                                                ? BoxDecoration(
+                                                                    color: Theme.of(
+                                                                      context,
+                                                                    ).cardColor,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                          Dimensions
+                                                                              .radiusSmall,
+                                                                        ),
+                                                                    boxShadow: const [
+                                                                      BoxShadow(
+                                                                        color: Colors
+                                                                            .black12,
+                                                                        blurRadius:
+                                                                            5,
+                                                                        spreadRadius:
+                                                                            1,
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                                : null,
+                                                            padding:
+                                                                const EdgeInsets.all(
+                                                                  Dimensions
+                                                                      .paddingSizeLarge,
+                                                                ),
+                                                            child: LoyaltyCardWidget(
+                                                              tooltipController:
+                                                                  tooltipController,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      width: Dimensions
+                                                          .paddingSizeDefault,
+                                                    ),
 
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-                                  child: LoyaltyHistoryWidget(),
-                                )
+                                                    Expanded(
+                                                      flex: 6,
+                                                      child: Column(
+                                                        children: [
+                                                          Container(
+                                                            decoration:
+                                                                ResponsiveHelper.isDesktop(
+                                                                  context,
+                                                                )
+                                                                ? BoxDecoration(
+                                                                    color: Theme.of(
+                                                                      context,
+                                                                    ).cardColor,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                          Dimensions
+                                                                              .radiusSmall,
+                                                                        ),
+                                                                    boxShadow: const [
+                                                                      BoxShadow(
+                                                                        color: Colors
+                                                                            .black12,
+                                                                        blurRadius:
+                                                                            5,
+                                                                        spreadRadius:
+                                                                            1,
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                                : null,
+                                                            padding:
+                                                                const EdgeInsets.all(
+                                                                  Dimensions
+                                                                      .paddingSizeLarge,
+                                                                ),
+                                                            child:
+                                                                const LoyaltyHistoryWidget(),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            : Column(
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: Dimensions
+                                                              .paddingSizeLarge,
+                                                        ),
+                                                    child: LoyaltyCardWidget(
+                                                      tooltipController:
+                                                          tooltipController,
+                                                    ),
+                                                  ),
 
-                              ]);
-                            }
+                                                  const Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: Dimensions
+                                                              .paddingSizeLarge,
+                                                        ),
+                                                    child:
+                                                        LoyaltyHistoryWidget(),
+                                                  ),
+                                                ],
+                                              );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       )
-                    ],
-                  ),
-                ),
-              ),
-            ) : const Center(child: CircularProgressIndicator()) : NotLoggedInScreen(callBack: (value){
-              initCall();
-              setState(() {});
-            });
-          }
+                    : const Center(child: CircularProgressIndicator())
+              : NotLoggedInScreen(
+                  callBack: (value) {
+                    initCall();
+                    setState(() {});
+                  },
+                );
+        },
       ),
     );
   }
@@ -178,37 +301,84 @@ class WalletShimmer extends StatelessWidget {
       key: UniqueKey(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 50,
-        mainAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0.01,
+        mainAxisSpacing: ResponsiveHelper.isDesktop(context)
+            ? Dimensions.paddingSizeLarge
+            : 0.01,
         childAspectRatio: ResponsiveHelper.isDesktop(context) ? 5 : 4.1,
         crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : 2,
       ),
-      physics:  const NeverScrollableScrollPhysics(),
-      shrinkWrap:  true,
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
       itemCount: 10,
-      padding: EdgeInsets.only(top: ResponsiveHelper.isDesktop(context) ? 28 : 25),
+      padding: EdgeInsets.only(
+        top: ResponsiveHelper.isDesktop(context) ? 28 : 25,
+      ),
       itemBuilder: (context, index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+          padding: const EdgeInsets.symmetric(
+            vertical: Dimensions.paddingSizeSmall,
+          ),
           child: Shimmer(
             duration: const Duration(seconds: 2),
             enabled: loyaltyController.transactionList == null,
-            child: Column(children: [
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Container(height: 10, width: 50, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-                    const SizedBox(height: 10),
-                    Container(height: 10, width: 70, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-                  ]),
-                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                    Container(height: 10, width: 50, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-                    const SizedBox(height: 10),
-                    Container(height: 10, width: 70, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-                  ]),
-                ],
-              ),
-              Padding(padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge), child: Divider(color: Theme.of(context).disabledColor)),
-            ],
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 10,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          height: 10,
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          height: 10,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          height: 10,
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: Dimensions.paddingSizeLarge,
+                  ),
+                  child: Divider(color: Theme.of(context).disabledColor),
+                ),
+              ],
             ),
           ),
         );

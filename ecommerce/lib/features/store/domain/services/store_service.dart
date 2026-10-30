@@ -16,17 +16,27 @@ class StoreService implements StoreServiceInterface {
 
   @override
   Future<StoreModel?> getStoreList(int offset, String filterBy) async {
-    return await storeRepositoryInterface.getList(offset: offset, isStoreList: true, filterBy: filterBy);
+    return await storeRepositoryInterface.getList(
+      offset: offset,
+      isStoreList: true,
+      filterBy: filterBy,
+    );
   }
 
   @override
   Future<List<Store>?> getPopularStoreList(String type) async {
-    return await storeRepositoryInterface.getList(isPopularStoreList: true, type: type);
+    return await storeRepositoryInterface.getList(
+      isPopularStoreList: true,
+      type: type,
+    );
   }
 
   @override
   Future<List<Store>?> getLatestStoreList(String type) async {
-    return await storeRepositoryInterface.getList(isLatestStoreList: true, type: type);
+    return await storeRepositoryInterface.getList(
+      isLatestStoreList: true,
+      type: type,
+    );
   }
 
   @override
@@ -40,33 +50,91 @@ class StoreService implements StoreServiceInterface {
   }
 
   @override
-  Future<Store?> getStoreDetails(String storeID, bool fromCart, String slug, String languageCode, ModuleModel? module, int? cacheModuleId, int? moduleId) async {
-    return await storeRepositoryInterface.getStoreDetails(storeID, fromCart, slug, languageCode, module, cacheModuleId, moduleId);
+  Future<Store?> getStoreDetails(
+    String storeID,
+    bool fromCart,
+    String slug,
+    String languageCode,
+    ModuleModel? module,
+    int? cacheModuleId,
+    int? moduleId,
+  ) async {
+    return await storeRepositoryInterface.getStoreDetails(
+      storeID,
+      fromCart,
+      slug,
+      languageCode,
+      module,
+      cacheModuleId,
+      moduleId,
+    );
   }
 
   @override
-  Future<ItemModel?> getStoreItemList(int? storeID, int offset, int? categoryID, String type) async {
-    return await storeRepositoryInterface.getStoreItemList(storeID, offset, categoryID, type);
+  Future<ItemModel?> getStoreItemList(
+    int? storeID,
+    int offset,
+    int? categoryID,
+    String type,
+  ) async {
+    return await storeRepositoryInterface.getStoreItemList(
+      storeID,
+      offset,
+      categoryID,
+      type,
+    );
   }
 
   @override
-  Future<ItemModel?> getStoreSearchItemList(String searchText, String? storeID, int offset, String type, int? categoryID) async {
-    return await storeRepositoryInterface.getStoreSearchItemList(searchText, storeID, offset, type, categoryID);
+  Future<ItemModel?> getStoreSearchItemList(
+    String searchText,
+    String? storeID,
+    int offset,
+    String type,
+    int? categoryID,
+  ) async {
+    return await storeRepositoryInterface.getStoreSearchItemList(
+      searchText,
+      storeID,
+      offset,
+      type,
+      categoryID,
+    );
   }
 
   @override
-  Future<RecommendedItemModel?> getStoreRecommendedItemList(int? storeId) async {
-    return await storeRepositoryInterface.getList(isStoreRecommendedItemList: true, storeId: storeId);
+  Future<RecommendedItemModel?> getStoreRecommendedItemList(
+    int? storeId,
+  ) async {
+    return await storeRepositoryInterface.getList(
+      isStoreRecommendedItemList: true,
+      storeId: storeId,
+    );
   }
 
   @override
-  Future<CartSuggestItemModel?> getCartStoreSuggestedItemList(int? storeId, String languageCode, ModuleModel? module, int? cacheModuleId, int? moduleId) async {
-    return await storeRepositoryInterface.getCartStoreSuggestedItemList(storeId, languageCode, module, cacheModuleId, moduleId);
+  Future<CartSuggestItemModel?> getCartStoreSuggestedItemList(
+    int? storeId,
+    String languageCode,
+    ModuleModel? module,
+    int? cacheModuleId,
+    int? moduleId,
+  ) async {
+    return await storeRepositoryInterface.getCartStoreSuggestedItemList(
+      storeId,
+      languageCode,
+      module,
+      cacheModuleId,
+      moduleId,
+    );
   }
 
   @override
   Future<List<StoreBannerModel>?> getStoreBannerList(int? storeId) async {
-    return await storeRepositoryInterface.getList(isStoreBannerList: true, storeId: storeId);
+    return await storeRepositoryInterface.getList(
+      isStoreBannerList: true,
+      storeId: storeId,
+    );
   }
 
   @override
@@ -77,12 +145,12 @@ class StoreService implements StoreServiceInterface {
   @override
   List<Modules> moduleList() {
     List<Modules> moduleList = [];
-    for (ZoneData zone in AddressHelper.getUserAddressFromSharedPref()!.zoneData ?? []) {
+    for (ZoneData zone
+        in AddressHelper.getUserAddressFromSharedPref()!.zoneData ?? []) {
       for (Modules module in zone.modules ?? []) {
         moduleList.add(module);
       }
     }
     return moduleList;
   }
-
 }

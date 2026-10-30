@@ -1,74 +1,169 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get_connect/connect.dart';
+import 'package:get/get_utils/src/platform/platform.dart';
 import 'package:ecommerce/api/api_client.dart';
+import 'package:ecommerce/core/error/exceptions.dart';
+import 'package:ecommerce/features/auth/data/models/signup_body_model.dart';
+import 'package:ecommerce/features/auth/data/models/social_log_in_body.dart';
 import 'package:ecommerce/util/app_constants.dart';
 
-/// Handles all auth-related API calls.
-///
-/// Returns raw [Response] objects — the repository converts these
-/// into typed results or Failures.
-class AuthRemoteDataSource {
-  final ApiClient _apiClient;
+/// Raw API access for auth. Returns the GetX [Response] for the social
+/// endpoints (the repository inspects status/body to decide the branch) and
+/// throws [ServerException]/[NetworkException] for the simple register/login/
+/// guest flows.
+abstract class AuthRemoteDataSource {
+  /// Returns the registration token on success.
+  Future<String> register(SignUpBodyModel body);
 
-  const AuthRemoteDataSource(this._apiClient);
+  Future<Response> login({String? phone, String? password, String? guestId});
 
+  Future<String> guestLogin(String? deviceToken);
+
+  Future<Response> loginWithSocialMedia(SocialLogInBody body, int timeout);
+  Future<Response> registerWithSocialMedia(SocialLogInBody body);
+
+  Future<Response> updateToken({String notificationDeviceToken});
+  Future<void> updateZone();
+  Future<void> clearRemoteToken();
+
+  Future<String?> deviceToken();
+}
+
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final ApiClient apiClient;
+
+  AuthRemoteDataSourceImpl({required this.apiClient});
+
+  @override
+  Future<String> register(SignUpBodyModel body) async {
+    final Response response = await apiClient.postData(
+      AppConstants.registerUri,
+      body.toJson(),
+      handleError: false,
+    );
+    if (response.statusCode == 200) {
+      return response.body['token'];
+    }
+    throw _exceptionFor(response);
+  }
+
+  @override
   Future<Response> login({
-    required String phone,
-    required String password,
+    String? phone,
+    String? password,
     String? guestId,
   }) async {
     final Map<String, String> data = {
-      'phone': phone,
-      'password': password,
+      "phone": phone ?? '',
+      "password": password ?? '',
     };
     if (guestId != null && guestId.isNotEmpty) {
-      data['guest_id'] = guestId;
+      data.addAll({"guest_id": guestId});
     }
-    return _apiClient.postData(
-      AppConstants.loginUri,
-      data,
-      handleError: false,
-    );
+    return apiClient.postData(AppConstants.loginUri, data, handleError: false);
   }
 
-  Future<Response> register(Map<String, dynamic> body) async {
-    return _apiClient.postData(
-      AppConstants.registerUri,
-      body,
-      handleError: false,
-    );
-  }
-
-  Future<Response> guestLogin(String? fcmToken) async {
-    return _apiClient.postData(
+  @override
+  Future<String> guestLogin(String? deviceToken) async {
+    final Response response = await apiClient.postData(
       AppConstants.guestLoginUri,
-      {'fcm_token': fcmToken},
+      {'fcm_token': deviceToken},
     );
+    if (response.statusCode == 200) {
+      return response.body['guest_id'].toString();
+    }
+    throw _exceptionFor(response);
   }
 
-  Future<Response> loginWithSocialMedia(
-    Map<String, dynamic> body, {
-    int timeout = 60,
-  }) async {
-    return _apiClient.postData(
+  @override
+  Future<Response> loginWithSocialMedia(SocialLogInBody body, int timeout) {
+    return apiClient.postData(
       AppConstants.socialLoginUri,
-      body,
+      body.toJson(),
       timeout: timeout,
     );
   }
 
-  Future<Response> registerWithSocialMedia(Map<String, dynamic> body) async {
-    return _apiClient.postData(AppConstants.socialRegisterUri, body);
+  @override
+  Future<Response> registerWithSocialMedia(SocialLogInBody body) {
+    return apiClient.postData(AppConstants.socialRegisterUri, body.toJson());
   }
 
-  Future<Response> updateToken(String token) async {
-    return _apiClient.postData(
-      AppConstants.tokenUri,
-      {'_method': 'put', 'cm_firebase_token': token},
-      handleError: false,
-    );
+  @override
+  Future<Response> updateToken({String notificationDeviceToken = ''}) async {
+    String? token;
+    if (notificationDeviceToken.isEmpty) {
+      if (GetPlatform.isIOS && !GetPlatform.isWeb) {
+        FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        final NotificationSettings settings = await FirebaseMessaging.instance
+            .requestPermission(
+              alert: true,
+              announcement: false,
+              badge: true,
+              carPlay: false,
+              criticalAlert: false,
+              provisional: false,
+              sound: true,
+            );
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          token = await deviceToken();
+        }
+      } else {
+        token = await deviceToken();
+      }
+      if (!GetPlatform.isWeb) {
+        FirebaseMessaging.instance.subscribeToTopic(AppConstants.topic);
+      }
+    }
+    return apiClient.postData(AppConstants.tokenUri, {
+      "_method": "put",
+      "cm_firebase_token": notificationDeviceToken.isNotEmpty
+          ? notificationDeviceToken
+          : token,
+    }, handleError: false);
   }
 
-  Future<Response> updateZone() async {
-    return _apiClient.getData(AppConstants.updateZoneUri);
+  @override
+  Future<void> updateZone() async {
+    await apiClient.getData(AppConstants.updateZoneUri);
+  }
+
+  @override
+  Future<void> clearRemoteToken() async {
+    if (!GetPlatform.isWeb) {
+      FirebaseMessaging.instance.unsubscribeFromTopic(AppConstants.topic);
+      await apiClient.postData(AppConstants.tokenUri, {
+        "_method": "put",
+        "cm_firebase_token": '@',
+      }, handleError: false);
+    }
+  }
+
+  @override
+  Future<String?> deviceToken() async {
+    String? token = '@';
+    if (!GetPlatform.isWeb) {
+      try {
+        token = (await FirebaseMessaging.instance.getToken())!;
+      } catch (_) {}
+    }
+    if (token != null && kDebugMode) {
+      print('--------Device Token---------- $token');
+    }
+    return token;
+  }
+
+  Exception _exceptionFor(Response response) {
+    if (response.statusCode == null ||
+        response.statusCode == 0 ||
+        response.statusCode == 1) {
+      return NetworkException(response.statusText ?? 'No internet connection');
+    }
+    return ServerException(response.statusText ?? 'Server error');
   }
 }

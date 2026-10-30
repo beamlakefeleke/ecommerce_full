@@ -1,31 +1,12 @@
-/// Pure Dart entity representing an authentication response.
-///
-/// No JSON, no Flutter imports. Data-layer models convert API responses
-/// into this entity via `toEntity()`.
-class AuthResponse {
+import 'package:equatable/equatable.dart';
+
+/// Pure result of a successful authentication (login / register / social).
+class AuthResponse extends Equatable {
   final String token;
   final bool isPhoneVerified;
-  final String? phone;
 
-  const AuthResponse({
-    required this.token,
-    required this.isPhoneVerified,
-    this.phone,
-  });
+  const AuthResponse({required this.token, this.isPhoneVerified = false});
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AuthResponse &&
-          runtimeType == other.runtimeType &&
-          token == other.token &&
-          isPhoneVerified == other.isPhoneVerified &&
-          phone == other.phone;
-
-  @override
-  int get hashCode => Object.hash(token, isPhoneVerified, phone);
-
-  @override
-  String toString() =>
-      'AuthResponse(token: ${token.isNotEmpty ? "***" : ""}, isPhoneVerified: $isPhoneVerified, phone: $phone)';
+  List<Object?> get props => [token, isPhoneVerified];
 }

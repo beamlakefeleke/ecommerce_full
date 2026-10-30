@@ -1,4 +1,5 @@
-import 'package:ecommerce/features/search/controllers/search_controller.dart' as search;
+import 'package:ecommerce/features/search/controllers/search_controller.dart'
+    as search;
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
@@ -14,20 +15,28 @@ class ItemViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GetBuilder<search.SearchController>(builder: (searchController) {
-        return SingleChildScrollView(
-          child: FooterView(
-            child: SizedBox(
+      body: GetBuilder<search.SearchController>(
+        builder: (searchController) {
+          return SingleChildScrollView(
+            child: FooterView(
+              child: SizedBox(
                 width: Dimensions.webMaxWidth,
-                child: ResponsiveHelper.isDesktop(context) ? WebItemsView(
-                  isStore: isItem, items: searchController.searchItemList, stores: searchController.searchStoreList,
-                ) : ItemsView(
-                  isStore: isItem, items: searchController.searchItemList, stores: searchController.searchStoreList,
-                ),
+                child: ResponsiveHelper.isDesktop(context)
+                    ? WebItemsView(
+                        isStore: isItem,
+                        items: searchController.searchItemList,
+                        stores: searchController.searchStoreList,
+                      )
+                    : ItemsView(
+                        isStore: isItem,
+                        items: searchController.searchItemList,
+                        stores: searchController.searchStoreList,
+                      ),
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }

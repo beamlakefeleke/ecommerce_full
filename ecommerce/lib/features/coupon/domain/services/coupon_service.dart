@@ -2,7 +2,7 @@ import 'package:ecommerce/features/coupon/domain/models/coupon_model.dart';
 import 'package:ecommerce/features/coupon/domain/repositories/coupon_repository_interface.dart';
 import 'package:ecommerce/features/coupon/domain/services/coupon_service_interface.dart';
 
-class CouponService implements CouponServiceInterface{
+class CouponService implements CouponServiceInterface {
   final CouponRepositoryInterface couponRepositoryInterface;
   CouponService({required this.couponRepositoryInterface});
 
@@ -22,8 +22,13 @@ class CouponService implements CouponServiceInterface{
   }
 
   @override
-  Future<CouponModel?> applyTaxiCoupon(String couponCode, int? providerId) async {
-    return await couponRepositoryInterface.applyTaxiCoupon(couponCode, providerId);
+  Future<CouponModel?> applyTaxiCoupon(
+    String couponCode,
+    int? providerId,
+  ) async {
+    return await couponRepositoryInterface.applyTaxiCoupon(
+      couponCode,
+      providerId,
+    );
   }
-
 }

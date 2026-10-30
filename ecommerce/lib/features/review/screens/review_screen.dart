@@ -19,7 +19,6 @@ class ReviewScreen extends StatefulWidget {
 }
 
 class _ReviewScreenState extends State<ReviewScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -30,34 +29,77 @@ class _ReviewScreenState extends State<ReviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-          ? 'restaurant_reviews'.tr : 'store_reviews'.tr),
-      endDrawer: const MenuDrawer(),endDrawerEnableOpenDragGesture: false,
-      body: GetBuilder<ReviewController>(builder: (reviewController) {
-        return reviewController.storeReviewList != null ? reviewController.storeReviewList!.isNotEmpty ? RefreshIndicator(
-          onRefresh: () async {
-            await reviewController.getStoreReviewList(widget.storeID);
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: FooterView(child: SizedBox(width: Dimensions.webMaxWidth, child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : 2,
-                childAspectRatio: (1/0.2), crossAxisSpacing: 10, mainAxisSpacing: 10,
-              ),
-              itemCount: reviewController.storeReviewList!.length,
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-              itemBuilder: (context, index) {
-                return ReviewWidget(
-                  review: reviewController.storeReviewList![index],
-                  hasDivider: index != reviewController.storeReviewList!.length-1,
-                );
-              },
-            )))),
-        ) : Center(child: NoDataScreen(text: 'no_review_found'.tr, showFooter: true)) : const Center(child: CircularProgressIndicator());
-      }),
+      appBar: CustomAppBar(
+        title:
+            Get.find<SplashController>()
+                .configModel!
+                .moduleConfig!
+                .module!
+                .showRestaurantText!
+            ? 'restaurant_reviews'.tr
+            : 'store_reviews'.tr,
+      ),
+      endDrawer: const MenuDrawer(),
+      endDrawerEnableOpenDragGesture: false,
+      body: GetBuilder<ReviewController>(
+        builder: (reviewController) {
+          return reviewController.storeReviewList != null
+              ? reviewController.storeReviewList!.isNotEmpty
+                    ? RefreshIndicator(
+                        onRefresh: () async {
+                          await reviewController.getStoreReviewList(
+                            widget.storeID,
+                          );
+                        },
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: FooterView(
+                            child: SizedBox(
+                              width: Dimensions.webMaxWidth,
+                              child: GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount:
+                                          ResponsiveHelper.isMobile(context)
+                                          ? 1
+                                          : 2,
+                                      childAspectRatio: (1 / 0.2),
+                                      crossAxisSpacing: 10,
+                                      mainAxisSpacing: 10,
+                                    ),
+                                itemCount:
+                                    reviewController.storeReviewList!.length,
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                padding: const EdgeInsets.all(
+                                  Dimensions.paddingSizeSmall,
+                                ),
+                                itemBuilder: (context, index) {
+                                  return ReviewWidget(
+                                    review: reviewController
+                                        .storeReviewList![index],
+                                    hasDivider:
+                                        index !=
+                                        reviewController
+                                                .storeReviewList!
+                                                .length -
+                                            1,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: NoDataScreen(
+                          text: 'no_review_found'.tr,
+                          showFooter: true,
+                        ),
+                      )
+              : const Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }

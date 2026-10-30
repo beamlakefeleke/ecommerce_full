@@ -14,28 +14,47 @@ class GuestButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
+      listenWhen: (prev, curr) =>
+          prev.actionStatus != curr.actionStatus &&
+          curr.actionType == AuthActionType.guestLogin &&
+          curr.actionStatus == AuthActionStatus.success,
       listener: (context, state) {
-        if (state is AuthGuestSuccess) {
-          Get.find<ProfileController>().setForceFullyUserEmpty();
-          Navigator.pushReplacementNamed(context, RouteHelper.getInitialRoute());
-        }
+        Get.find<ProfileController>().setForceFullyUserEmpty();
+        Navigator.pushReplacementNamed(context, RouteHelper.getInitialRoute());
       },
       builder: (context, state) {
-        final guestLoading = state is AuthGuestLoading;
-
-        return !guestLoading ? TextButton(
-          style: TextButton.styleFrom(
-            minimumSize: const Size(1, 40),
-          ),
-          onPressed: () {
-            context.read<AuthBloc>().add(const GuestLoginRequested());
-          },
-          child: RichText(text: TextSpan(children: [
-            TextSpan(text: '${'continue_as'.tr} ', style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
-            TextSpan(text: 'guest'.tr, style: robotoMedium.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color)),
-          ])),
-        ) : const Center(child: SizedBox(height: 25, width: 25, child: CircularProgressIndicator()));
-      }
+        return !state.guestLoading
+            ? TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size(1, 40)),
+                onPressed: () =>
+                    context.read<AuthBloc>().add(const GuestLoginRequested()),
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${'continue_as'.tr} ',
+                        style: robotoRegular.copyWith(
+                          color: Theme.of(context).disabledColor,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'guest'.tr,
+                        style: robotoMedium.copyWith(
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : const Center(
+                child: SizedBox(
+                  height: 25,
+                  width: 25,
+                  child: CircularProgressIndicator(),
+                ),
+              );
+      },
     );
   }
 }

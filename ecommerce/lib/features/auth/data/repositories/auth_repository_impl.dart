@@ -1,270 +1,232 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:ecommerce/core/network/failure.dart';
+import 'package:get/get_connect/connect.dart';
+import 'package:ecommerce/core/error/exceptions.dart';
+import 'package:ecommerce/core/error/failure.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:ecommerce/features/auth/data/models/auth_response_model.dart';
 import 'package:ecommerce/features/auth/data/models/signup_body_model.dart';
-import 'package:ecommerce/features/auth/data/models/social_login_body_model.dart';
+import 'package:ecommerce/features/auth/data/models/social_log_in_body.dart';
 import 'package:ecommerce/features/auth/domain/entities/auth_response.dart';
-import 'package:ecommerce/features/auth/domain/entities/signup_body.dart';
-import 'package:ecommerce/features/auth/domain/entities/social_login_body.dart';
+import 'package:ecommerce/features/auth/domain/entities/sign_up_params.dart';
+import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 
-/// Concrete implementation of [AuthRepository].
-///
-/// Catches data-source exceptions and converts them to typed [Failure]s.
-/// Returns `Either<Failure, T>` — no raw exceptions cross the domain boundary.
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource _remoteDataSource;
-  final AuthLocalDataSource _localDataSource;
+  final AuthRemoteDataSource remote;
+  final AuthLocalDataSource local;
 
-  const AuthRepositoryImpl(this._remoteDataSource, this._localDataSource);
+  AuthRepositoryImpl({required this.remote, required this.local});
 
   @override
-  Future<Either<Failure, AuthResponse>> login({
-    required String phone,
-    required String password,
-  }) async {
+  Future<Either<Failure, AuthResponse>> register(
+    SignUpParams params,
+    bool isCustomerVerificationOn,
+  ) async {
     try {
-      final guestId = _localDataSource.getGuestId();
-      final response = await _remoteDataSource.login(
-        phone: phone,
-        password: password,
-        guestId: guestId,
-      );
-
-      if (response.statusCode == 200) {
-        final model = AuthResponseModel.fromJson(response.body);
-        return Right(model.toEntity());
-      } else {
-        return Left(ServerFailure(
-          response.statusText ?? 'Login failed',
-          statusCode: response.statusCode,
-        ));
+      final token = await remote.register(SignUpBodyModel.fromEntity(params));
+      if (!isCustomerVerificationOn) {
+        await local.saveUserToken(token);
+        await remote.updateToken();
+        await local.clearGuestId();
       }
+      return Right(AuthResponse(token: token, isPhoneVerified: true));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(UnexpectedFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, AuthResponse>> register(SignupBody body) async {
+  Future<Either<Failure, AuthResponse>> login({
+    String? phone,
+    String? password,
+    required bool isCustomerVerificationOn,
+  }) async {
     try {
-      final model = SignupBodyModel.fromEntity(body);
-      final response = await _remoteDataSource.register(model.toJson());
-
+      final Response response = await remote.login(
+        phone: phone,
+        password: password,
+        guestId: local.getGuestId(),
+      );
       if (response.statusCode == 200) {
-        final token = response.body['token'] as String? ?? '';
-        return Right(AuthResponse(
-          token: token,
-          isPhoneVerified: true, // registration doesn't return verification status
-        ));
-      } else {
-        return Left(ServerFailure(
-          response.statusText ?? 'Registration failed',
-          statusCode: response.statusCode,
-        ));
+        final bool phoneVerified = response.body['is_phone_verified'] == 1;
+        final String token = response.body['token'] ?? '';
+        if (!(isCustomerVerificationOn && !phoneVerified)) {
+          await local.saveUserToken(token);
+          await remote.updateToken();
+          await local.clearGuestId();
+        }
+        return Right(
+          AuthResponse(token: token, isPhoneVerified: phoneVerified),
+        );
       }
+      return Left(ServerFailure(response.statusText ?? 'Login failed'));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(UnexpectedFailure(e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, String>> guestLogin() async {
     try {
-      final deviceToken = await _localDataSource.getDeviceToken();
-      final response = await _remoteDataSource.guestLogin(deviceToken);
-
-      if (response.statusCode == 200) {
-        final guestId = response.body['guest_id'].toString();
-        await _localDataSource.saveGuestId(guestId);
-        return Right(guestId);
-      } else {
-        return Left(ServerFailure(
-          response.statusText ?? 'Guest login failed',
-          statusCode: response.statusCode,
-        ));
-      }
+      final deviceToken = await remote.deviceToken();
+      final guestId = await remote.guestLogin(deviceToken);
+      await local.saveGuestId(guestId);
+      return Right(guestId);
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(UnexpectedFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, AuthResponse>> loginWithSocialMedia(
-    SocialLoginBody body, {
-    int timeout = 60,
-  }) async {
-    try {
-      final model = SocialLoginBodyModel.fromEntity(body);
-      final response = await _remoteDataSource.loginWithSocialMedia(
-        model.toJson(),
-        timeout: timeout,
-      );
-
-      if (response.statusCode == 200) {
-        final authModel = AuthResponseModel.fromJson(response.body);
-        return Right(authModel.toEntity());
-      } else if (response.statusCode == 403) {
-        // 403 with email error code → user needs to register
-        final errors = response.body['errors'] as List<dynamic>?;
-        if (errors != null &&
-            errors.isNotEmpty &&
-            errors[0]['code'] == 'email') {
-          return Right(const AuthResponse(
-            token: '',
-            isPhoneVerified: false,
-          ));
-        }
-        return Left(ServerFailure(
-          response.statusText ?? 'Social login forbidden',
-          statusCode: 403,
-        ));
-      } else {
-        return Left(ServerFailure(
-          response.statusText ?? 'Social login failed',
-          statusCode: response.statusCode,
-        ));
-      }
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, AuthResponse>> registerWithSocialMedia(
-    SocialLoginBody body,
+  Future<Either<Failure, SocialAuthResult>> loginWithSocialMedia(
+    SocialSignInParams params,
+    int timeout,
+    bool isCustomerVerificationOn,
   ) async {
     try {
-      final model = SocialLoginBodyModel.fromEntity(body);
-      final response =
-          await _remoteDataSource.registerWithSocialMedia(model.toJson());
-
+      final Response response = await remote.loginWithSocialMedia(
+        SocialLogInBody.fromEntity(params),
+        timeout,
+      );
       if (response.statusCode == 200) {
-        final authModel = AuthResponseModel.fromJson(response.body);
-        return Right(authModel.toEntity());
-      } else {
-        return Left(ServerFailure(
-          response.statusText ?? 'Social registration failed',
-          statusCode: response.statusCode,
-        ));
+        final String? token = response.body['token'];
+        if (token != null && token.isNotEmpty) {
+          if (isCustomerVerificationOn &&
+              response.body['is_phone_verified'] == 0) {
+            return Right(
+              SocialAuthResult(
+                outcome: SocialAuthOutcome.needsVerification,
+                token: token,
+                phone: response.body['phone'] ?? params.email,
+              ),
+            );
+          }
+          await local.saveUserToken(token);
+          await remote.updateToken();
+          await local.clearGuestId();
+          return const Right(
+            SocialAuthResult(outcome: SocialAuthOutcome.authenticated),
+          );
+        }
+        return const Right(
+          SocialAuthResult(outcome: SocialAuthOutcome.needsRegistration),
+        );
+      } else if (response.statusCode == 403 &&
+          response.body['errors'][0]['code'] == 'email') {
+        return const Right(
+          SocialAuthResult(outcome: SocialAuthOutcome.needsRegistration),
+        );
       }
+      return Right(
+        SocialAuthResult(
+          outcome: SocialAuthOutcome.failed,
+          message: response.statusText,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(UnexpectedFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> saveUserToken(String token) async {
+  Future<Either<Failure, SocialAuthResult>> registerWithSocialMedia(
+    SocialSignInParams params,
+    bool isCustomerVerificationOn,
+  ) async {
     try {
-      await _localDataSource.saveUserToken(token);
-      return const Right(null);
-    } catch (e) {
-      return Left(CacheFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> updateToken() async {
-    try {
-      await _localDataSource.setupNotifications();
-      final deviceToken = await _localDataSource.getDeviceToken();
-      final response =
-          await _remoteDataSource.updateToken(deviceToken ?? '@');
+      final Response response = await remote.registerWithSocialMedia(
+        SocialLogInBody.fromEntity(params),
+      );
       if (response.statusCode == 200) {
-        return const Right(null);
-      } else {
-        return Left(ServerFailure(
-          response.statusText ?? 'Token update failed',
-          statusCode: response.statusCode,
-        ));
+        final String? token = response.body['token'];
+        if (isCustomerVerificationOn &&
+            response.body['is_phone_verified'] == 0) {
+          return Right(
+            SocialAuthResult(
+              outcome: SocialAuthOutcome.needsVerification,
+              token: token,
+              phone: params.phone,
+            ),
+          );
+        }
+        await local.saveUserToken(token ?? '');
+        await remote.updateToken();
+        await local.clearGuestId();
+        return const Right(
+          SocialAuthResult(outcome: SocialAuthOutcome.authenticated),
+        );
       }
+      return Right(
+        SocialAuthResult(
+          outcome: SocialAuthOutcome.failed,
+          message: response.statusText,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(UnexpectedFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> updateZone() async {
-    try {
-      final response = await _remoteDataSource.updateZone();
-      if (response.statusCode == 200) {
-        return const Right(null);
-      } else {
-        return Left(ServerFailure(
-          response.statusText ?? 'Zone update failed',
-          statusCode: response.statusCode,
-        ));
-      }
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
-  // ─── Delegated local operations ───────────────────────────────────
+  Future<void> updateToken() => remote.updateToken();
 
   @override
-  bool clearSharedData() => _localDataSource.clearSharedData();
+  Future<void> updateZone() => remote.updateZone();
 
+  // --- local passthrough ---
   @override
-  Future<bool> clearSharedAddress() => _localDataSource.clearSharedAddress();
-
+  bool isLoggedIn() => local.isLoggedIn();
   @override
-  bool isLoggedIn() => _localDataSource.isLoggedIn();
-
+  bool isGuestLoggedIn() => local.isGuestLoggedIn();
   @override
-  bool isGuestLoggedIn() => _localDataSource.isGuestLoggedIn();
-
+  String getGuestId() => local.getGuestId();
   @override
-  String getGuestId() => _localDataSource.getGuestId();
-
+  bool clearSharedData() => local.clearSharedData();
+  @override
+  Future<bool> clearSharedAddress() => local.clearSharedAddress();
+  @override
+  bool isNotificationActive() => local.isNotificationActive();
+  @override
+  void setNotificationActive(bool isActive) =>
+      local.setNotificationActive(isActive);
   @override
   Future<void> saveUserNumberAndPassword(
     String number,
     String password,
     String countryCode,
-  ) =>
-      _localDataSource.saveUserNumberAndPassword(number, password, countryCode);
-
+  ) => local.saveUserNumberAndPassword(number, password, countryCode);
   @override
-  String getUserNumber() => _localDataSource.getUserNumber();
-
+  String getUserNumber() => local.getUserNumber();
   @override
-  String getUserCountryCode() => _localDataSource.getUserCountryCode();
-
+  String getUserCountryCode() => local.getUserCountryCode();
   @override
-  String getUserPassword() => _localDataSource.getUserPassword();
-
+  String getUserPassword() => local.getUserPassword();
   @override
   Future<bool> clearUserNumberAndPassword() =>
-      _localDataSource.clearUserNumberAndPassword();
-
+      local.clearUserNumberAndPassword();
   @override
-  String getUserToken() => _localDataSource.getUserToken();
-
+  String getUserToken() => local.getUserToken();
   @override
   Future<bool> saveGuestContactNumber(String number) =>
-      _localDataSource.saveGuestContactNumber(number);
-
+      local.saveGuestContactNumber(number);
   @override
-  String getGuestContactNumber() =>
-      _localDataSource.getGuestContactNumber();
-
+  String getGuestContactNumber() => local.getGuestContactNumber();
   @override
-  bool isNotificationActive() => _localDataSource.isNotificationActive();
-
+  Future<bool> saveDmTipIndex(String index) => local.saveDmTipIndex(index);
   @override
-  void setNotificationActive(bool isActive) {
-    if (isActive) {
-      updateToken();
-    } else {
-      _localDataSource.unsubscribeNotifications();
-      _remoteDataSource.updateToken('@');
-    }
-    _localDataSource.setNotificationActive(isActive);
-  }
-
+  String getDmTipIndex() => local.getDmTipIndex();
   @override
-  Future<bool> clearGuestId() => _localDataSource.clearGuestId();
+  Future<bool> saveEarningPoint(String point) => local.saveEarningPoint(point);
+  @override
+  String getEarningPoint() => local.getEarningPoint();
 }

@@ -509,16 +509,13 @@ class OrderCalculationWidget extends StatelessWidget {
                         ),
                       ),
                       child: DottedBorder(
-                        options: RoundedRectDottedBorderOptions(
-                          color: Theme.of(context).primaryColor,
-                          strokeWidth: 1,
-                          strokeCap: StrokeCap.butt,
-                          dashPattern: const [8, 5],
-                          padding: const EdgeInsets.all(8),
-                          radius: const Radius.circular(
-                            Dimensions.radiusDefault,
-                          ),
-                        ),
+                        color: Theme.of(context).primaryColor,
+                        strokeWidth: 1,
+                        strokeCap: StrokeCap.butt,
+                        dashPattern: const [8, 5],
+                        padding: const EdgeInsets.all(8),
+                        borderType: BorderType.RRect,
+                        radius: const Radius.circular(Dimensions.radiusDefault),
                         child: Column(
                           children: [
                             Row(
