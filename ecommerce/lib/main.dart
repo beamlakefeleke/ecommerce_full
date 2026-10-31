@@ -7,7 +7,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:meta_seo/meta_seo.dart';
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
@@ -33,6 +32,7 @@ import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'helper/get_di.dart' as di;
 
@@ -136,7 +136,7 @@ class _MyAppState extends State<MyApp> {
 
       if ((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) &&
           Get.find<SplashController>().cacheModule != null) {
-        Get.find<CartController>().getCartDataOnline();
+        clean_di.getIt<CartBloc>().add(const CartDataOnlineRequested());
       }
     }
     Get.find<SplashController>()

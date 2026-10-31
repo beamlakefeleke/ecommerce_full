@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
+import 'package:get/get.dart';
 
 class NotAvailableBottomSheetWidget extends StatelessWidget {
   const NotAvailableBottomSheetWidget({super.key});
+
+  // Static option list exposed for use in cart_screen's pricing view.
+  static const List<String> options = [
+    'remove_and_place_order',
+    'wait_for_all_items',
+    'cancel_order',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +38,13 @@ class NotAvailableBottomSheetWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: Dimensions.paddingSizeLarge,
         ),
-        child: Column(
-          children: [
-            !ResponsiveHelper.isDesktop(context)
-                ? Container(
+        child: BlocBuilder<CartBloc, CartState>(
+          buildWhen: (p, c) => p.notAvailableIndex != c.notAvailableIndex,
+          builder: (context, state) {
+            return Column(
+              children: [
+                if (!ResponsiveHelper.isDesktop(context))
+                  Container(
                     height: 4,
                     width: 35,
                     margin: const EdgeInsets.symmetric(
@@ -41,47 +54,49 @@ class NotAvailableBottomSheetWidget extends StatelessWidget {
                       color: Theme.of(context).disabledColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                  )
-                : const SizedBox(),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'if_any_product_is_not_available'.tr,
-                  style: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Get.back(),
-                  icon: Icon(
-                    Icons.clear,
-                    color: Theme.of(context).disabledColor,
-                  ),
-                ),
-              ],
-            ),
 
-            GetBuilder<CartController>(
-              builder: (cartController) {
-                return ListView.builder(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'if_any_product_is_not_available'.tr,
+                      style: robotoBold.copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Get.back(),
+                      icon: Icon(
+                        Icons.clear,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                    ),
+                  ],
+                ),
+
+                ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: cartController.notAvailableList.length,
+                  itemCount: options.length,
                   itemBuilder: (context, index) {
+                    final bool selected = state.notAvailableIndex == index;
                     return InkWell(
-                      onTap: () => cartController.setAvailableIndex(index),
+                      onTap: () => context.read<CartBloc>().add(
+                        CartNotAvailableIndexSet(index),
+                      ),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: cartController.notAvailableIndex == index
-                              ? Theme.of(context).primaryColor.withOpacity(0.1)
+                          color: selected
+                              ? Theme.of(
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.1)
                               : Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(
                             Dimensions.radiusSmall,
                           ),
                           border: Border.all(
-                            color: cartController.notAvailableIndex == index
+                            color: selected
                                 ? Theme.of(context).primaryColor
                                 : Theme.of(context).disabledColor,
                             width: 0.5,
@@ -95,10 +110,10 @@ class NotAvailableBottomSheetWidget extends StatelessWidget {
                           bottom: Dimensions.paddingSizeDefault,
                         ),
                         child: Text(
-                          cartController.notAvailableList[index].tr,
+                          options[index].tr,
                           style: robotoRegular.copyWith(
                             fontSize: Dimensions.fontSizeDefault,
-                            color: cartController.notAvailableIndex == index
+                            color: selected
                                 ? Theme.of(context).textTheme.bodyMedium!.color
                                 : Theme.of(context).disabledColor,
                           ),
@@ -106,25 +121,19 @@ class NotAvailableBottomSheetWidget extends StatelessWidget {
                       ),
                     );
                   },
-                );
-              },
-            ),
+                ),
 
-            GetBuilder<CartController>(
-              builder: (cartController) {
-                return CustomButton(
+                CustomButton(
                   buttonText: 'apply'.tr,
-                  onPressed: cartController.notAvailableIndex == -1
+                  onPressed: state.notAvailableIndex == -1
                       ? null
-                      : () {
-                          Get.back();
-                        },
-                );
-              },
-            ),
+                      : () => Get.back(),
+                ),
 
-            const SizedBox(height: Dimensions.paddingSizeLarge),
-          ],
+                const SizedBox(height: Dimensions.paddingSizeLarge),
+              ],
+            );
+          },
         ),
       ),
     );

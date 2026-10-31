@@ -98,7 +98,9 @@ verification, wallet.
 | core | Done — `error/failure.dart`, `error/exceptions.dart`, `usecase/usecase.dart`, `di/injection.dart` (manual get_it, bridges to GetX `ApiClient`) |
 | address | Done — single `AddressBloc`; legacy controller/service/repository/old-model deleted; model unified at `data/models/`; provided app-wide via `MultiBlocProvider`; pages/widgets under `presentation/` |
 | auth | Core DONE — `AuthBloc` (login/register/social/guest/toggles); usecases, repo (remote+local data sources), entities built; legacy `AuthController`/`AuthService(Interface)` deleted + removed from get_di; `AuthHelper` now reads `getIt<AuthRepository>()`; `AuthBloc` provided app-wide via `MultiBlocProvider`. See transitional notes below. |
-| **banner** | **NEXT (not started)** |
+| **banner** | Done — single `BannerBloc`; five fetch usecases; legacy deleted; provided app-wide |
+| cart | Done — single `CartBloc`; all CRUD/sync usecases; legacy `CartController`/service deleted; screens/widgets migrated; provided app-wide |
+| **category** | **NEXT** |
 | all others | Not migrated (still GetX); each is migrated whole, never half |
 
 Order: alphabetical, one feature at a time. Next up: `banner`, then `cart`, …

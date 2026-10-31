@@ -14,7 +14,7 @@ import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_dropdown.dart';
-import 'package:ecommerce/features/cart/widgets/delivery_option_button_widget.dart';
+import 'package:ecommerce/features/cart/presentation/widgets/delivery_option_button_widget.dart';
 import 'package:ecommerce/features/checkout/widgets/coupon_section.dart';
 import 'package:ecommerce/features/checkout/widgets/delivery_instruction_view.dart';
 import 'package:ecommerce/features/checkout/widgets/delivery_section.dart';

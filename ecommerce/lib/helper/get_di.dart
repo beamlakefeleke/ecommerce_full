@@ -50,7 +50,6 @@ import 'package:ecommerce/features/location/controllers/location_controller.dart
 import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/taxi_booking/repo/car_selection_repo.dart';
-import 'package:ecommerce/features/taxi_booking/repo/cart_repo.dart';
 import 'package:ecommerce/features/taxi_booking/repo/rider_repo.dart';
 import 'package:ecommerce/api/api_client.dart';
 
@@ -158,9 +157,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
 
   /// Repository
-  Get.lazyPut(
-    () => CartRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
-  );
   Get.lazyPut(
     () => RiderRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
   );
@@ -303,10 +299,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => loyaltyRepositoryInterface);
 
-    apiClient: Get.find(),
-    sharedPreferences: Get.find(),
-  );
-
   VerificationRepositoryInterface verificationRepositoryInterface =
       VerificationRepository(
         apiClient: Get.find(),
@@ -442,8 +434,6 @@ Future<Map<String, Map<String, String>>> init() async {
     loyaltyRepositoryInterface: Get.find(),
   );
   Get.lazyPut(() => loyaltyServiceInterface);
-
-  );
 
   VerificationServiceInterface verificationServiceInterface =
       VerificationService(

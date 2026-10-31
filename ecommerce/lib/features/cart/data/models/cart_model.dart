@@ -169,17 +169,3 @@ class CartModel {
     e.quantityLimit,
   );
 }
-
-class AddOn {
-  int? id;
-  int? quantity;
-
-  AddOn({this.id, this.quantity});
-
-  AddOn.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    quantity = json['quantity'];
-  }
-
-  Map<String, dynamic> toJson() => {'id': id, 'quantity': quantity};
-}

@@ -4,6 +4,7 @@ import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/core/usecase/usecase.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/cart/data/models/online_cart_model.dart';
+import 'package:ecommerce/features/cart/domain/entities/cart_item.dart';
 import 'package:ecommerce/features/cart/domain/repositories/cart_repository.dart';
 import 'package:ecommerce/features/cart/domain/usecases/add_to_cart_usecase.dart';
 import 'package:ecommerce/features/cart/domain/usecases/clear_cart_usecase.dart';
@@ -46,6 +47,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartCutleryToggled>(_onCutleryToggled);
     on<CartNotAvailableIndexSet>(_onNotAvailableIndexSet);
     on<CartCurrentIndexChanged>(_onCurrentIndexChanged);
+    on<CartModuleForcefullySet>(_onModuleForcefullySet);
   }
 
   // ── handlers ─────────────────────────────────────────────────────────────
@@ -195,6 +197,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) {
     emit(state.copyWith(currentIndex: event.index));
+  }
+
+  void _onModuleForcefullySet(
+    CartModuleForcefullySet event,
+    Emitter<CartState> emit,
+  ) {
+    // Module selection is a cross-feature concern handled by SplashController
+    // (still GetX). This event is a no-op in the bloc — the caller uses
+    // Get.find<SplashController>().setModule(...) directly for now.
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────

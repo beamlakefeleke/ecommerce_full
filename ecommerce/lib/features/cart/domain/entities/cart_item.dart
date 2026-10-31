@@ -1,6 +1,23 @@
 import 'package:equatable/equatable.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 
+/// A single cart addon selection: which addon and how many.
+class AddOn extends Equatable {
+  final int? id;
+  final int? quantity;
+
+  const AddOn({this.id, this.quantity});
+
+  AddOn.fromJson(Map<String, dynamic> json)
+    : id = json['id'],
+      quantity = json['quantity'];
+
+  Map<String, dynamic> toJson() => {'id': id, 'quantity': quantity};
+
+  @override
+  List<Object?> get props => [id, quantity];
+}
+
 /// Pure domain entity representing one cart entry.
 ///
 /// Mutable fields (`quantity`, `isLoading`) exist because the cart is

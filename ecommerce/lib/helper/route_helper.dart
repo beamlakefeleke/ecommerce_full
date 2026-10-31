@@ -32,7 +32,7 @@ import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/html_type.dart';
 import 'package:ecommerce/common/widgets/image_viewer_screen.dart';
 import 'package:ecommerce/common/widgets/not_found.dart';
-import 'package:ecommerce/features/cart/screens/cart_screen.dart';
+import 'package:ecommerce/features/cart/presentation/pages/cart_screen.dart';
 import 'package:ecommerce/features/category/screens/category_item_screen.dart';
 import 'package:ecommerce/features/chat/screens/chat_screen.dart';
 import 'package:ecommerce/features/chat/screens/conversation_screen.dart';
