@@ -2,7 +2,7 @@ import 'package:get/get_connect.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/core/error/exceptions.dart';
 import 'package:ecommerce/features/cart/data/models/online_cart_model.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
 

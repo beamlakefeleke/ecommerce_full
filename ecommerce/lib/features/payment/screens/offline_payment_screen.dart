@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/checkout/controllers/checkout_controller.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
 import 'package:ecommerce/features/payment/controllers/payment_controller.dart';
 import 'package:ecommerce/features/payment/domain/models/offline_method_model.dart';

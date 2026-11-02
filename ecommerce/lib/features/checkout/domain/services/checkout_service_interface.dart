@@ -4,8 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/features/payment/domain/models/offline_method_model.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
-import 'package:ecommerce/features/checkout/domain/models/timeslote_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/timeslote_model.dart';
 
 abstract class CheckoutServiceInterface {
   Future<List<OfflineMethodModel>?> getOfflineMethodList();

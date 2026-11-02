@@ -6,12 +6,12 @@ import 'package:ecommerce/features/loyalty/screens/loyalty_screen.dart';
 import 'package:ecommerce/features/refer_and_earn/screens/refer_and_earn_screen.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/auth/domain/models/social_log_in_body.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
-import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
+import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
@@ -23,7 +23,7 @@ import 'package:ecommerce/features/auth/screens/delivery_man_registration_screen
 import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
 import 'package:ecommerce/features/auth/screens/sign_up_screen.dart';
 import 'package:ecommerce/features/auth/screens/store_registration_screen.dart';
-import 'package:ecommerce/features/category/screens/category_screen.dart';
+import 'package:ecommerce/features/category/presentation/pages/category_screen.dart';
 import 'package:ecommerce/features/location/screens/map_screen.dart';
 import 'package:ecommerce/features/store/screens/campaign_screen.dart';
 import 'package:ecommerce/helper/address_helper.dart';
@@ -33,9 +33,9 @@ import 'package:ecommerce/util/html_type.dart';
 import 'package:ecommerce/common/widgets/image_viewer_screen.dart';
 import 'package:ecommerce/common/widgets/not_found.dart';
 import 'package:ecommerce/features/cart/presentation/pages/cart_screen.dart';
-import 'package:ecommerce/features/category/screens/category_item_screen.dart';
-import 'package:ecommerce/features/chat/screens/chat_screen.dart';
-import 'package:ecommerce/features/chat/screens/conversation_screen.dart';
+import 'package:ecommerce/features/category/presentation/pages/category_item_screen.dart';
+import 'package:ecommerce/features/chat/presentation/pages/chat_screen.dart';
+import 'package:ecommerce/features/chat/presentation/pages/conversation_screen.dart';
 import 'package:ecommerce/features/checkout/screens/checkout_screen.dart';
 import 'package:ecommerce/features/payment/screens/offline_payment_screen.dart';
 import 'package:ecommerce/features/checkout/screens/order_successful_screen.dart';
@@ -971,7 +971,7 @@ class RouteHelper {
         return getRoute(
           ChatScreen(
             notificationBody: notificationBody,
-            user: user,
+            user: user?.toEntity(),
             index: Get.parameters['index'] != 'null'
                 ? int.parse(Get.parameters['index']!)
                 : null,

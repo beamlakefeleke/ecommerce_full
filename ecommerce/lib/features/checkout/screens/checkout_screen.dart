@@ -6,7 +6,7 @@ import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';

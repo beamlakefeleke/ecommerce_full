@@ -3,16 +3,6 @@ import 'package:ecommerce/features/coupon/domain/repositories/coupon_repository.
 import 'package:ecommerce/features/coupon/domain/repositories/coupon_repository_interface.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
-import 'package:ecommerce/features/category/controllers/category_controller.dart';
-import 'package:ecommerce/features/category/domain/reposotories/category_repository.dart';
-import 'package:ecommerce/features/category/domain/reposotories/category_repository_interface.dart';
-import 'package:ecommerce/features/category/domain/services/category_service.dart';
-import 'package:ecommerce/features/category/domain/services/category_service_interface.dart';
-import 'package:ecommerce/features/chat/controllers/chat_controller.dart';
-import 'package:ecommerce/features/chat/domain/repositories/chat_repository.dart';
-import 'package:ecommerce/features/chat/domain/repositories/chat_repository_interface.dart';
-import 'package:ecommerce/features/chat/domain/services/chat_service.dart';
-import 'package:ecommerce/features/chat/domain/services/chat_service_interface.dart';
 import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
 import 'package:ecommerce/features/coupon/domain/services/coupon_service.dart';
 import 'package:ecommerce/features/coupon/domain/services/coupon_service_interface.dart';
@@ -210,12 +200,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => campaignRepositoryInterface);
 
-  ChatRepositoryInterface chatRepositoryInterface = ChatRepository(
-    apiClient: Get.find(),
-    sharedPreferences: Get.find(),
-  );
-  Get.lazyPut(() => chatRepositoryInterface);
-
   CouponRepositoryInterface couponRepositoryInterface = CouponRepository(
     apiClient: Get.find(),
   );
@@ -289,11 +273,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => itemRepositoryInterface);
 
-  CategoryRepositoryInterface categoryRepositoryInterface = CategoryRepository(
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => categoryRepositoryInterface);
-
   LoyaltyRepositoryInterface loyaltyRepositoryInterface = LoyaltyRepository(
     apiClient: Get.find(),
   );
@@ -350,11 +329,6 @@ Future<Map<String, Map<String, String>>> init() async {
     campaignRepositoryInterface: Get.find(),
   );
   Get.lazyPut(() => campaignServiceInterface);
-
-  ChatServiceInterface chatServiceInterface = ChatService(
-    chatRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => chatServiceInterface);
 
   CouponServiceInterface couponServiceInterface = CouponService(
     couponRepositoryInterface: Get.find(),
@@ -425,11 +399,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => itemServiceInterface);
 
-  CategoryServiceInterface categoryServiceInterface = CategoryService(
-    categoryRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => categoryServiceInterface);
-
   LoyaltyServiceInterface loyaltyServiceInterface = LoyaltyService(
     loyaltyRepositoryInterface: Get.find(),
   );
@@ -465,7 +434,6 @@ Future<Map<String, Map<String, String>>> init() async {
     ),
   );
   Get.lazyPut(() => ProfileController(profileServiceInterface: Get.find()));
-  Get.lazyPut(() => CategoryController(categoryServiceInterface: Get.find()));
   Get.lazyPut(() => ItemController(itemServiceInterface: Get.find()));
   Get.lazyPut(() => StoreController(storeServiceInterface: Get.find()));
   Get.lazyPut(() => FavouriteController(favouriteServiceInterface: Get.find()));
@@ -478,7 +446,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => CampaignController(campaignServiceInterface: Get.find()));
   Get.lazyPut(() => ParcelController(parcelServiceInterface: Get.find()));
   Get.lazyPut(() => WalletController(walletServiceInterface: Get.find()));
-  Get.lazyPut(() => ChatController(chatServiceInterface: Get.find()));
   Get.lazyPut(() => RiderController(riderRepo: Get.find()));
   Get.lazyPut(() => CarSelectionController(carSelectionRepo: Get.find()));
   Get.lazyPut(() => BookingCheckoutController(riderRepo: Get.find()));
@@ -487,7 +454,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => PaymentController(paymentServiceInterface: Get.find()));
   Get.lazyPut(() => HtmlController(htmlServiceInterface: Get.find()));
   Get.lazyPut(() => ReviewController(reviewServiceInterface: Get.find()));
-  Get.lazyPut(() => CategoryController(categoryServiceInterface: Get.find()));
   Get.lazyPut(() => LoyaltyController(loyaltyServiceInterface: Get.find()));
   Get.lazyPut(
     () => VerificationController(verificationServiceInterface: Get.find()),

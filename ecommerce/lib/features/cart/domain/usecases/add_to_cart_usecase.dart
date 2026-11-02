@@ -4,7 +4,7 @@ import 'package:ecommerce/core/error/failure.dart';
 import 'package:ecommerce/core/usecase/usecase.dart';
 import 'package:ecommerce/features/cart/data/models/online_cart_model.dart';
 import 'package:ecommerce/features/cart/domain/repositories/cart_repository.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 
 class AddToCartParams extends Equatable {
   final OnlineCart cart;

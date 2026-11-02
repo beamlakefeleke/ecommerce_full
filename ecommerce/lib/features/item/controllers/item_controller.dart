@@ -1,6 +1,6 @@
 import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/item/domain/models/basic_medicine_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/item/domain/models/common_condition_model.dart';

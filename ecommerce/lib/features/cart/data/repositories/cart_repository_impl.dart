@@ -6,7 +6,7 @@ import 'package:ecommerce/features/cart/data/datasources/cart_remote_data_source
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/cart/data/models/online_cart_model.dart';
 import 'package:ecommerce/features/cart/domain/repositories/cart_repository.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 
 class CartRepositoryImpl implements CartRepository {
   final CartRemoteDataSource remoteDataSource;

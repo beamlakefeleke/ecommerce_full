@@ -6,7 +6,7 @@ import 'package:ecommerce/features/location/controllers/location_controller.dart
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
+import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';

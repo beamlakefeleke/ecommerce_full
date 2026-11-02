@@ -1,5 +1,5 @@
 import 'package:get/get_connect/http/src/response/response.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository_interface.dart';
 import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
 import 'package:ecommerce/features/parcel/domain/models/video_content_model.dart';

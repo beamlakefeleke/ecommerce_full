@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
-import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
+import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/review/domain/models/review_model.dart';

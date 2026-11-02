@@ -100,7 +100,9 @@ verification, wallet.
 | auth | Core DONE — `AuthBloc` (login/register/social/guest/toggles); usecases, repo (remote+local data sources), entities built; legacy `AuthController`/`AuthService(Interface)` deleted + removed from get_di; `AuthHelper` now reads `getIt<AuthRepository>()`; `AuthBloc` provided app-wide via `MultiBlocProvider`. See transitional notes below. |
 | **banner** | Done — single `BannerBloc`; five fetch usecases; legacy deleted; provided app-wide |
 | cart | Done — single `CartBloc`; all CRUD/sync usecases; legacy `CartController`/service deleted; screens/widgets migrated; provided app-wide |
-| **category** | **NEXT** |
+| category | Done — single `CategoryBloc`; all list/subcategory/item/store/search/interest usecases; legacy deleted; screens under `presentation/pages/`; `interest_screen.dart` migrated |
+| chat | Done — single `ChatBloc`; conversation/message/search/send usecases; missing `domain/repositories/chat_repository.dart` contract added; pages + web widgets under `presentation/`; `notification_helper` + `route_helper` repointed to bloc; legacy screens/widgets deleted |
+| **checkout** | **NEXT** |
 | all others | Not migrated (still GetX); each is migrated whole, never half |
 
 Order: alphabetical, one feature at a time. Next up: `banner`, then `cart`, …

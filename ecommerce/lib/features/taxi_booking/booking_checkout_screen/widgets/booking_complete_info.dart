@@ -5,7 +5,7 @@ import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
-import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
+import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/route_helper.dart';

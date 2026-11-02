@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
-import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
+import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/common/models/response_model.dart';
 import 'package:ecommerce/features/profile/domain/models/userinfo_model.dart';
 import 'package:get/get.dart';

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/chat/controllers/chat_controller.dart';
+import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 
 class MessageBubbleShimmer extends StatelessWidget {
@@ -21,28 +22,38 @@ class MessageBubbleShimmer extends StatelessWidget {
             : MainAxisAlignment.start,
         children: [
           Flexible(
-            child: Shimmer(
-              duration: const Duration(seconds: 2),
-              enabled: Get.find<ChatController>().messageModel == null,
-              child: Container(
-                height: 30,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(Dimensions.radiusDefault),
-                    bottomLeft: isMe
-                        ? const Radius.circular(Dimensions.radiusDefault)
-                        : const Radius.circular(0),
-                    bottomRight: isMe
-                        ? const Radius.circular(0)
-                        : const Radius.circular(Dimensions.radiusDefault),
-                    topRight: const Radius.circular(Dimensions.radiusDefault),
+            child: BlocBuilder<ChatBloc, ChatState>(
+              buildWhen: (p, c) =>
+                  (p.messageModel == null) != (c.messageModel == null),
+              builder: (context, state) {
+                return Shimmer(
+                  duration: const Duration(seconds: 2),
+                  enabled: state.messageModel == null,
+                  child: Container(
+                    height: 30,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(
+                          Dimensions.radiusDefault,
+                        ),
+                        bottomLeft: isMe
+                            ? const Radius.circular(Dimensions.radiusDefault)
+                            : const Radius.circular(0),
+                        bottomRight: isMe
+                            ? const Radius.circular(0)
+                            : const Radius.circular(Dimensions.radiusDefault),
+                        topRight: const Radius.circular(
+                          Dimensions.radiusDefault,
+                        ),
+                      ),
+                      color: isMe
+                          ? Theme.of(context).hintColor
+                          : Theme.of(context).disabledColor,
+                    ),
                   ),
-                  color: isMe
-                      ? Theme.of(context).hintColor
-                      : Theme.of(context).disabledColor,
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],

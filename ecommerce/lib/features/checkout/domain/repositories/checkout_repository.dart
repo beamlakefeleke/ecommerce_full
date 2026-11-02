@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/features/payment/domain/models/offline_method_model.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository_interface.dart';
 import 'package:ecommerce/util/app_constants.dart';
 

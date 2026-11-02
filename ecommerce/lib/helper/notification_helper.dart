@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:ecommerce/features/chat/controllers/chat_controller.dart';
+import 'package:ecommerce/core/di/injection.dart' as clean_di;
+import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
@@ -84,28 +86,31 @@ class NotificationHelper {
       if (message.data['type'] == 'message' &&
           Get.currentRoute.startsWith(RouteHelper.messages)) {
         if (AuthHelper.isLoggedIn()) {
-          Get.find<ChatController>().getConversationList(1);
-          if (Get.find<ChatController>().messageModel!.conversation!.id
-                  .toString() ==
-              message.data['conversation_id'].toString()) {
-            Get.find<ChatController>().getMessages(
-              1,
-              NotificationBodyModel(
-                notificationType: NotificationType.message,
-                adminId: message.data['sender_type'] == UserType.admin.name
-                    ? 0
-                    : null,
-                restaurantId:
-                    message.data['sender_type'] == UserType.vendor.name
-                    ? 0
-                    : null,
-                deliverymanId:
-                    message.data['sender_type'] == UserType.delivery_man.name
-                    ? 0
-                    : null,
+          final chatBloc = clean_di.getIt<ChatBloc>();
+          chatBloc.add(const ConversationListRequested(offset: 1));
+          final int conversationId = int.parse(
+            message.data['conversation_id'].toString(),
+          );
+          if (chatBloc.state.messageModel?.conversation?.id == conversationId) {
+            chatBloc.add(
+              MessagesRequested(
+                offset: 1,
+                notificationBody: NotificationBodyModel(
+                  notificationType: NotificationType.message,
+                  adminId: message.data['sender_type'] == UserType.admin.name
+                      ? 0
+                      : null,
+                  restaurantId:
+                      message.data['sender_type'] == UserType.vendor.name
+                      ? 0
+                      : null,
+                  deliverymanId:
+                      message.data['sender_type'] == UserType.delivery_man.name
+                      ? 0
+                      : null,
+                ),
+                conversationId: conversationId,
               ),
-              null,
-              int.parse(message.data['conversation_id'].toString()),
             );
           } else {
             NotificationHelper.showNotification(
@@ -118,7 +123,9 @@ class NotificationHelper {
       } else if (message.data['type'] == 'message' &&
           Get.currentRoute.startsWith(RouteHelper.conversation)) {
         if (AuthHelper.isLoggedIn()) {
-          Get.find<ChatController>().getConversationList(1);
+          clean_di.getIt<ChatBloc>().add(
+            const ConversationListRequested(offset: 1),
+          );
         }
         NotificationHelper.showNotification(
           message,

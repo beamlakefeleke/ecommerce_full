@@ -5,7 +5,7 @@ import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/store/domain/models/cart_suggested_item_model.dart';
-import 'package:ecommerce/features/category/domain/models/category_model.dart';
+import 'package:ecommerce/features/category/data/models/category_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/store/domain/models/recommended_product_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_banner_model.dart';

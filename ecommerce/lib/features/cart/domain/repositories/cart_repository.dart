@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:ecommerce/core/error/failure.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/cart/data/models/online_cart_model.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 
 /// Abstract cart repository. Implemented in the data layer.
 abstract class CartRepository {

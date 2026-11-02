@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/api/api_client.dart';
-import 'package:ecommerce/features/checkout/domain/models/place_order_body_model.dart';
+import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';

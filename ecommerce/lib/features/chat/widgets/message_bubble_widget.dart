@@ -4,8 +4,7 @@ import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/common/models/config_model.dart';
-import 'package:ecommerce/features/chat/domain/models/conversation_model.dart';
-import 'package:ecommerce/features/chat/domain/models/chat_model.dart';
+import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -14,8 +13,8 @@ import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/features/chat/widgets/image_dialog_widget.dart';
 
 class MessageBubbleWidget extends StatelessWidget {
-  final Message message;
-  final User? user;
+  final ChatMessage message;
+  final ChatUser? user;
   final String userType;
   const MessageBubbleWidget({
     super.key,

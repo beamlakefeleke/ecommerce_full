@@ -30,6 +30,24 @@ import 'package:ecommerce/features/cart/domain/usecases/remove_cart_item_usecase
 import 'package:ecommerce/features/cart/domain/usecases/update_cart_quantity_usecase.dart';
 import 'package:ecommerce/features/cart/domain/usecases/update_cart_usecase.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/category/data/datasources/category_remote_data_source.dart';
+import 'package:ecommerce/features/category/data/repositories/category_repository_impl.dart';
+import 'package:ecommerce/features/category/domain/repositories/category_repository.dart';
+import 'package:ecommerce/features/category/domain/usecases/get_categories_usecase.dart';
+import 'package:ecommerce/features/category/domain/usecases/get_category_items_usecase.dart';
+import 'package:ecommerce/features/category/domain/usecases/get_category_stores_usecase.dart';
+import 'package:ecommerce/features/category/domain/usecases/get_sub_categories_usecase.dart';
+import 'package:ecommerce/features/category/domain/usecases/save_interest_usecase.dart';
+import 'package:ecommerce/features/category/domain/usecases/search_category_usecase.dart';
+import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
+import 'package:ecommerce/features/chat/data/datasources/chat_remote_data_source.dart';
+import 'package:ecommerce/features/chat/data/repositories/chat_repository_impl.dart';
+import 'package:ecommerce/features/chat/domain/repositories/chat_repository.dart';
+import 'package:ecommerce/features/chat/domain/usecases/get_conversation_list_usecase.dart';
+import 'package:ecommerce/features/chat/domain/usecases/get_messages_usecase.dart';
+import 'package:ecommerce/features/chat/domain/usecases/search_conversation_usecase.dart';
+import 'package:ecommerce/features/chat/domain/usecases/send_message_usecase.dart';
+import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:ecommerce/features/auth/data/repositories/auth_repository_impl.dart';
@@ -66,6 +84,8 @@ void configureDependencies() {
   _registerAuth();
   _registerBanner();
   _registerCart();
+  _registerCategory();
+  _registerChat();
 }
 
 void _registerCart() {
@@ -194,6 +214,58 @@ void _registerAddress() {
       addAddress: getIt(),
       updateAddress: getIt(),
       deleteAddress: getIt(),
+    ),
+  );
+}
+
+// ── Category ─────────────────────────────────────────────────────────────────
+// imports appended here — add to the top of the file when tidying imports
+
+// ── Category ──────────────────────────────────────────────────────────────────
+
+void _registerCategory() {
+  getIt.registerLazySingleton<CategoryRemoteDataSource>(
+    () => CategoryRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<CategoryRepository>(
+    () => CategoryRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetCategoriesUseCase(getIt()));
+  getIt.registerFactory(() => GetSubCategoriesUseCase(getIt()));
+  getIt.registerFactory(() => GetCategoryItemsUseCase(getIt()));
+  getIt.registerFactory(() => GetCategoryStoresUseCase(getIt()));
+  getIt.registerFactory(() => SearchCategoryUseCase(getIt()));
+  getIt.registerFactory(() => SaveInterestUseCase(getIt()));
+  getIt.registerFactory(
+    () => CategoryBloc(
+      getCategories: getIt(),
+      getSubCategories: getIt(),
+      getCategoryItems: getIt(),
+      getCategoryStores: getIt(),
+      searchCategory: getIt(),
+      saveInterest: getIt(),
+    ),
+  );
+}
+
+void _registerChat() {
+  getIt.registerLazySingleton<ChatRemoteDataSource>(
+    () => ChatRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<ChatRepository>(
+    () => ChatRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetConversationListUseCase(getIt()));
+  getIt.registerFactory(() => SearchConversationUseCase(getIt()));
+  getIt.registerFactory(() => GetMessagesUseCase(getIt()));
+  getIt.registerFactory(() => SendMessageUseCase(getIt()));
+  getIt.registerFactory(
+    () => ChatBloc(
+      getConversationList: getIt(),
+      searchConversation: getIt(),
+      getMessages: getIt(),
+      sendMessage: getIt(),
+      repository: getIt(),
     ),
   );
 }
