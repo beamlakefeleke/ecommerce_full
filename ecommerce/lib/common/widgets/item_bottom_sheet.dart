@@ -21,7 +21,7 @@ import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/discount_tag.dart';
 import 'package:ecommerce/common/widgets/quantity_button.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
-import 'package:ecommerce/features/checkout/screens/checkout_screen.dart';
+import 'package:ecommerce/features/checkout/presentation/pages/checkout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

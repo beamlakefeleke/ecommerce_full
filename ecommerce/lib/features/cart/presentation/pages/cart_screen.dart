@@ -4,7 +4,7 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/cart/presentation/widgets/not_available_bottom_sheet_widget.dart';
-import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
+import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
@@ -846,7 +846,7 @@ class _CheckoutButton extends StatelessWidget {
                         HomeScreen.loadData(true);
                       }
                     }
-                    Get.find<CouponController>().removeCouponData(false);
+                    context.read<CouponBloc>().add(const CouponDataRemoved());
                     Get.toNamed(RouteHelper.getCheckoutRoute('cart'));
                   },
                 ),

@@ -1,11 +1,6 @@
 import 'dart:convert';
-import 'package:ecommerce/features/coupon/domain/repositories/coupon_repository.dart';
-import 'package:ecommerce/features/coupon/domain/repositories/coupon_repository_interface.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
-import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
-import 'package:ecommerce/features/coupon/domain/services/coupon_service.dart';
-import 'package:ecommerce/features/coupon/domain/services/coupon_service_interface.dart';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/features/favourite/domain/repositories/favourite_repository.dart';
 import 'package:ecommerce/features/favourite/domain/repositories/favourite_repository_interface.dart';
@@ -55,11 +50,6 @@ import 'package:ecommerce/features/auth/domain/services/deliveryman_registration
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
-import 'package:ecommerce/features/checkout/controllers/checkout_controller.dart';
-import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository.dart';
-import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository_interface.dart';
-import 'package:ecommerce/features/checkout/domain/services/checkout_service.dart';
-import 'package:ecommerce/features/checkout/domain/services/checkout_service_interface.dart';
 import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
 import 'package:ecommerce/features/location/domain/repositories/location_repository_interface.dart';
 import 'package:ecommerce/features/location/domain/services/location_service.dart';
@@ -153,12 +143,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => CarSelectionRepo(apiClient: Get.find()));
 
   /// Repository interface
-  CheckoutRepositoryInterface checkoutRepositoryInterface = CheckoutRepository(
-    apiClient: Get.find(),
-    sharedPreferences: Get.find(),
-  );
-  Get.lazyPut(() => checkoutRepositoryInterface);
-
   AuthRepositoryInterface authRepositoryInterface = AuthRepository(
     apiClient: Get.find(),
     sharedPreferences: Get.find(),
@@ -199,11 +183,6 @@ Future<Map<String, Map<String, String>>> init() async {
     apiClient: Get.find(),
   );
   Get.lazyPut(() => campaignRepositoryInterface);
-
-  CouponRepositoryInterface couponRepositoryInterface = CouponRepository(
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => couponRepositoryInterface);
 
   FavouriteRepositoryInterface favouriteRepositoryInterface =
       FavouriteRepository(apiClient: Get.find());
@@ -286,11 +265,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => verificationRepositoryInterface);
 
   /// Service Interface
-  CheckoutServiceInterface checkoutServiceInterface = CheckoutService(
-    checkoutRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => checkoutServiceInterface);
-
   LocationServiceInterface locationServiceInterface = LocationService(
     locationRepoInterface: Get.find(),
   );
@@ -329,11 +303,6 @@ Future<Map<String, Map<String, String>>> init() async {
     campaignRepositoryInterface: Get.find(),
   );
   Get.lazyPut(() => campaignServiceInterface);
-
-  CouponServiceInterface couponServiceInterface = CouponService(
-    couponRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => couponServiceInterface);
 
   FavouriteServiceInterface favouriteServiceInterface = FavouriteService(
     favouriteRepositoryInterface: Get.find(),
@@ -438,7 +407,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => StoreController(storeServiceInterface: Get.find()));
   Get.lazyPut(() => FavouriteController(favouriteServiceInterface: Get.find()));
   Get.lazyPut(() => SearchController(searchServiceInterface: Get.find()));
-  Get.lazyPut(() => CouponController(couponServiceInterface: Get.find()));
   Get.lazyPut(() => OrderController(orderServiceInterface: Get.find()));
   Get.lazyPut(
     () => NotificationController(notificationServiceInterface: Get.find()),
@@ -450,7 +418,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => CarSelectionController(carSelectionRepo: Get.find()));
   Get.lazyPut(() => BookingCheckoutController(riderRepo: Get.find()));
   Get.lazyPut(() => FlashSaleController(flashSaleServiceInterface: Get.find()));
-  Get.lazyPut(() => CheckoutController(checkoutServiceInterface: Get.find()));
   Get.lazyPut(() => PaymentController(paymentServiceInterface: Get.find()));
   Get.lazyPut(() => HtmlController(htmlServiceInterface: Get.find()));
   Get.lazyPut(() => ReviewController(reviewServiceInterface: Get.find()));

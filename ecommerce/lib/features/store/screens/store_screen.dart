@@ -16,7 +16,7 @@ import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
-import 'package:ecommerce/features/checkout/screens/checkout_screen.dart';
+import 'package:ecommerce/features/checkout/presentation/pages/checkout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -18,7 +18,7 @@ import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
-import 'package:ecommerce/features/checkout/screens/checkout_screen.dart';
+import 'package:ecommerce/features/checkout/presentation/pages/checkout_screen.dart';
 import 'package:ecommerce/features/item/widgets/details_app_bar_widget.dart';
 import 'package:ecommerce/features/item/widgets/details_web_view_widget.dart';
 import 'package:ecommerce/features/item/widgets/item_image_view_widget.dart';

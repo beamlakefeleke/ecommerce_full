@@ -20,7 +20,7 @@ import 'package:ecommerce/common/widgets/custom_dialog.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
-import 'package:ecommerce/features/checkout/widgets/offline_success_dialog.dart';
+import 'package:ecommerce/features/checkout/presentation/widgets/offline_success_dialog.dart';
 import 'package:ecommerce/features/order/widgets/cancellation_dialogue_widget.dart';
 import 'package:ecommerce/features/order/widgets/order_calcuation_widget.dart';
 import 'package:ecommerce/features/order/widgets/order_info_widget.dart';

@@ -40,6 +40,17 @@ import 'package:ecommerce/features/category/domain/usecases/get_sub_categories_u
 import 'package:ecommerce/features/category/domain/usecases/save_interest_usecase.dart';
 import 'package:ecommerce/features/category/domain/usecases/search_category_usecase.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
+import 'package:ecommerce/features/checkout/data/datasources/checkout_local_data_source.dart';
+import 'package:ecommerce/features/checkout/data/datasources/checkout_remote_data_source.dart';
+import 'package:ecommerce/features/checkout/data/repositories/checkout_repository_impl.dart';
+import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository.dart';
+import 'package:ecommerce/features/checkout/domain/usecases/get_distance_usecase.dart';
+import 'package:ecommerce/features/checkout/domain/usecases/get_dm_tip_usecase.dart';
+import 'package:ecommerce/features/checkout/domain/usecases/get_extra_charge_usecase.dart';
+import 'package:ecommerce/features/checkout/domain/usecases/get_offline_methods_usecase.dart';
+import 'package:ecommerce/features/checkout/domain/usecases/place_order_usecase.dart';
+import 'package:ecommerce/features/checkout/domain/usecases/place_prescription_order_usecase.dart';
+import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/chat/data/datasources/chat_remote_data_source.dart';
 import 'package:ecommerce/features/chat/data/repositories/chat_repository_impl.dart';
 import 'package:ecommerce/features/chat/domain/repositories/chat_repository.dart';
@@ -48,6 +59,14 @@ import 'package:ecommerce/features/chat/domain/usecases/get_messages_usecase.dar
 import 'package:ecommerce/features/chat/domain/usecases/search_conversation_usecase.dart';
 import 'package:ecommerce/features/chat/domain/usecases/send_message_usecase.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:ecommerce/features/coupon/data/datasources/coupon_remote_data_source.dart';
+import 'package:ecommerce/features/coupon/data/repositories/coupon_repository_impl.dart';
+import 'package:ecommerce/features/coupon/domain/repositories/coupon_repository.dart';
+import 'package:ecommerce/features/coupon/domain/usecases/apply_coupon_usecase.dart';
+import 'package:ecommerce/features/coupon/domain/usecases/apply_taxi_coupon_usecase.dart';
+import 'package:ecommerce/features/coupon/domain/usecases/get_coupon_list_usecase.dart';
+import 'package:ecommerce/features/coupon/domain/usecases/get_taxi_coupon_list_usecase.dart';
+import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:ecommerce/features/auth/data/repositories/auth_repository_impl.dart';
@@ -86,6 +105,61 @@ void configureDependencies() {
   _registerCart();
   _registerCategory();
   _registerChat();
+  _registerCheckout();
+  _registerCoupon();
+}
+
+void _registerCoupon() {
+  getIt.registerLazySingleton<CouponRemoteDataSource>(
+    () => CouponRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<CouponRepository>(
+    () => CouponRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetCouponListUseCase(getIt()));
+  getIt.registerFactory(() => GetTaxiCouponListUseCase(getIt()));
+  getIt.registerFactory(() => ApplyCouponUseCase(getIt()));
+  getIt.registerFactory(() => ApplyTaxiCouponUseCase(getIt()));
+  getIt.registerFactory(
+    () => CouponBloc(
+      getCouponListUseCase: getIt(),
+      getTaxiCouponListUseCase: getIt(),
+      applyCouponUseCase: getIt(),
+      applyTaxiCouponUseCase: getIt(),
+    ),
+  );
+}
+
+void _registerCheckout() {
+  getIt.registerLazySingleton<CheckoutRemoteDataSource>(
+    () => CheckoutRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<CheckoutLocalDataSource>(
+    () => CheckoutLocalDataSourceImpl(sharedPreferences: getIt()),
+  );
+  getIt.registerLazySingleton<CheckoutRepository>(
+    () => CheckoutRepositoryImpl(
+      remoteDataSource: getIt(),
+      localDataSource: getIt(),
+    ),
+  );
+  getIt.registerFactory(() => GetOfflineMethodsUseCase(getIt()));
+  getIt.registerFactory(() => GetDmTipMostTappedUseCase(getIt()));
+  getIt.registerFactory(() => GetExtraChargeUseCase(getIt()));
+  getIt.registerFactory(() => GetDistanceUseCase(getIt()));
+  getIt.registerFactory(() => PlaceOrderUseCase(getIt()));
+  getIt.registerFactory(() => PlacePrescriptionOrderUseCase(getIt()));
+  getIt.registerFactory(
+    () => CheckoutBloc(
+      repository: getIt(),
+      getOfflineMethods: getIt(),
+      getDmTipMostTapped: getIt(),
+      getExtraCharge: getIt(),
+      getDistance: getIt(),
+      placeOrder: getIt(),
+      placePrescriptionOrder: getIt(),
+    ),
+  );
 }
 
 void _registerCart() {

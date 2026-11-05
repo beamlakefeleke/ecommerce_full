@@ -17,7 +17,7 @@ import 'package:ecommerce/common/widgets/confirmation_dialog.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
-import 'package:ecommerce/features/checkout/screens/checkout_screen.dart';
+import 'package:ecommerce/features/checkout/presentation/pages/checkout_screen.dart';
 import 'package:ecommerce/features/item/screens/item_details_screen.dart';
 import 'package:ecommerce/features/item/widgets/item_title_view_widget.dart';
 

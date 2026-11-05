@@ -102,10 +102,12 @@ verification, wallet.
 | cart | Done — single `CartBloc`; all CRUD/sync usecases; legacy `CartController`/service deleted; screens/widgets migrated; provided app-wide |
 | category | Done — single `CategoryBloc`; all list/subcategory/item/store/search/interest usecases; legacy deleted; screens under `presentation/pages/`; `interest_screen.dart` migrated |
 | chat | Done — single `ChatBloc`; conversation/message/search/send usecases; missing `domain/repositories/chat_repository.dart` contract added; pages + web widgets under `presentation/`; `notification_helper` + `route_helper` repointed to bloc; legacy screens/widgets deleted |
-| **checkout** | **NEXT** |
+| checkout | Done — single `CheckoutBloc` (event-driven; distance, dm-tip, extra-charge, offline-methods, place-order, prescription-order); entities/`TimeSlot`, unified `data/models/` (distance/place-order-body/timeslote); repo with distance fallback + pure time-slot generation/validation + `PlaceOrderResult`; legacy `CheckoutController`/service/interface/repository deleted + removed from get_di; all widgets + `checkout_screen` migrated; shared `TextEditingController`/`FocusNode`s moved into screen State and passed to child widgets; provided app-wide. Pending package-level `DottedBorder` API errors in `top_section.dart` are pre-existing and ignored. Cross-feature: `ParcelService` (get_di) and `store/widgets/camera_button_sheet_widget.dart` still reference deleted checkout APIs — fixed on parcel/store turns. |
+| coupon | Done — single `CouponBloc` (app-wide; coupon list, taxi coupon list, apply/apply-taxi with full min-purchase + percent/max-discount + free-delivery logic ported into the bloc, remove-coupon, current-index); pure `Coupon` entity + unified mutable `data/models/coupon_model.dart` (keeps UI-only `JustTheController toolTip`) with `toEntity/fromEntity`; four usecases; repo returns `Either<Failure, …>`; legacy `CouponController`/service(+interface)/repository-interface/old-model/old screen+card-widget deleted + removed from get_di; pages/widgets under `presentation/`; checkout `coupon_section`/`coupon_bottom_sheet`/`bottom_section`/`checkout_screen` + `cart_screen` migrated to `CouponBloc`; snackbar/balance side-effects moved to a `BlocConsumer` listener. Cross-feature: taxi_booking (`taxi_coupon_screen`, `booking_details_info`), `store_controller`, home (`home_screen`, `web_coupon_banner_view_widget`, `promo_code_banner_view`) still reference the deleted `CouponController` — fixed on their turns. |
+| **dashboard** | **NEXT** |
 | all others | Not migrated (still GetX); each is migrated whole, never half |
 
-Order: alphabetical, one feature at a time. Next up: `banner`, then `cart`, …
+Order: alphabetical, one feature at a time. Next up: `dashboard`, then `favourite`, …
 
 ### auth — transitional notes (resolve on the relevant feature's turn)
 - The legacy `auth/domain/reposotories/auth_repository(_interface).dart` and the old
