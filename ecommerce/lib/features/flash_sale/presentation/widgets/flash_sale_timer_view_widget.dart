@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/util/dimensions.dart';
-import 'package:ecommerce/features/flash_sale/widgets/timer_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/timer_widget.dart';
 
 class FlashSaleTimerView extends StatelessWidget {
   final Duration? eventDuration;

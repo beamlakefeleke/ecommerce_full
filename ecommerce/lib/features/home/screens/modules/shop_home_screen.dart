@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/util/images.dart';
-import 'package:ecommerce/features/flash_sale/widgets/flash_sale_view_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/flash_sale_view_widget.dart';
 import 'package:ecommerce/features/home/widgets/bad_weather_widget.dart';
 import 'package:ecommerce/features/home/widgets/views/product_with_categories_view.dart';
 import 'package:ecommerce/features/home/widgets/views/featured_categories_view.dart';

@@ -1,9 +1,10 @@
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/item_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 class FavItemViewWidget extends StatelessWidget {
@@ -18,11 +19,11 @@ class FavItemViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GetBuilder<FavouriteController>(
-        builder: (favouriteController) {
+      body: BlocBuilder<FavouriteBloc, FavouriteState>(
+        builder: (context, favouriteController) {
           return RefreshIndicator(
             onRefresh: () async {
-              await favouriteController.getFavouriteList();
+              context.read<FavouriteBloc>().add(const FavouriteListRequested());
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),

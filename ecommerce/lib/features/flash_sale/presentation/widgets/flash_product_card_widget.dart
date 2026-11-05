@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/flash_sale/domain/models/product_flash_sale.dart';
+import 'package:ecommerce/features/flash_sale/data/models/product_flash_sale.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';

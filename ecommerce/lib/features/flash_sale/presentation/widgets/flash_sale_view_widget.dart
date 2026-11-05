@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/flash_sale/controllers/flash_sale_controller.dart';
+import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
@@ -12,8 +13,8 @@ import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
-import 'package:ecommerce/features/flash_sale/widgets/timer_widget.dart';
-import 'package:ecommerce/features/flash_sale/widgets/flash_sale_timer_view_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/timer_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/flash_sale_timer_view_widget.dart';
 
 class FlashSaleViewWidget extends StatefulWidget {
   const FlashSaleViewWidget({super.key});
@@ -25,8 +26,8 @@ class FlashSaleViewWidget extends StatefulWidget {
 class _FlashSaleViewWidgetState extends State<FlashSaleViewWidget> {
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<FlashSaleController>(
-      builder: (flashSaleController) {
+    return BlocBuilder<FlashSaleBloc, FlashSaleState>(
+      builder: (context, flashSaleController) {
         Item? item;
         int stock = 0;
         int remaining = 0;
@@ -47,7 +48,7 @@ class _FlashSaleViewWidgetState extends State<FlashSaleViewWidget> {
         }
         return flashSaleController.flashSaleModel != null
             ? flashSaleController.flashSaleModel!.activeProducts != null &&
-                      flashSaleController.duration!.inSeconds > 1
+                      (flashSaleController.duration?.inSeconds ?? 0) > 1
                   ? Container(
                       width: Get.width,
                       margin: const EdgeInsets.all(

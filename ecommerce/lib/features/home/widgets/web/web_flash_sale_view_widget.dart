@@ -9,7 +9,7 @@ import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
-import 'package:ecommerce/features/flash_sale/widgets/flash_sale_timer_view_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/flash_sale_timer_view_widget.dart';
 
 class WebFlashSaleViewWidget extends StatefulWidget {
   const WebFlashSaleViewWidget({super.key});

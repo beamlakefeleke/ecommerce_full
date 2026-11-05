@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ecommerce/features/flash_sale/widgets/flash_sale_view_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/flash_sale_view_widget.dart';
 import 'package:ecommerce/features/home/widgets/bad_weather_widget.dart';
 import 'package:ecommerce/features/home/widgets/views/banner_view.dart';
 import 'package:ecommerce/features/home/widgets/views/best_reviewed_item_view.dart';

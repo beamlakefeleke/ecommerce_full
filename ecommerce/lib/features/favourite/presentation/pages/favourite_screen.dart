@@ -1,13 +1,14 @@
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/not_logged_in_screen.dart';
-import 'package:ecommerce/features/favourite/widgets/fav_item_view_widget.dart';
+import 'package:ecommerce/features/favourite/presentation/widgets/fav_item_view_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 class FavouriteScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class FavouriteScreenState extends State<FavouriteScreen>
 
   void initCall() {
     if (AuthHelper.isLoggedIn()) {
-      Get.find<FavouriteController>().getFavouriteList();
+      context.read<FavouriteBloc>().add(const FavouriteListRequested());
     }
   }
 

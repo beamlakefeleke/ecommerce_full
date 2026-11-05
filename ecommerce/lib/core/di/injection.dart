@@ -67,6 +67,19 @@ import 'package:ecommerce/features/coupon/domain/usecases/apply_taxi_coupon_usec
 import 'package:ecommerce/features/coupon/domain/usecases/get_coupon_list_usecase.dart';
 import 'package:ecommerce/features/coupon/domain/usecases/get_taxi_coupon_list_usecase.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
+import 'package:ecommerce/features/favourite/data/datasources/favourite_remote_data_source.dart';
+import 'package:ecommerce/features/favourite/data/repositories/favourite_repository_impl.dart';
+import 'package:ecommerce/features/favourite/domain/repositories/favourite_repository.dart';
+import 'package:ecommerce/features/favourite/domain/usecases/add_favourite_usecase.dart';
+import 'package:ecommerce/features/favourite/domain/usecases/get_favourite_list_usecase.dart';
+import 'package:ecommerce/features/favourite/domain/usecases/remove_favourite_usecase.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
+import 'package:ecommerce/features/flash_sale/data/datasources/flash_sale_remote_data_source.dart';
+import 'package:ecommerce/features/flash_sale/data/repositories/flash_sale_repository_impl.dart';
+import 'package:ecommerce/features/flash_sale/domain/repositories/flash_sale_repository.dart';
+import 'package:ecommerce/features/flash_sale/domain/usecases/get_flash_sale_usecase.dart';
+import 'package:ecommerce/features/flash_sale/domain/usecases/get_flash_sale_with_id_usecase.dart';
+import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:ecommerce/features/auth/data/repositories/auth_repository_impl.dart';
@@ -107,6 +120,46 @@ void configureDependencies() {
   _registerChat();
   _registerCheckout();
   _registerCoupon();
+  _registerFavourite();
+  _registerFlashSale();
+}
+
+void _registerFlashSale() {
+  getIt.registerLazySingleton<FlashSaleRemoteDataSource>(
+    () => FlashSaleRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<FlashSaleRepository>(
+    () => FlashSaleRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetFlashSaleUseCase(getIt()));
+  getIt.registerFactory(() => GetFlashSaleWithIdUseCase(getIt()));
+  // app-wide: flash-sale countdown + list are read on home and details screens.
+  getIt.registerLazySingleton(
+    () => FlashSaleBloc(
+      getFlashSaleUseCase: getIt(),
+      getFlashSaleWithIdUseCase: getIt(),
+    ),
+  );
+}
+
+void _registerFavourite() {
+  getIt.registerLazySingleton<FavouriteRemoteDataSource>(
+    () => FavouriteRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<FavouriteRepository>(
+    () => FavouriteRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetFavouriteListUseCase(getIt()));
+  getIt.registerFactory(() => AddFavouriteUseCase(getIt()));
+  getIt.registerFactory(() => RemoveFavouriteUseCase(getIt()));
+  // app-wide: wish state is read across item/store/menu/profile screens.
+  getIt.registerLazySingleton(
+    () => FavouriteBloc(
+      getFavouriteListUseCase: getIt(),
+      addFavouriteUseCase: getIt(),
+      removeFavouriteUseCase: getIt(),
+    ),
+  );
 }
 
 void _registerCoupon() {

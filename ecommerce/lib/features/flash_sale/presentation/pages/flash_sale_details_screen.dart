@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/flash_sale/controllers/flash_sale_controller.dart';
+import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/paginated_list_view.dart';
-import 'package:ecommerce/features/flash_sale/widgets/flash_product_card_widget.dart';
-import 'package:ecommerce/features/flash_sale/widgets/flash_sale_timer_view_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/flash_product_card_widget.dart';
+import 'package:ecommerce/features/flash_sale/presentation/widgets/flash_sale_timer_view_widget.dart';
 
 class FlashSaleDetailsScreen extends StatefulWidget {
   final int id;
@@ -26,7 +27,9 @@ class _FlashSaleDetailsScreenState extends State<FlashSaleDetailsScreen> {
   void initState() {
     super.initState();
 
-    Get.find<FlashSaleController>().getFlashSaleWithId(1, false, widget.id);
+    context.read<FlashSaleBloc>().add(
+      FlashSaleWithIdRequested(offset: 1, reload: false, id: widget.id),
+    );
   }
 
   @override
@@ -40,8 +43,8 @@ class _FlashSaleDetailsScreenState extends State<FlashSaleDetailsScreen> {
     return Scaffold(
       appBar: CustomAppBar(title: 'flash_sale'.tr),
       body: Center(
-        child: GetBuilder<FlashSaleController>(
-          builder: (flashSaleController) {
+        child: BlocBuilder<FlashSaleBloc, FlashSaleState>(
+          builder: (context, flashSaleController) {
             return Column(
               children: [
                 SizedBox(
@@ -116,10 +119,12 @@ class _FlashSaleDetailsScreenState extends State<FlashSaleDetailsScreen> {
                               flashSaleController.productFlashSale?.totalSize,
                           offset: flashSaleController.productFlashSale?.offset,
                           onPaginate: (int? offset) async =>
-                              await flashSaleController.getFlashSaleWithId(
-                                offset!,
-                                false,
-                                widget.id,
+                              context.read<FlashSaleBloc>().add(
+                                FlashSaleWithIdRequested(
+                                  offset: offset!,
+                                  reload: false,
+                                  id: widget.id,
+                                ),
                               ),
                           itemView: flashSaleController.productFlashSale != null
                               ? GridView.builder(

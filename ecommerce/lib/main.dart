@@ -10,7 +10,6 @@ import 'package:meta_seo/meta_seo.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -36,6 +35,8 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
+import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'helper/get_di.dart' as di;
@@ -150,7 +151,9 @@ class _MyAppState extends State<MyApp> {
             if (authRepository.isLoggedIn()) {
               authRepository.updateToken();
               if (Get.find<SplashController>().module != null) {
-                await Get.find<FavouriteController>().getFavouriteList();
+                clean_di.getIt<FavouriteBloc>().add(
+                  const FavouriteListRequested(),
+                );
               }
             }
           }
@@ -193,6 +196,12 @@ class _MyAppState extends State<MyApp> {
                           ),
                           BlocProvider<CouponBloc>(
                             create: (_) => clean_di.getIt<CouponBloc>(),
+                          ),
+                          BlocProvider<FavouriteBloc>(
+                            create: (_) => clean_di.getIt<FavouriteBloc>(),
+                          ),
+                          BlocProvider<FlashSaleBloc>(
+                            create: (_) => clean_di.getIt<FlashSaleBloc>(),
                           ),
                         ],
                         child: GetMaterialApp(
