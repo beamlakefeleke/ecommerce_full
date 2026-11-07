@@ -37,6 +37,8 @@ import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'helper/get_di.dart' as di;
@@ -202,6 +204,12 @@ class _MyAppState extends State<MyApp> {
                           ),
                           BlocProvider<FlashSaleBloc>(
                             create: (_) => clean_di.getIt<FlashSaleBloc>(),
+                          ),
+                          BlocProvider<ItemBloc>(
+                            create: (_) => clean_di.getIt<ItemBloc>(),
+                          ),
+                          BlocProvider<CampaignBloc>(
+                            create: (_) => clean_di.getIt<CampaignBloc>(),
                           ),
                         ],
                         child: GetMaterialApp(

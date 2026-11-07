@@ -76,6 +76,58 @@ class CartState extends Equatable {
     );
   }
 
+  // ── Read-only lookups (ported from the legacy CartController) ─────────────
+
+  int? getCartId(int index) {
+    if (index < 0 || index >= cartList.length) return null;
+    return cartList[index].id;
+  }
+
+  int cartQuantity(int itemId) {
+    int quantity = 0;
+    for (var cart in cartList) {
+      if (cart.item!.id == itemId) {
+        quantity = quantity + cart.quantity!;
+      }
+    }
+    return quantity;
+  }
+
+  String cartVariant(int itemId) {
+    String variant = '';
+    for (var cart in cartList) {
+      if (cart.item!.id == itemId) {
+        variant = (cart.variation != null && cart.variation!.isNotEmpty)
+            ? (cart.variation![0].type ?? '')
+            : '';
+        break;
+      }
+    }
+    return variant;
+  }
+
+  int isExistInCart(
+    int? itemId,
+    String variationType,
+    bool isUpdate,
+    int? cartIndex,
+  ) {
+    for (int index = 0; index < cartList.length; index++) {
+      final cart = cartList[index];
+      if (cart.item!.id == itemId &&
+          ((cart.variation != null && cart.variation!.isNotEmpty)
+                  ? cart.variation![0].type
+                  : '') ==
+              variationType) {
+        if (isUpdate && index == cartIndex) {
+          return -1;
+        }
+        return index;
+      }
+    }
+    return -1;
+  }
+
   @override
   List<Object?> get props => [
     status,

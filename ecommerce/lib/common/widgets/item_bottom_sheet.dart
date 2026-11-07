@@ -1,9 +1,14 @@
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
+import 'package:ecommerce/features/cart/domain/entities/cart_item.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -65,7 +70,9 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
             .getModuleConfig(widget.item!.moduleType)
             .newVariation ??
         false;
-    Get.find<ItemController>().initData(widget.item, widget.cart);
+    context.read<ItemBloc>().add(
+      ItemDataInitialized(widget.item!, cart: widget.cart),
+    );
   }
 
   @override
@@ -81,8 +88,8 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                 top: Radius.circular(Dimensions.radiusExtraLarge),
               ),
       ),
-      child: GetBuilder<ItemController>(
-        builder: (itemController) {
+      child: BlocBuilder<ItemBloc, ItemState>(
+        builder: (context, itemController) {
           double? startingPrice;
           double? endingPrice;
           if (widget.item!.choiceOptions!.isNotEmpty &&
@@ -311,10 +318,11 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                   Get.back();
                                                 } else {
                                                   Get.back();
-                                                  Get.find<CartController>()
-                                                      .forcefullySetModule(
-                                                        widget.item!.moduleId!,
-                                                      );
+                                                  context.read<CartBloc>().add(
+                                                    CartModuleForcefullySet(
+                                                      widget.item!.moduleId!,
+                                                    ),
+                                                  );
                                                   Get.toNamed(
                                                     RouteHelper.getStoreRoute(
                                                       id: widget.item!.storeId,
@@ -397,8 +405,11 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                         children: [
                                           widget.isCampaign
                                               ? const SizedBox(height: 25)
-                                              : GetBuilder<FavouriteController>(
-                                                  builder: (wishList) {
+                                              : BlocBuilder<
+                                                  FavouriteBloc,
+                                                  FavouriteState
+                                                >(
+                                                  builder: (context, wishList) {
                                                     return InkWell(
                                                       onTap: () {
                                                         if (AuthHelper.isLoggedIn()) {
@@ -408,23 +419,30 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                                         .item!
                                                                         .id,
                                                                   )
-                                                              ? wishList
-                                                                    .removeFromFavouriteList(
-                                                                      widget
-                                                                          .item!
-                                                                          .id,
-                                                                      false,
-                                                                      getXSnackBar:
-                                                                          true,
+                                                              ? context
+                                                                    .read<
+                                                                      FavouriteBloc
+                                                                    >()
+                                                                    .add(
+                                                                      FavouriteRemoved(
+                                                                        id: widget
+                                                                            .item!
+                                                                            .id,
+                                                                        isStore:
+                                                                            false,
+                                                                      ),
                                                                     )
-                                                              : wishList
-                                                                    .addToFavouriteList(
-                                                                      widget
-                                                                          .item,
-                                                                      null,
-                                                                      false,
-                                                                      getXSnackBar:
-                                                                          true,
+                                                              : context
+                                                                    .read<
+                                                                      FavouriteBloc
+                                                                    >()
+                                                                    .add(
+                                                                      FavouriteAdded(
+                                                                        product:
+                                                                            widget.item,
+                                                                        isStore:
+                                                                            false,
+                                                                      ),
                                                                     );
                                                         } else {
                                                           showCustomSnackBar(
@@ -823,11 +841,15 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                             onTap: () {
                                               if (itemController.quantity! >
                                                   1) {
-                                                itemController.setQuantity(
-                                                  false,
-                                                  stock,
-                                                  widget.item!.quantityLimit,
-                                                  getxSnackBar: true,
+                                                context.read<ItemBloc>().add(
+                                                  ItemQuantityChanged(
+                                                    isIncrement: false,
+                                                    stock: stock,
+                                                    quantityLimit: widget
+                                                        .item!
+                                                        .quantityLimit,
+                                                    getxSnackBar: true,
+                                                  ),
                                                 );
                                               }
                                             },
@@ -843,11 +865,15 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                           ),
                                           QuantityButton(
                                             onTap: () =>
-                                                itemController.setQuantity(
-                                                  true,
-                                                  stock,
-                                                  widget.item!.quantityLimit,
-                                                  getxSnackBar: true,
+                                                context.read<ItemBloc>().add(
+                                                  ItemQuantityChanged(
+                                                    isIncrement: true,
+                                                    stock: stock,
+                                                    quantityLimit: widget
+                                                        .item!
+                                                        .quantityLimit,
+                                                    getxSnackBar: true,
+                                                  ),
                                                 ),
                                             isIncrement: true,
                                             fromSheet: true,
@@ -859,8 +885,8 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                       ),
 
                                       Expanded(
-                                        child: GetBuilder<CartController>(
-                                          builder: (cartController) {
+                                        child: BlocBuilder<CartBloc, CartState>(
+                                          builder: (context, cartController) {
                                             return CustomButton(
                                               width:
                                                   ResponsiveHelper.isDesktop(
@@ -944,12 +970,11 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                                       .item!
                                                                       .foodVariations![index]
                                                                       .min! >
-                                                                  itemController
-                                                                      .selectedVariationLength(
-                                                                        itemController
-                                                                            .selectedVariations,
-                                                                        index,
-                                                                      )) {
+                                                                  ItemHelper.selectedVariationLength(
+                                                                    itemController
+                                                                        .selectedVariations,
+                                                                    index,
+                                                                  )) {
                                                             invalid =
                                                                 '${'select_minimum'.tr} ${widget.item!.foodVariations![index].min} '
                                                                 '${'and_up_to'.tr} ${widget.item!.foodVariations![index].max} ${'options_from'.tr}'
@@ -1100,29 +1125,26 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                                 ),
                                                           );
                                                         } else {
-                                                          if (Get.find<
-                                                                CartController
-                                                              >()
-                                                              .existAnotherStoreItem(
-                                                                cartModel
-                                                                    .item!
-                                                                    .storeId,
-                                                                Get.find<
-                                                                              SplashController
-                                                                            >()
-                                                                            .module !=
-                                                                        null
-                                                                    ? Get.find<
-                                                                            SplashController
-                                                                          >()
-                                                                          .module!
-                                                                          .id
-                                                                    : Get.find<
-                                                                            SplashController
-                                                                          >()
-                                                                          .cacheModule!
-                                                                          .id,
-                                                              )) {
+                                                          if (ItemHelper.existAnotherStoreItem(
+                                                            cartModel
+                                                                .item!
+                                                                .storeId,
+                                                            Get.find<
+                                                                          SplashController
+                                                                        >()
+                                                                        .module !=
+                                                                    null
+                                                                ? Get.find<
+                                                                        SplashController
+                                                                      >()
+                                                                      .module!
+                                                                      .id
+                                                                : Get.find<
+                                                                        SplashController
+                                                                      >()
+                                                                      .cacheModule!
+                                                                      .id,
+                                                          )) {
                                                             Get.dialog(
                                                               ConfirmationDialog(
                                                                 icon: Images
@@ -1144,24 +1166,24 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                                           .tr,
                                                                 onYesPressed: () {
                                                                   Get.back();
-                                                                  Get.find<
-                                                                        CartController
+                                                                  context
+                                                                      .read<
+                                                                        CartBloc
                                                                       >()
-                                                                      .clearCartOnline()
-                                                                      .then((
-                                                                        success,
-                                                                      ) async {
-                                                                        if (success) {
-                                                                          await Get.find<
-                                                                                CartController
-                                                                              >()
-                                                                              .addToCartOnline(
-                                                                                onlineCart,
-                                                                              );
-                                                                          Get.back();
-                                                                          showCartSnackBar();
-                                                                        }
-                                                                      });
+                                                                      .add(
+                                                                        const CartCleared(),
+                                                                      );
+                                                                  context
+                                                                      .read<
+                                                                        CartBloc
+                                                                      >()
+                                                                      .add(
+                                                                        CartOnlineSynced(
+                                                                          onlineCart,
+                                                                        ),
+                                                                      );
+                                                                  Get.back();
+                                                                  showCartSnackBar();
                                                                 },
                                                               ),
                                                               barrierDismissible:
@@ -1173,33 +1195,27 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                                 itemController
                                                                         .cartIndex !=
                                                                     -1) {
-                                                              await Get.find<
-                                                                    CartController
+                                                              context
+                                                                  .read<
+                                                                    CartBloc
                                                                   >()
-                                                                  .updateCartOnline(
-                                                                    onlineCart,
-                                                                  )
-                                                                  .then((
-                                                                    success,
-                                                                  ) {
-                                                                    if (success) {
-                                                                      Get.back();
-                                                                    }
-                                                                  });
+                                                                  .add(
+                                                                    CartOnlineUpdated(
+                                                                      onlineCart,
+                                                                    ),
+                                                                  );
+                                                              Get.back();
                                                             } else {
-                                                              await Get.find<
-                                                                    CartController
+                                                              context
+                                                                  .read<
+                                                                    CartBloc
                                                                   >()
-                                                                  .addToCartOnline(
-                                                                    onlineCart,
-                                                                  )
-                                                                  .then((
-                                                                    success,
-                                                                  ) {
-                                                                    if (success) {
-                                                                      Get.back();
-                                                                    }
-                                                                  });
+                                                                  .add(
+                                                                    CartOnlineSynced(
+                                                                      onlineCart,
+                                                                    ),
+                                                                  );
+                                                              Get.back();
                                                             }
 
                                                             showCartSnackBar();
@@ -1300,7 +1316,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
 
 class AddonView extends StatelessWidget {
   final Item item;
-  final ItemController itemController;
+  final ItemState itemController;
   const AddonView({
     super.key,
     required this.item,
@@ -1344,9 +1360,13 @@ class AddonView extends StatelessWidget {
             return InkWell(
               onTap: () {
                 if (!itemController.addOnActiveList[index]) {
-                  itemController.addAddOn(true, index);
+                  context.read<ItemBloc>().add(
+                    AddOnToggled(isAdd: true, index: index),
+                  );
                 } else if (itemController.addOnQtyList[index] == 1) {
-                  itemController.addAddOn(false, index);
+                  context.read<ItemBloc>().add(
+                    AddOnToggled(isAdd: false, index: index),
+                  );
                 }
               },
               child: Padding(
@@ -1368,10 +1388,14 @@ class AddonView extends StatelessWidget {
                           ),
                           onChanged: (bool? newValue) {
                             if (!itemController.addOnActiveList[index]) {
-                              itemController.addAddOn(true, index);
+                              context.read<ItemBloc>().add(
+                                AddOnToggled(isAdd: true, index: index),
+                              );
                             } else if (itemController.addOnQtyList[index] ==
                                 1) {
-                              itemController.addAddOn(false, index);
+                              context.read<ItemBloc>().add(
+                                AddOnToggled(isAdd: false, index: index),
+                              );
                             }
                           },
                           visualDensity: const VisualDensity(
@@ -1436,12 +1460,19 @@ class AddonView extends StatelessWidget {
                                     onTap: () {
                                       if (itemController.addOnQtyList[index]! >
                                           1) {
-                                        itemController.setAddOnQuantity(
-                                          false,
-                                          index,
+                                        context.read<ItemBloc>().add(
+                                          AddOnQuantityChanged(
+                                            isIncrement: false,
+                                            index: index,
+                                          ),
                                         );
                                       } else {
-                                        itemController.addAddOn(false, index);
+                                        context.read<ItemBloc>().add(
+                                          AddOnToggled(
+                                            isAdd: false,
+                                            index: index,
+                                          ),
+                                        );
                                       }
                                     },
                                     child: Center(
@@ -1471,8 +1502,12 @@ class AddonView extends StatelessWidget {
                                 ),
                                 Expanded(
                                   child: InkWell(
-                                    onTap: () => itemController
-                                        .setAddOnQuantity(true, index),
+                                    onTap: () => context.read<ItemBloc>().add(
+                                      AddOnQuantityChanged(
+                                        isIncrement: true,
+                                        index: index,
+                                      ),
+                                    ),
                                     child: Center(
                                       child: Icon(
                                         Icons.add,
@@ -1500,7 +1535,7 @@ class AddonView extends StatelessWidget {
 
 class VariationView extends StatelessWidget {
   final Item? item;
-  final ItemController itemController;
+  final ItemState itemController;
   const VariationView({
     super.key,
     required this.item,
@@ -1542,7 +1577,9 @@ class VariationView extends StatelessWidget {
                     ),
                     child: InkWell(
                       onTap: () {
-                        itemController.setCartVariationIndex(index, i, item);
+                        context.read<ItemBloc>().add(
+                          CartVariationIndexSet(index, i, item),
+                        );
                       },
                       child: Row(
                         children: [
@@ -1558,8 +1595,9 @@ class VariationView extends StatelessWidget {
                           Radio<int>(
                             value: i,
                             groupValue: itemController.variationIndex![index],
-                            onChanged: (int? value) => itemController
-                                .setCartVariationIndex(index, i, item),
+                            onChanged: (int? value) => context
+                                .read<ItemBloc>()
+                                .add(CartVariationIndexSet(index, i, item)),
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                             activeColor: Theme.of(context).primaryColor,
@@ -1585,7 +1623,7 @@ class VariationView extends StatelessWidget {
 
 class NewVariationView extends StatelessWidget {
   final Item? item;
-  final ItemController itemController;
+  final ItemState itemController;
   final double? discount;
   final String? discountType;
   final bool showOriginalPrice;
@@ -1755,8 +1793,9 @@ class NewVariationView extends StatelessWidget {
                               Dimensions.paddingSizeExtraSmall,
                             ),
                             child: InkWell(
-                              onTap: () =>
-                                  itemController.showMoreSpecificSection(index),
+                              onTap: () => context.read<ItemBloc>().add(
+                                VariationSectionToggled(index),
+                              ),
                               child: Row(
                                 children: [
                                   Icon(
@@ -1787,10 +1826,8 @@ class NewVariationView extends StatelessWidget {
                             ),
                             child: InkWell(
                               onTap: () {
-                                itemController.setNewCartVariationIndex(
-                                  index,
-                                  i,
-                                  item!,
+                                context.read<ItemBloc>().add(
+                                  NewCartVariationIndexSet(index, i, item!),
                                 );
                               },
                               child: Row(
@@ -1813,12 +1850,13 @@ class NewVariationView extends StatelessWidget {
                                                     ),
                                               ),
                                               onChanged: (bool? newValue) {
-                                                itemController
-                                                    .setNewCartVariationIndex(
-                                                      index,
-                                                      i,
-                                                      item!,
-                                                    );
+                                                context.read<ItemBloc>().add(
+                                                  NewCartVariationIndexSet(
+                                                    index,
+                                                    i,
+                                                    item!,
+                                                  ),
+                                                );
                                               },
                                               visualDensity:
                                                   const VisualDensity(
@@ -1838,12 +1876,13 @@ class NewVariationView extends StatelessWidget {
                                                   .selectedVariations[index]
                                                   .indexOf(true),
                                               onChanged: (dynamic value) {
-                                                itemController
-                                                    .setNewCartVariationIndex(
-                                                      index,
-                                                      i,
-                                                      item!,
-                                                    );
+                                                context.read<ItemBloc>().add(
+                                                  NewCartVariationIndexSet(
+                                                    index,
+                                                    i,
+                                                    item!,
+                                                  ),
+                                                );
                                               },
                                               activeColor: Theme.of(
                                                 context,

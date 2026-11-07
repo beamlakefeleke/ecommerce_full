@@ -80,6 +80,21 @@ import 'package:ecommerce/features/flash_sale/domain/repositories/flash_sale_rep
 import 'package:ecommerce/features/flash_sale/domain/usecases/get_flash_sale_usecase.dart';
 import 'package:ecommerce/features/flash_sale/domain/usecases/get_flash_sale_with_id_usecase.dart';
 import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
+import 'package:ecommerce/features/html/data/datasources/html_remote_data_source.dart';
+import 'package:ecommerce/features/html/data/repositories/html_repository_impl.dart';
+import 'package:ecommerce/features/html/domain/repositories/html_repository.dart';
+import 'package:ecommerce/features/html/domain/usecases/get_html_text_usecase.dart';
+import 'package:ecommerce/features/html/presentation/bloc/html_bloc.dart';
+import 'package:ecommerce/features/item/data/datasources/campaign_remote_data_source.dart';
+import 'package:ecommerce/features/item/data/datasources/item_remote_data_source.dart';
+import 'package:ecommerce/features/item/data/repositories/campaign_repository_impl.dart';
+import 'package:ecommerce/features/item/data/repositories/item_repository_impl.dart';
+import 'package:ecommerce/features/item/domain/repositories/campaign_repository.dart';
+import 'package:ecommerce/features/item/domain/repositories/item_repository.dart';
+import 'package:ecommerce/features/item/domain/usecases/campaign_usecases.dart';
+import 'package:ecommerce/features/item/domain/usecases/item_usecases.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:ecommerce/features/auth/data/repositories/auth_repository_impl.dart';
@@ -122,6 +137,74 @@ void configureDependencies() {
   _registerCoupon();
   _registerFavourite();
   _registerFlashSale();
+  _registerHtml();
+  _registerItem();
+}
+
+void _registerItem() {
+  // data
+  getIt.registerLazySingleton<ItemRemoteDataSource>(
+    () => ItemRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<CampaignRemoteDataSource>(
+    () => CampaignRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<ItemRepository>(
+    () => ItemRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerLazySingleton<CampaignRepository>(
+    () => CampaignRepositoryImpl(remoteDataSource: getIt()),
+  );
+
+  // item usecases
+  getIt.registerFactory(() => GetPopularItemsUseCase(getIt()));
+  getIt.registerFactory(() => GetReviewedItemsUseCase(getIt()));
+  getIt.registerFactory(() => GetFeaturedCategoriesItemsUseCase(getIt()));
+  getIt.registerFactory(() => GetRecommendedItemsUseCase(getIt()));
+  getIt.registerFactory(() => GetDiscountedItemsUseCase(getIt()));
+  getIt.registerFactory(() => GetItemDetailsUseCase(getIt()));
+  getIt.registerFactory(() => GetBasicMedicineUseCase(getIt()));
+  getIt.registerFactory(() => GetCommonConditionsUseCase(getIt()));
+  getIt.registerFactory(() => GetConditionsWiseItemsUseCase(getIt()));
+
+  // campaign usecases
+  getIt.registerFactory(() => GetBasicCampaignListUseCase(getIt()));
+  getIt.registerFactory(() => GetCampaignDetailsUseCase(getIt()));
+  getIt.registerFactory(() => GetItemCampaignListUseCase(getIt()));
+
+  // app-wide blocs (list caches + item selection state shared across screens)
+  getIt.registerLazySingleton(
+    () => ItemBloc(
+      getPopularItems: getIt(),
+      getReviewedItems: getIt(),
+      getFeaturedCategoriesItems: getIt(),
+      getRecommendedItems: getIt(),
+      getDiscountedItems: getIt(),
+      getItemDetails: getIt(),
+      getBasicMedicine: getIt(),
+      getCommonConditions: getIt(),
+      getConditionsWiseItems: getIt(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => CampaignBloc(
+      getBasicCampaignListUseCase: getIt(),
+      getCampaignDetailsUseCase: getIt(),
+      getItemCampaignListUseCase: getIt(),
+    ),
+  );
+}
+
+void _registerHtml() {
+  getIt.registerLazySingleton<HtmlRemoteDataSource>(
+    () => HtmlRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<HtmlRepository>(
+    () => HtmlRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetHtmlTextUseCase(getIt()));
+  // screen-scoped: a fresh bloc per html viewer screen.
+  getIt.registerFactory(() => HtmlBloc(getHtmlTextUseCase: getIt()));
 }
 
 void _registerFlashSale() {

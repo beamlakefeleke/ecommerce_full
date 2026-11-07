@@ -45,13 +45,13 @@ import 'package:ecommerce/features/coupon/presentation/pages/coupon_screen.dart'
 import 'package:ecommerce/features/dashboard/screens/dashboard_screen.dart';
 import 'package:ecommerce/features/favourite/presentation/pages/favourite_screen.dart';
 import 'package:ecommerce/features/flash_sale/presentation/pages/flash_sale_details_screen.dart';
-import 'package:ecommerce/features/item/screens/item_campaign_screen.dart';
-import 'package:ecommerce/features/item/screens/item_details_screen.dart';
-import 'package:ecommerce/features/item/screens/popular_item_screen.dart';
+import 'package:ecommerce/features/item/presentation/pages/item_campaign_screen.dart';
+import 'package:ecommerce/features/item/presentation/pages/item_details_screen.dart';
+import 'package:ecommerce/features/item/presentation/pages/popular_item_screen.dart';
 import 'package:ecommerce/features/verification/screens/forget_pass_screen.dart';
 import 'package:ecommerce/features/verification/screens/new_pass_screen.dart';
 import 'package:ecommerce/features/verification/screens/verification_screen.dart';
-import 'package:ecommerce/features/html/screens/html_viewer_screen.dart';
+import 'package:ecommerce/features/html/presentation/pages/html_viewer_screen.dart';
 import 'package:ecommerce/features/interest/screens/interest_screen.dart';
 import 'package:ecommerce/features/language/screens/language_screen.dart';
 import 'package:ecommerce/features/location/screens/access_location_screen.dart';
