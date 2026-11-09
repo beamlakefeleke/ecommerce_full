@@ -1,11 +1,6 @@
 import 'dart:convert';
 import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/language/domain/repository/language_repository.dart';
-import 'package:ecommerce/features/language/domain/repository/language_repository_interface.dart';
-import 'package:ecommerce/features/language/domain/service/language_service.dart';
-import 'package:ecommerce/features/language/domain/service/language_service_interface.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
@@ -95,7 +90,7 @@ import 'package:ecommerce/features/wallet/domain/repositories/wallet_repository_
 import 'package:ecommerce/features/wallet/domain/services/wallet_service.dart';
 import 'package:ecommerce/features/wallet/domain/services/wallet_service_interface.dart';
 import 'package:ecommerce/util/app_constants.dart';
-import 'package:ecommerce/features/language/domain/models/language_model.dart';
+import 'package:ecommerce/features/language/data/models/language_model.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
@@ -153,12 +148,6 @@ Future<Map<String, Map<String, String>>> init() async {
     sharedPreferences: Get.find(),
   );
   Get.lazyPut(() => paymentRepositoryInterface);
-
-  LanguageRepositoryInterface languageRepositoryInterface = LanguageRepository(
-    apiClient: Get.find(),
-    sharedPreferences: Get.find(),
-  );
-  Get.lazyPut(() => languageRepositoryInterface);
 
   NotificationRepositoryInterface notificationRepositoryInterface =
       NotificationRepository(
@@ -251,11 +240,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => paymentServiceInterface);
 
-  LanguageServiceInterface languageServiceInterface = LanguageService(
-    languageRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => languageServiceInterface);
-
   NotificationServiceInterface notificationServiceInterface =
       NotificationService(notificationRepositoryInterface: Get.find());
   Get.lazyPut(() => notificationServiceInterface);
@@ -313,9 +297,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(
     () =>
         LocationController(locationServiceInterface: locationServiceInterface),
-  );
-  Get.lazyPut(
-    () => LocalizationController(languageServiceInterface: Get.find()),
   );
   Get.lazyPut(() => OnBoardingController(onboardServiceInterface: Get.find()));
   Get.lazyPut(

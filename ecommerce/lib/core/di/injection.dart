@@ -95,6 +95,13 @@ import 'package:ecommerce/features/item/domain/usecases/campaign_usecases.dart';
 import 'package:ecommerce/features/item/domain/usecases/item_usecases.dart';
 import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
+import 'package:ecommerce/features/language/data/datasources/language_local_data_source.dart';
+import 'package:ecommerce/features/language/data/repositories/language_repository_impl.dart';
+import 'package:ecommerce/features/language/domain/repositories/language_repository.dart';
+import 'package:ecommerce/features/language/domain/usecases/save_language_usecase.dart';
+import 'package:ecommerce/features/language/domain/usecases/update_language_header_usecase.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_event.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:ecommerce/features/auth/data/repositories/auth_repository_impl.dart';
@@ -139,6 +146,31 @@ void configureDependencies() {
   _registerFlashSale();
   _registerHtml();
   _registerItem();
+  _registerLanguage();
+}
+
+void _registerLanguage() {
+  getIt.registerLazySingleton<LanguageLocalDataSource>(
+    () => LanguageLocalDataSourceImpl(
+      sharedPreferences: getIt(),
+      apiClient: getIt(),
+    ),
+  );
+  getIt.registerLazySingleton<LanguageRepository>(
+    () => LanguageRepositoryImpl(localDataSource: getIt()),
+  );
+  getIt.registerFactory(() => SaveLanguageUseCase(getIt()));
+  getIt.registerFactory(() => UpdateLanguageHeaderUseCase(getIt()));
+  // app-wide: the active locale + text direction drive GetMaterialApp and are
+  // read across many screens.
+  getIt.registerLazySingleton(
+    () => LanguageBloc(
+      repository: getIt(),
+      saveLanguage: getIt(),
+      updateHeader: getIt(),
+      currentModuleId: () => getx.Get.find<SplashController>().module?.id,
+    )..add(const LanguageInitialized()),
+  );
 }
 
 void _registerItem() {

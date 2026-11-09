@@ -1,4 +1,7 @@
-import 'package:ecommerce/features/language/widgets/web_language_widget.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_event.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_state.dart';
+import 'package:ecommerce/features/language/presentation/widgets/web_language_widget.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -6,9 +9,9 @@ import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/web_page_title_widget.dart';
-import 'package:ecommerce/features/language/widgets/language_widget.dart';
+import 'package:ecommerce/features/language/presentation/widgets/language_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
@@ -26,17 +29,24 @@ class ChooseLanguageScreen extends StatefulWidget {
 
 class _ChooseLanguageScreenState extends State<ChooseLanguageScreen> {
   @override
+  void initState() {
+    super.initState();
+    // Refresh the selectable list + highlighted index for the current locale.
+    context.read<LanguageBloc>().add(const LanguageInitialized());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: (widget.fromMenu || ResponsiveHelper.isDesktop(context))
           ? CustomAppBar(title: 'language'.tr, backButton: true)
           : null,
       endDrawer: const MenuDrawer(),
       endDrawerEnableOpenDragGesture: false,
       body: SafeArea(
-        child: GetBuilder<LocalizationController>(
-          builder: (localizationController) {
+        child: BlocBuilder<LanguageBloc, LanguageState>(
+          builder: (context, state) {
             return Column(
               children: [
                 WebScreenTitleWidget(title: 'language'.tr),
@@ -64,12 +74,7 @@ class _ChooseLanguageScreenState extends State<ChooseLanguageScreen> {
                                         ),
                                       )
                                     : const SizedBox.shrink(),
-                                SizedBox(
-                                  height:
-                                      Get.find<LocalizationController>().isLtr
-                                      ? 30
-                                      : 25,
-                                ),
+                                SizedBox(height: state.isLtr ? 30 : 25),
 
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -108,8 +113,7 @@ class _ChooseLanguageScreenState extends State<ChooseLanguageScreen> {
                                           crossAxisSpacing:
                                               Dimensions.paddingSizeDefault,
                                         ),
-                                    itemCount:
-                                        localizationController.languages.length,
+                                    itemCount: state.languages.length,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
                                     shrinkWrap: true,
@@ -120,19 +124,17 @@ class _ChooseLanguageScreenState extends State<ChooseLanguageScreen> {
                                         ResponsiveHelper.isDesktop(context)
                                         ? WebLanguageWidget(
                                             languageModel:
-                                                localizationController
-                                                    .languages[index],
-                                            localizationController:
-                                                localizationController,
+                                                state.languages[index],
                                             index: index,
+                                            isSelected:
+                                                state.selectedIndex == index,
                                           )
                                         : LanguageWidget(
                                             languageModel:
-                                                localizationController
-                                                    .languages[index],
-                                            localizationController:
-                                                localizationController,
+                                                state.languages[index],
                                             index: index,
+                                            isSelected:
+                                                state.selectedIndex == index,
                                           ),
                                   ),
                                 ),
@@ -165,7 +167,7 @@ class _ChooseLanguageScreenState extends State<ChooseLanguageScreen> {
                 ResponsiveHelper.isDesktop(context)
                     ? const SizedBox.shrink()
                     : LanguageSaveButton(
-                        localizationController: localizationController,
+                        state: state,
                         fromMenu: widget.fromMenu,
                       ),
               ],
@@ -178,13 +180,9 @@ class _ChooseLanguageScreenState extends State<ChooseLanguageScreen> {
 }
 
 class LanguageSaveButton extends StatelessWidget {
-  final LocalizationController localizationController;
+  final LanguageState state;
   final bool? fromMenu;
-  const LanguageSaveButton({
-    super.key,
-    required this.localizationController,
-    this.fromMenu,
-  });
+  const LanguageSaveButton({super.key, required this.state, this.fromMenu});
 
   @override
   Widget build(BuildContext context) {
@@ -195,16 +193,13 @@ class LanguageSaveButton extends StatelessWidget {
           buttonText: 'save'.tr,
           margin: const EdgeInsets.all(Dimensions.paddingSizeSmall),
           onPressed: () {
-            if (localizationController.languages.isNotEmpty &&
-                localizationController.selectedIndex != -1) {
-              localizationController.setLanguage(
-                Locale(
-                  AppConstants
-                      .languages[localizationController.selectedIndex]
-                      .languageCode!,
-                  AppConstants
-                      .languages[localizationController.selectedIndex]
-                      .countryCode,
+            if (state.languages.isNotEmpty && state.selectedIndex != -1) {
+              context.read<LanguageBloc>().add(
+                LanguageChanged(
+                  Locale(
+                    AppConstants.languages[state.selectedIndex].languageCode!,
+                    AppConstants.languages[state.selectedIndex].countryCode,
+                  ),
                 ),
               );
               if (fromMenu!) {

@@ -53,7 +53,7 @@ import 'package:ecommerce/features/verification/screens/new_pass_screen.dart';
 import 'package:ecommerce/features/verification/screens/verification_screen.dart';
 import 'package:ecommerce/features/html/presentation/pages/html_viewer_screen.dart';
 import 'package:ecommerce/features/interest/screens/interest_screen.dart';
-import 'package:ecommerce/features/language/screens/language_screen.dart';
+import 'package:ecommerce/features/language/presentation/pages/language_screen.dart';
 import 'package:ecommerce/features/location/screens/access_location_screen.dart';
 import 'package:ecommerce/features/location/screens/pick_map_screen.dart';
 import 'package:ecommerce/features/notification/screens/notification_screen.dart';

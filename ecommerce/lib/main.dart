@@ -7,7 +7,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:meta_seo/meta_seo.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/helper/address_helper.dart';
@@ -40,6 +39,9 @@ import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.
 import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_state.dart';
+import 'package:ecommerce/features/home/screens/home_screen.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'helper/get_di.dart' as di;
 
@@ -166,121 +168,140 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return GetBuilder<ThemeController>(
       builder: (themeController) {
-        return GetBuilder<LocalizationController>(
-          builder: (localizeController) {
-            return GetBuilder<SplashController>(
-              builder: (splashController) {
-                return (GetPlatform.isWeb &&
-                        splashController.configModel == null)
-                    ? const SizedBox()
-                    : MultiBlocProvider(
-                        providers: [
-                          BlocProvider<AddressBloc>(
-                            create: (_) => clean_di.getIt<AddressBloc>(),
-                          ),
-                          BlocProvider<AuthBloc>(
-                            create: (_) => clean_di.getIt<AuthBloc>(),
-                          ),
-                          BlocProvider<BannerBloc>(
-                            create: (_) => clean_di.getIt<BannerBloc>(),
-                          ),
-                          BlocProvider<CartBloc>(
-                            create: (_) => clean_di.getIt<CartBloc>(),
-                          ),
-                          BlocProvider<CategoryBloc>(
-                            create: (_) => clean_di.getIt<CategoryBloc>(),
-                          ),
-                          BlocProvider<ChatBloc>(
-                            create: (_) => clean_di.getIt<ChatBloc>(),
-                          ),
-                          BlocProvider<CheckoutBloc>(
-                            create: (_) => clean_di.getIt<CheckoutBloc>(),
-                          ),
-                          BlocProvider<CouponBloc>(
-                            create: (_) => clean_di.getIt<CouponBloc>(),
-                          ),
-                          BlocProvider<FavouriteBloc>(
-                            create: (_) => clean_di.getIt<FavouriteBloc>(),
-                          ),
-                          BlocProvider<FlashSaleBloc>(
-                            create: (_) => clean_di.getIt<FlashSaleBloc>(),
-                          ),
-                          BlocProvider<ItemBloc>(
-                            create: (_) => clean_di.getIt<ItemBloc>(),
-                          ),
-                          BlocProvider<CampaignBloc>(
-                            create: (_) => clean_di.getIt<CampaignBloc>(),
-                          ),
-                        ],
-                        child: GetMaterialApp(
-                          title: AppConstants.appName,
-                          debugShowCheckedModeBanner: false,
-                          navigatorKey: Get.key,
-                          scrollBehavior: const MaterialScrollBehavior()
-                              .copyWith(
-                                dragDevices: {
-                                  PointerDeviceKind.mouse,
-                                  PointerDeviceKind.touch,
-                                },
-                              ),
-                          theme: themeController.darkTheme ? dark() : light(),
-                          locale: localizeController.locale,
-                          translations: Messages(languages: widget.languages),
-                          fallbackLocale: Locale(
-                            AppConstants.languages[0].languageCode!,
-                            AppConstants.languages[0].countryCode,
-                          ),
-                          initialRoute: GetPlatform.isWeb
-                              ? RouteHelper.getInitialRoute()
-                              : RouteHelper.getSignInRoute(RouteHelper.splash),
-                          getPages: RouteHelper.routes,
-                          defaultTransition: Transition.topLevel,
-                          transitionDuration: const Duration(milliseconds: 500),
-                          builder: (BuildContext context, widget) {
-                            return MediaQuery(
-                              data: MediaQuery.of(context).copyWith(
-                                textScaler: const TextScaler.linear(1),
-                              ),
-                              child: Material(
-                                child: Stack(
-                                  children: [
-                                    widget!,
-                                    GetBuilder<SplashController>(
-                                      builder: (splashController) {
-                                        if (!splashController
-                                                .savedCookiesData &&
-                                            !splashController
-                                                .getAcceptCookiesStatus(
-                                                  splashController
-                                                              .configModel !=
-                                                          null
-                                                      ? splashController
-                                                            .configModel!
-                                                            .cookiesText!
-                                                      : '',
-                                                )) {
-                                          return ResponsiveHelper.isWeb()
-                                              ? const Align(
-                                                  alignment:
-                                                      Alignment.bottomCenter,
-                                                  child: CookiesView(),
-                                                )
-                                              : const SizedBox();
-                                        } else {
-                                          return const SizedBox();
-                                        }
-                                      },
-                                    ),
-                                  ],
+        return BlocProvider<LanguageBloc>(
+          create: (_) => clean_di.getIt<LanguageBloc>(),
+          child: BlocConsumer<LanguageBloc, LanguageState>(
+            listenWhen: (prev, curr) =>
+                curr.changeStatus == LanguageChangeStatus.applied,
+            listener: (context, languageState) {
+              // One-shot side effects of applying a language (kept out of the
+              // bloc): sync the GetX locale and reload zone/landing data.
+              Get.updateLocale(languageState.locale);
+              if (AddressHelper.getUserAddressFromSharedPref() != null) {
+                HomeScreen.loadData(true);
+              } else {
+                Get.find<SplashController>().getLandingPageData();
+              }
+            },
+            builder: (context, languageState) {
+              return GetBuilder<SplashController>(
+                builder: (splashController) {
+                  return (GetPlatform.isWeb &&
+                          splashController.configModel == null)
+                      ? const SizedBox()
+                      : MultiBlocProvider(
+                          providers: [
+                            BlocProvider<AddressBloc>(
+                              create: (_) => clean_di.getIt<AddressBloc>(),
+                            ),
+                            BlocProvider<AuthBloc>(
+                              create: (_) => clean_di.getIt<AuthBloc>(),
+                            ),
+                            BlocProvider<BannerBloc>(
+                              create: (_) => clean_di.getIt<BannerBloc>(),
+                            ),
+                            BlocProvider<CartBloc>(
+                              create: (_) => clean_di.getIt<CartBloc>(),
+                            ),
+                            BlocProvider<CategoryBloc>(
+                              create: (_) => clean_di.getIt<CategoryBloc>(),
+                            ),
+                            BlocProvider<ChatBloc>(
+                              create: (_) => clean_di.getIt<ChatBloc>(),
+                            ),
+                            BlocProvider<CheckoutBloc>(
+                              create: (_) => clean_di.getIt<CheckoutBloc>(),
+                            ),
+                            BlocProvider<CouponBloc>(
+                              create: (_) => clean_di.getIt<CouponBloc>(),
+                            ),
+                            BlocProvider<FavouriteBloc>(
+                              create: (_) => clean_di.getIt<FavouriteBloc>(),
+                            ),
+                            BlocProvider<FlashSaleBloc>(
+                              create: (_) => clean_di.getIt<FlashSaleBloc>(),
+                            ),
+                            BlocProvider<ItemBloc>(
+                              create: (_) => clean_di.getIt<ItemBloc>(),
+                            ),
+                            BlocProvider<CampaignBloc>(
+                              create: (_) => clean_di.getIt<CampaignBloc>(),
+                            ),
+                          ],
+                          child: GetMaterialApp(
+                            title: AppConstants.appName,
+                            debugShowCheckedModeBanner: false,
+                            navigatorKey: Get.key,
+                            scrollBehavior: const MaterialScrollBehavior()
+                                .copyWith(
+                                  dragDevices: {
+                                    PointerDeviceKind.mouse,
+                                    PointerDeviceKind.touch,
+                                  },
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-              },
-            );
-          },
+                            theme: themeController.darkTheme ? dark() : light(),
+                            locale: languageState.locale,
+                            translations: Messages(languages: widget.languages),
+                            fallbackLocale: Locale(
+                              AppConstants.languages[0].languageCode!,
+                              AppConstants.languages[0].countryCode,
+                            ),
+                            initialRoute: GetPlatform.isWeb
+                                ? RouteHelper.getInitialRoute()
+                                : RouteHelper.getSignInRoute(
+                                    RouteHelper.splash,
+                                  ),
+                            getPages: RouteHelper.routes,
+                            defaultTransition: Transition.topLevel,
+                            transitionDuration: const Duration(
+                              milliseconds: 500,
+                            ),
+                            builder: (BuildContext context, widget) {
+                              return MediaQuery(
+                                data: MediaQuery.of(context).copyWith(
+                                  textScaler: const TextScaler.linear(1),
+                                ),
+                                child: Material(
+                                  child: Stack(
+                                    children: [
+                                      widget!,
+                                      GetBuilder<SplashController>(
+                                        builder: (splashController) {
+                                          if (!splashController
+                                                  .savedCookiesData &&
+                                              !splashController
+                                                  .getAcceptCookiesStatus(
+                                                    splashController
+                                                                .configModel !=
+                                                            null
+                                                        ? splashController
+                                                              .configModel!
+                                                              .cookiesText!
+                                                        : '',
+                                                  )) {
+                                            return ResponsiveHelper.isWeb()
+                                                ? const Align(
+                                                    alignment:
+                                                        Alignment.bottomCenter,
+                                                    child: CookiesView(),
+                                                  )
+                                                : const SizedBox();
+                                          } else {
+                                            return const SizedBox();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                },
+              );
+            },
+          ),
         );
       },
     );

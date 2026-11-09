@@ -1,63 +1,55 @@
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/language/domain/models/language_model.dart';
+import 'package:ecommerce/features/language/domain/entities/language.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_event.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class WebLanguageWidget extends StatelessWidget {
-  final LanguageModel languageModel;
-  final LocalizationController localizationController;
+class LanguageWidget extends StatelessWidget {
+  final Language languageModel;
   final int index;
-  const WebLanguageWidget({
+  final bool isSelected;
+  const LanguageWidget({
     super.key,
     required this.languageModel,
-    required this.localizationController,
     required this.index,
+    required this.isSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        localizationController.setLanguage(
-          Locale(
-            AppConstants.languages[index].languageCode!,
-            AppConstants.languages[index].countryCode,
+        context.read<LanguageBloc>().add(
+          LanguageChanged(
+            Locale(
+              AppConstants.languages[index].languageCode!,
+              AppConstants.languages[index].countryCode,
+            ),
           ),
         );
-        localizationController.setSelectIndex(index);
+        context.read<LanguageBloc>().add(LanguageIndexSelected(index));
       },
       child: Container(
         padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-        margin: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey[Get.isDarkMode ? 800 : 200]!,
-              blurRadius: 5,
-              spreadRadius: 1,
-            ),
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1),
           ],
-          border: Border.all(
-            color: localizationController.selectedIndex == index
-                ? Theme.of(context).primaryColor
-                : Colors.transparent,
-          ),
         ),
         child: Stack(
           children: [
             Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    height: 59,
-                    width: 59,
+                    height: 65,
+                    width: 65,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(
                         Dimensions.radiusSmall,
@@ -70,23 +62,24 @@ class WebLanguageWidget extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Image.asset(
                       languageModel.imageUrl!,
-                      width: 26,
-                      height: 26,
+                      width: 36,
+                      height: 36,
                       color:
                           languageModel.languageCode == 'en' ||
                               languageModel.languageCode == 'ar' ||
-                              languageModel.languageCode == 'es'
+                              languageModel.languageCode == 'es' ||
+                              languageModel.languageCode == 'bn'
                           ? Theme.of(context).textTheme.bodyLarge!.color
                           : null,
                     ),
                   ),
-                  const SizedBox(width: Dimensions.paddingSizeLarge),
+                  const SizedBox(height: Dimensions.paddingSizeLarge),
                   Text(languageModel.languageName!, style: robotoRegular),
                 ],
               ),
             ),
 
-            localizationController.selectedIndex == index
+            isSelected
                 ? Positioned(
                     top: 0,
                     right: 0,

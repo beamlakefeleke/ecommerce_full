@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:ecommerce/common/models/choose_us_model.dart';
-import 'package:ecommerce/features/language/domain/models/language_model.dart';
+import 'package:ecommerce/features/language/data/models/language_model.dart';
 import 'package:ecommerce/util/images.dart';
 
 class AppConstants {
