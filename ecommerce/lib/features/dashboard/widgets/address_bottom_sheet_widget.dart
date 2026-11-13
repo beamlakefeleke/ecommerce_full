@@ -14,7 +14,7 @@ import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_loader.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
-import 'package:ecommerce/features/location/screens/pick_map_screen.dart';
+import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
 
 class AddressBottomSheetWidget extends StatelessWidget {
   final bool fromDialog;

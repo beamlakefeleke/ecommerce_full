@@ -6,7 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
 import 'package:ecommerce/features/auth/widgets/module_view_widget.dart';
-import 'package:ecommerce/features/location/widgets/location_search_dialog_widget.dart';
+import 'package:ecommerce/features/location/presentation/widgets/location_search_dialog_widget.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';

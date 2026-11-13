@@ -1,22 +1,20 @@
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/location/domain/services/location_service_interface.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/location/domain/entities/zone_response.dart';
+import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_data_model.dart';
-import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
 import 'package:ecommerce/features/auth/domain/models/store_body_model.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
 
 class StoreRegistrationController extends GetxController
     implements GetxService {
   final StoreRegistrationServiceInterface storeRegistrationServiceInterface;
-  final LocationServiceInterface locationServiceInterface;
 
   StoreRegistrationController({
-    required this.locationServiceInterface,
     required this.storeRegistrationServiceInterface,
   });
 
@@ -201,17 +199,25 @@ class StoreRegistrationController extends GetxController
   }
 
   void setLocation(LatLng location) async {
-    // ZoneResponseModel response = await Get.find<LocationController>().getZone(
-    //   location.latitude.toString(), location.longitude.toString(), false, handleError: true,
-    // );
-    ZoneResponseModel response = await locationServiceInterface.getZone(
+    final zoneEither = await getIt<LocationRepository>().getZone(
       location.latitude.toString(),
       location.longitude.toString(),
       handleError: true,
     );
-    _storeAddress = await Get.find<LocationController>().getAddressFromGeocode(
+    final ZoneResult response = zoneEither.fold(
+      (_) => const ZoneResult(
+        isSuccess: false,
+        message: null,
+        zoneIds: [],
+        zoneData: [],
+        areaIds: [],
+      ),
+      (z) => z,
+    );
+    final geoEither = await getIt<LocationRepository>().getAddressFromGeocode(
       LatLng(location.latitude, location.longitude),
     );
+    _storeAddress = geoEither.fold((_) => 'Unknown Location Found', (a) => a);
     if (response.isSuccess && response.zoneIds.isNotEmpty) {
       _restaurantLocation = location;
       _zoneIds = response.zoneIds;

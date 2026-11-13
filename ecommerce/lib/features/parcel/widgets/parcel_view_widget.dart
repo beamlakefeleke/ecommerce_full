@@ -17,7 +17,7 @@ import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_dropdown.dart';
 import 'package:ecommerce/common/widgets/custom_text_field.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
-import 'package:ecommerce/features/location/screens/pick_map_screen.dart';
+import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
 
 class ParcelViewWidget extends StatefulWidget {
   final bool isSender;

@@ -4,15 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
+import 'package:ecommerce/features/location/domain/entities/zone_response.dart';
+import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/location/domain/models/prediction_model.dart';
-import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
-import 'package:ecommerce/features/location/widgets/web_landing_page_shimmer_widget.dart';
+import 'package:ecommerce/features/location/presentation/widgets/web_landing_page_shimmer_widget.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -25,9 +29,9 @@ import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/custom_loader.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
-import 'package:ecommerce/features/location/screens/pick_map_screen.dart';
-import 'package:ecommerce/features/location/widgets/landing_card_widget.dart';
-import 'package:ecommerce/features/location/widgets/registration_card_widget.dart';
+import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
+import 'package:ecommerce/features/location/presentation/widgets/landing_card_widget.dart';
+import 'package:ecommerce/features/location/presentation/widgets/registration_card_widget.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:intl/intl.dart' as intl;
@@ -300,13 +304,21 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                         barrierDismissible:
                                                             false,
                                                       );
-                                                      _address =
-                                                          await Get.find<
-                                                                LocationController
-                                                              >()
-                                                              .getCurrentLocation(
-                                                                true,
-                                                              );
+                                                      final locationBloc =
+                                                          getIt<LocationBloc>();
+                                                      locationBloc.add(
+                                                        const CurrentLocationRequested(
+                                                          fromAddress: true,
+                                                        ),
+                                                      );
+                                                      await locationBloc.stream
+                                                          .firstWhere(
+                                                            (s) => !s.loading,
+                                                          );
+                                                      _address = locationBloc
+                                                          .buildAddressModel(
+                                                            fromAddress: true,
+                                                          );
                                                       _controller.text =
                                                           _address!.address ??
                                                           '';
@@ -334,13 +346,23 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                               ),
                                               suggestionsCallback:
                                                   (pattern) async {
-                                                    return await Get.find<
-                                                          LocationController
-                                                        >()
-                                                        .searchLocation(
-                                                          context,
-                                                          pattern,
-                                                        );
+                                                    if (pattern.isEmpty) {
+                                                      return <
+                                                        PredictionModel
+                                                      >[];
+                                                    }
+                                                    final result =
+                                                        await getIt<
+                                                              LocationRepository
+                                                            >()
+                                                            .searchLocation(
+                                                              pattern,
+                                                            );
+                                                    return result.fold(
+                                                      (_) =>
+                                                          <PredictionModel>[],
+                                                      (list) => list,
+                                                    );
                                                   },
                                               itemBuilder:
                                                   (
@@ -393,17 +415,24 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                         suggestion
                                                             .description ??
                                                         '';
-                                                    _address =
-                                                        await Get.find<
-                                                              LocationController
-                                                            >()
-                                                            .setLocation(
-                                                              suggestion
-                                                                  .placeId,
-                                                              suggestion
-                                                                  .description,
-                                                              null,
-                                                            );
+                                                    final locationBloc =
+                                                        getIt<LocationBloc>();
+                                                    locationBloc.add(
+                                                      PredictionSelected(
+                                                        placeId:
+                                                            suggestion.placeId,
+                                                        address: suggestion
+                                                            .description,
+                                                      ),
+                                                    );
+                                                    await locationBloc.stream
+                                                        .firstWhere(
+                                                          (s) => !s.loading,
+                                                        );
+                                                    _address = locationBloc
+                                                        .buildAddressModel(
+                                                          fromAddress: false,
+                                                        );
                                                   },
                                             ),
                                           ),
@@ -426,46 +455,37 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                   const CustomLoader(),
                                                   barrierDismissible: false,
                                                 );
-                                                ZoneResponseModel response =
-                                                    await Get.find<
-                                                          LocationController
+                                                final zoneEither =
+                                                    await getIt<
+                                                          LocationRepository
                                                         >()
                                                         .getZone(
                                                           _address!.latitude,
                                                           _address!.longitude,
-                                                          false,
                                                         );
+                                                final ZoneResult response =
+                                                    zoneEither.fold(
+                                                      (_) => const ZoneResult(
+                                                        isSuccess: false,
+                                                        message: null,
+                                                        zoneIds: [],
+                                                        zoneData: [],
+                                                        areaIds: [],
+                                                      ),
+                                                      (z) => z,
+                                                    );
                                                 if (response.isSuccess) {
                                                   if (!AuthHelper.isGuestLoggedIn() &&
                                                       !AuthHelper.isLoggedIn()) {
-                                                    Get.find<AuthController>().guestLogin().then((
-                                                      response,
+                                                    getIt<AuthRepository>().guestLogin().then((
+                                                      result,
                                                     ) {
-                                                      if (response.isSuccess) {
+                                                      result.fold((_) {}, (_) {
                                                         Get.find<
                                                               ProfileController
                                                             >()
                                                             .setForceFullyUserEmpty();
-                                                        Get.find<
-                                                              LocationController
-                                                            >()
-                                                            .saveAddressAndNavigate(
-                                                              _address,
-                                                              widget.fromSignUp,
-                                                              widget.route,
-                                                              widget.route !=
-                                                                  null,
-                                                              ResponsiveHelper.isDesktop(
-                                                                Get.context,
-                                                              ),
-                                                            );
-                                                      }
-                                                    });
-                                                  } else {
-                                                    Get.find<
-                                                          LocationController
-                                                        >()
-                                                        .saveAddressAndNavigate(
+                                                        LocationHelper.saveAddressAndNavigate(
                                                           _address,
                                                           widget.fromSignUp,
                                                           widget.route,
@@ -474,6 +494,18 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                             Get.context,
                                                           ),
                                                         );
+                                                      });
+                                                    });
+                                                  } else {
+                                                    LocationHelper.saveAddressAndNavigate(
+                                                      _address,
+                                                      widget.fromSignUp,
+                                                      widget.route,
+                                                      widget.route != null,
+                                                      ResponsiveHelper.isDesktop(
+                                                        Get.context,
+                                                      ),
+                                                    );
                                                   }
                                                 } else {
                                                   Get.back();
@@ -662,38 +694,15 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                             padding:
                                                                 EdgeInsets.zero,
                                                             child: Html(
-                                                              data:
-                                                                  splashController
-                                                                      .moduleList![index]
-                                                                      .description ??
-                                                                  '',
-                                                              shrinkWrap: true,
-                                                              onLinkTap:
-                                                                  (
-                                                                    url,
-                                                                    context,
-                                                                    attributes,
-                                                                    element,
-                                                                  ) {
-                                                                    if (url!
-                                                                        .startsWith(
-                                                                          'www.',
-                                                                        )) {
-                                                                      url =
-                                                                          'https://$url';
-                                                                    }
-                                                                    if (kDebugMode) {
-                                                                      print(
-                                                                        'Redirect to url: $url',
-                                                                      );
-                                                                    }
-                                                                    html.window
-                                                                        .open(
-                                                                          url,
-                                                                          "_blank",
-                                                                        );
-                                                                  },
-                                                            ),
+                                                                data: splashController.moduleList![index].description ?? '',
+                                                                shrinkWrap: true,
+                                                                onLinkTap: (url, attributes, element) {
+                                                                  if (url == null || url.isEmpty) return;
+                                                                  final link = url.startsWith('www.') ? 'https://$url' : url;
+                                                                  if (kDebugMode) print('Redirect to url: $link');
+                                                                  html.window.open(link, '_blank');
+                                                                },
+                                                              )
                                                           ),
                                                         ),
                                                       ],

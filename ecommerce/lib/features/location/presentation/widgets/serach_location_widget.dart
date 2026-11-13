@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:ecommerce/features/location/widgets/location_search_dialog_widget.dart';
+import 'package:ecommerce/features/location/presentation/widgets/location_search_dialog_widget.dart';
 import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';

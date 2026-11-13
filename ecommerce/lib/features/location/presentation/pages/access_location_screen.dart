@@ -1,11 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/common/widgets/address_widget.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
+import 'package:ecommerce/features/address/domain/entities/address.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -22,8 +29,8 @@ import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/no_data_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/location/screens/pick_map_screen.dart';
-import 'package:ecommerce/features/location/screens/web_landing_page.dart';
+import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
+import 'package:ecommerce/features/location/presentation/pages/web_landing_page.dart';
 
 class AccessLocationScreen extends StatefulWidget {
   final bool fromSignUp;
@@ -47,7 +54,7 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
   void initState() {
     super.initState();
     if (AuthHelper.isLoggedIn()) {
-      Get.find<AddressController>().getAddressList();
+      context.read<AddressBloc>().add(const AddressListRequested());
     }
   }
 
@@ -96,9 +103,13 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
             padding: ResponsiveHelper.isDesktop(context)
                 ? EdgeInsets.zero
                 : const EdgeInsets.all(Dimensions.paddingSizeSmall),
-            child: GetBuilder<AddressController>(
-              builder: (locationController) {
+            child: BlocBuilder<AddressBloc, AddressState>(
+              builder: (context, addressState) {
                 bool isLoggedIn = AuthHelper.isLoggedIn();
+                final List<Address> addressList = addressState.addresses;
+                final bool addressLoaded =
+                    addressState.status == AddressStatus.loaded ||
+                    addressState.status == AddressStatus.error;
                 return (ResponsiveHelper.isDesktop(context) &&
                         AddressHelper.getUserAddressFromSharedPref() == null)
                     ? WebLandingPage(
@@ -115,25 +126,23 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    locationController.addressList != null
-                                        ? locationController
-                                                  .addressList!
-                                                  .isNotEmpty
+                                    addressLoaded
+                                        ? addressList.isNotEmpty
                                               ? ListView.builder(
                                                   physics:
                                                       const NeverScrollableScrollPhysics(),
                                                   shrinkWrap: true,
-                                                  itemCount: locationController
-                                                      .addressList!
-                                                      .length,
+                                                  itemCount: addressList.length,
                                                   itemBuilder: (context, index) {
+                                                    final AddressModel address =
+                                                        AddressModel.fromEntity(
+                                                          addressList[index],
+                                                        );
                                                     return Center(
                                                       child: SizedBox(
                                                         width: 700,
                                                         child: AddressWidget(
-                                                          address:
-                                                              locationController
-                                                                  .addressList![index],
+                                                          address: address,
                                                           fromAddress: false,
                                                           onTap: () {
                                                             Get.dialog(
@@ -141,24 +150,16 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
                                                               barrierDismissible:
                                                                   false,
                                                             );
-                                                            AddressModel
-                                                            address =
-                                                                locationController
-                                                                    .addressList![index];
-                                                            Get.find<
-                                                                  LocationController
-                                                                >()
-                                                                .saveAddressAndNavigate(
-                                                                  address,
-                                                                  widget
-                                                                      .fromSignUp,
-                                                                  widget.route,
-                                                                  widget.route !=
-                                                                      null,
-                                                                  ResponsiveHelper.isDesktop(
-                                                                    context,
-                                                                  ),
-                                                                );
+                                                            LocationHelper.saveAddressAndNavigate(
+                                                              address,
+                                                              widget.fromSignUp,
+                                                              widget.route,
+                                                              widget.route !=
+                                                                  null,
+                                                              ResponsiveHelper.isDesktop(
+                                                                context,
+                                                              ),
+                                                            );
                                                           },
                                                         ),
                                                       ),
@@ -279,19 +280,23 @@ class BottomButton extends StatelessWidget {
             CustomButton(
               buttonText: 'user_current_location'.tr,
               onPressed: () async {
-                Get.find<LocationController>().checkPermission(() async {
+                LocationHelper.checkPermission(() async {
                   Get.dialog(const CustomLoader(), barrierDismissible: false);
-                  AddressModel address = await Get.find<LocationController>()
-                      .getCurrentLocation(true);
-                  ZoneResponseModel response =
-                      await Get.find<LocationController>().getZone(
-                        address.latitude,
-                        address.longitude,
-                        false,
-                      );
+                  final locationBloc = getIt<LocationBloc>();
+                  locationBloc.add(
+                    const CurrentLocationRequested(fromAddress: true),
+                  );
+                  // Wait for the resolve + geocode + zone lookup to finish.
+                  await locationBloc.stream.firstWhere((s) => !s.loading);
+                  final LocationState state = locationBloc.state;
+                  final AddressModel address = locationBloc.buildAddressModel(
+                    fromAddress: true,
+                  );
+                  final bool isSuccess =
+                      state.lastZoneResult?.isSuccess ?? false;
 
-                  if (response.isSuccess) {
-                    Get.find<LocationController>().saveAddressAndNavigate(
+                  if (isSuccess) {
+                    LocationHelper.saveAddressAndNavigate(
                       address,
                       fromSignUp,
                       route,
@@ -303,7 +308,7 @@ class BottomButton extends StatelessWidget {
                     if (ResponsiveHelper.isDesktop(Get.context)) {
                       showGeneralDialog(
                         context: Get.context!,
-                        pageBuilder: (_, __, ___) {
+                        pageBuilder: (_, _, _) {
                           return SizedBox(
                             height: 300,
                             width: 300,
@@ -349,7 +354,7 @@ class BottomButton extends StatelessWidget {
                 if (ResponsiveHelper.isDesktop(Get.context)) {
                   showGeneralDialog(
                     context: Get.context!,
-                    pageBuilder: (_, __, ___) {
+                    pageBuilder: (_, _, _) {
                       return SizedBox(
                         height: 300,
                         width: 300,

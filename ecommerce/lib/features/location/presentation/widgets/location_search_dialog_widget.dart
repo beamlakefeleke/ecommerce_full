@@ -1,4 +1,7 @@
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
 import 'package:ecommerce/features/location/domain/models/prediction_model.dart';
 import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
@@ -24,8 +27,6 @@ class LocationSearchDialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController controller = TextEditingController();
-
     return Container(
       width: 500,
       margin: EdgeInsets.only(
@@ -41,39 +42,44 @@ class LocationSearchDialogWidget extends StatelessWidget {
           width: ResponsiveHelper.isDesktop(context)
               ? 600
               : Dimensions.webMaxWidth,
-          child: TypeAheadField(
-            textFieldConfiguration: TextFieldConfiguration(
-              controller: controller,
-              textInputAction: TextInputAction.search,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              keyboardType: TextInputType.streetAddress,
-              decoration: InputDecoration(
-                hintText: 'search_location'.tr,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    style: BorderStyle.none,
-                    width: 0,
+          child: TypeAheadField<PredictionModel>(
+            builder: (context, controller, focusNode) {
+              return TextField(
+                controller: controller,
+                focusNode: focusNode,
+                textInputAction: TextInputAction.search,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                keyboardType: TextInputType.streetAddress,
+                decoration: InputDecoration(
+                  hintText: 'search_location'.tr,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(
+                      style: BorderStyle.none,
+                      width: 0,
+                    ),
                   ),
+                  hintStyle: Theme.of(context).textTheme.displayMedium!
+                      .copyWith(
+                        fontSize: Dimensions.fontSizeDefault,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
                 ),
-                hintStyle: Theme.of(context).textTheme.displayMedium!.copyWith(
-                  fontSize: Dimensions.fontSizeDefault,
-                  color: Theme.of(context).disabledColor,
+                style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge!.color,
+                  fontSize: Dimensions.fontSizeLarge,
                 ),
-                filled: true,
-                fillColor: Theme.of(context).cardColor,
-              ),
-              style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-                fontSize: Dimensions.fontSizeLarge,
-              ),
-            ),
+              );
+            },
             suggestionsCallback: (pattern) async {
-              return await Get.find<LocationController>().searchLocation(
-                context,
+              if (pattern.isEmpty) return <PredictionModel>[];
+              final result = await getIt<LocationRepository>().searchLocation(
                 pattern,
               );
+              return result.fold((_) => <PredictionModel>[], (list) => list);
             },
             itemBuilder: (context, PredictionModel suggestion) {
               return Padding(
@@ -99,7 +105,7 @@ class LocationSearchDialogWidget extends StatelessWidget {
                 ),
               );
             },
-            onSuggestionSelected: (PredictionModel suggestion) {
+            onSelected: (PredictionModel suggestion) {
               if (isRider) {
                 Get.find<RiderController>().setLocationFromPlace(
                   suggestion.placeId,
@@ -108,10 +114,15 @@ class LocationSearchDialogWidget extends StatelessWidget {
                 );
               } else {
                 if (isPickedUp == null) {
-                  Get.find<LocationController>().setLocation(
-                    suggestion.placeId,
-                    suggestion.description,
-                    mapController,
+                  final locationBloc = getIt<LocationBloc>();
+                  if (mapController != null) {
+                    locationBloc.setMapController(mapController!);
+                  }
+                  locationBloc.add(
+                    PredictionSelected(
+                      placeId: suggestion.placeId,
+                      address: suggestion.description,
+                    ),
                   );
                 } else {
                   Get.find<ParcelController>().setLocationFromPlace(

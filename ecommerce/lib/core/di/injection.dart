@@ -102,6 +102,12 @@ import 'package:ecommerce/features/language/domain/usecases/save_language_usecas
 import 'package:ecommerce/features/language/domain/usecases/update_language_header_usecase.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_event.dart';
+import 'package:ecommerce/features/location/data/datasources/location_remote_data_source.dart';
+import 'package:ecommerce/features/location/data/repositories/location_repository_impl.dart';
+import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
+import 'package:ecommerce/features/location/domain/usecases/location_usecases.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:ecommerce/features/auth/data/repositories/auth_repository_impl.dart';
@@ -147,6 +153,37 @@ void configureDependencies() {
   _registerHtml();
   _registerItem();
   _registerLanguage();
+  _registerLocation();
+}
+
+void _registerLocation() {
+  getIt.registerLazySingleton<LocationRemoteDataSource>(
+    () => LocationRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<LocationRepository>(
+    () => LocationRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetAddressFromGeocodeUseCase(getIt()));
+  getIt.registerFactory(() => GetZoneUseCase(getIt()));
+  getIt.registerFactory(() => SearchLocationUseCase(getIt()));
+  getIt.registerFactory(() => GetLatLngUseCase(getIt()));
+  // app-wide: the working position / picked address / zone status is read
+  // across access-location, pick-map, add-address and the home address banner.
+  getIt.registerLazySingleton(
+    () => LocationBloc(
+      getAddressFromGeocode: getIt(),
+      getZone: getIt(),
+      searchLocation: getIt(),
+      getLatLng: getIt(),
+      configDefaultLatLng: () {
+        final config = getx.Get.find<SplashController>().configModel;
+        return LatLng(
+          double.parse(config?.defaultLocation?.lat ?? '0'),
+          double.parse(config?.defaultLocation?.lng ?? '0'),
+        );
+      },
+    ),
+  );
 }
 
 void _registerLanguage() {

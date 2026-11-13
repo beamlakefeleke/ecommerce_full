@@ -10,7 +10,7 @@ import 'package:ecommerce/features/address/presentation/bloc/address_event.dart'
 import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
-import 'package:ecommerce/features/location/widgets/permission_dialog_widget.dart';
+import 'package:ecommerce/features/location/presentation/widgets/permission_dialog_widget.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/custom_validator.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -24,7 +24,7 @@ import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/custom_text_field.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
-import 'package:ecommerce/features/location/screens/pick_map_screen.dart';
+import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

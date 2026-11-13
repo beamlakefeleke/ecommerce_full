@@ -40,6 +40,7 @@ import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_state.dart';
 import 'package:ecommerce/features/home/screens/home_screen.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
@@ -226,6 +227,9 @@ class _MyAppState extends State<MyApp> {
                             ),
                             BlocProvider<CampaignBloc>(
                               create: (_) => clean_di.getIt<CampaignBloc>(),
+                            ),
+                            BlocProvider<LocationBloc>(
+                              create: (_) => clean_di.getIt<LocationBloc>(),
                             ),
                           ],
                           child: GetMaterialApp(

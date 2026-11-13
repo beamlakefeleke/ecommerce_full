@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/taxi_booking/repo/car_selection_repo.dart';
@@ -20,10 +19,6 @@ import 'package:ecommerce/features/auth/domain/services/deliveryman_registration
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
-import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
-import 'package:ecommerce/features/location/domain/repositories/location_repository_interface.dart';
-import 'package:ecommerce/features/location/domain/services/location_service.dart';
-import 'package:ecommerce/features/location/domain/services/location_service_interface.dart';
 import 'package:ecommerce/features/loyalty/controllers/loyalty_controller.dart';
 import 'package:ecommerce/features/loyalty/domain/repositories/loyalty_repository.dart';
 import 'package:ecommerce/features/loyalty/domain/repositories/loyalty_repository_interface.dart';
@@ -119,11 +114,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => authRepositoryInterface);
 
-  LocationRepositoryInterface locationRepositoryInterface = LocationRepository(
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => locationRepositoryInterface);
-
   DeliverymanRegistrationRepositoryInterface
   deliverymanRegistrationRepositoryInterface =
       DeliverymanRegistrationRepository(apiClient: Get.find());
@@ -206,10 +196,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => verificationRepositoryInterface);
 
   /// Service Interface
-  LocationServiceInterface locationServiceInterface = LocationService(
-    locationRepoInterface: Get.find(),
-  );
-
   DeliverymanRegistrationServiceInterface
   deliverymanRegistrationServiceInterface = DeliverymanRegistrationService(
     deliverymanRegistrationRepoInterface: Get.find(),
@@ -294,10 +280,6 @@ Future<Map<String, Map<String, String>>> init() async {
   /// Controller
   Get.lazyPut(() => ThemeController(sharedPreferences: Get.find()));
   Get.lazyPut(() => SplashController(splashServiceInterface: Get.find()));
-  Get.lazyPut(
-    () =>
-        LocationController(locationServiceInterface: locationServiceInterface),
-  );
   Get.lazyPut(() => OnBoardingController(onboardServiceInterface: Get.find()));
   Get.lazyPut(
     () => DeliverymanRegistrationController(
@@ -307,7 +289,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(
     () => StoreRegistrationController(
       storeRegistrationServiceInterface: Get.find(),
-      locationServiceInterface: locationServiceInterface,
     ),
   );
   Get.lazyPut(() => ProfileController(profileServiceInterface: Get.find()));

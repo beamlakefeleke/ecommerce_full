@@ -1,12 +1,13 @@
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/location/domain/entities/zone_response.dart';
+import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_data_model.dart';
-import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
 import 'package:ecommerce/features/auth/domain/models/delivery_man_body.dart';
 import 'package:ecommerce/features/auth/domain/models/delivery_man_vehicles_model.dart';
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
@@ -224,10 +225,19 @@ class DeliverymanRegistrationController extends GetxController
   }
 
   void _setLocation(LatLng location) async {
-    ZoneResponseModel response = await Get.find<LocationController>().getZone(
+    final zoneEither = await getIt<LocationRepository>().getZone(
       location.latitude.toString(),
       location.longitude.toString(),
-      false,
+    );
+    final ZoneResult response = zoneEither.fold(
+      (_) => const ZoneResult(
+        isSuccess: false,
+        message: null,
+        zoneIds: [],
+        zoneData: [],
+        areaIds: [],
+      ),
+      (z) => z,
     );
     if (response.isSuccess && response.zoneIds.isNotEmpty) {
       _zoneIds = response.zoneIds;
