@@ -7,7 +7,7 @@ import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
-import 'package:ecommerce/features/order/screens/order_details_screen.dart';
+import 'package:ecommerce/features/order/presentation/pages/order_details_screen.dart';
 
 class RunningOrderViewWidget extends StatelessWidget {
   final List<OrderModel> reversOrder;

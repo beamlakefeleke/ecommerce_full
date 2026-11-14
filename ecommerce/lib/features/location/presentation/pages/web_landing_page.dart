@@ -243,107 +243,110 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            child: TypeAheadField(
-                                              textFieldConfiguration: TextFieldConfiguration(
-                                                controller: _controller,
-                                                textInputAction:
-                                                    TextInputAction.search,
-                                                textCapitalization:
-                                                    TextCapitalization.words,
-                                                keyboardType:
-                                                    TextInputType.streetAddress,
-                                                decoration: InputDecoration(
-                                                  hintText:
-                                                      'search_location'.tr,
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          10,
+                                            child: TypeAheadField<PredictionModel>(
+                                              controller: _controller,
+                                              builder: (context, controller, focusNode) {
+                                                return TextField(
+                                                  controller: controller,
+                                                  focusNode: focusNode,
+                                                  textInputAction:
+                                                      TextInputAction.search,
+                                                  textCapitalization:
+                                                      TextCapitalization.words,
+                                                  keyboardType: TextInputType
+                                                      .streetAddress,
+                                                  decoration: InputDecoration(
+                                                    hintText:
+                                                        'search_location'.tr,
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withOpacity(0.3),
+                                                        width: 1,
+                                                      ),
+                                                    ),
+                                                    enabledBorder: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withOpacity(0.3),
+                                                        width: 1,
+                                                      ),
+                                                    ),
+                                                    hintStyle: Theme.of(context)
+                                                        .textTheme
+                                                        .displayMedium!
+                                                        .copyWith(
+                                                          fontSize: Dimensions
+                                                              .fontSizeDefault,
+                                                          color: Theme.of(
+                                                            context,
+                                                          ).disabledColor,
                                                         ),
-                                                    borderSide: BorderSide(
-                                                      color: Theme.of(context)
-                                                          .primaryColor
-                                                          .withOpacity(0.3),
-                                                      width: 1,
+                                                    filled: true,
+                                                    fillColor: Theme.of(
+                                                      context,
+                                                    ).cardColor,
+                                                    suffixIcon: IconButton(
+                                                      onPressed: () async {
+                                                        Get.dialog(
+                                                          const CustomLoader(),
+                                                          barrierDismissible:
+                                                              false,
+                                                        );
+                                                        final locationBloc =
+                                                            getIt<
+                                                              LocationBloc
+                                                            >();
+                                                        locationBloc.add(
+                                                          const CurrentLocationRequested(
+                                                            fromAddress: true,
+                                                          ),
+                                                        );
+                                                        await locationBloc
+                                                            .stream
+                                                            .firstWhere(
+                                                              (s) => !s.loading,
+                                                            );
+                                                        _address = locationBloc
+                                                            .buildAddressModel(
+                                                              fromAddress: true,
+                                                            );
+                                                        _controller.text =
+                                                            _address!.address ??
+                                                            '';
+                                                        Get.back();
+                                                      },
+                                                      icon: Icon(
+                                                        Icons.my_location,
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).primaryColor,
+                                                      ),
                                                     ),
                                                   ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              10,
-                                                            ),
-                                                        borderSide: BorderSide(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .primaryColor
-                                                                  .withOpacity(
-                                                                    0.3,
-                                                                  ),
-                                                          width: 1,
-                                                        ),
-                                                      ),
-                                                  hintStyle: Theme.of(context)
+                                                  style: Theme.of(context)
                                                       .textTheme
                                                       .displayMedium!
                                                       .copyWith(
+                                                        color: Theme.of(context)
+                                                            .textTheme
+                                                            .bodyLarge!
+                                                            .color,
                                                         fontSize: Dimensions
-                                                            .fontSizeDefault,
-                                                        color: Theme.of(
-                                                          context,
-                                                        ).disabledColor,
+                                                            .fontSizeLarge,
                                                       ),
-                                                  filled: true,
-                                                  fillColor: Theme.of(
-                                                    context,
-                                                  ).cardColor,
-                                                  suffixIcon: IconButton(
-                                                    onPressed: () async {
-                                                      Get.dialog(
-                                                        const CustomLoader(),
-                                                        barrierDismissible:
-                                                            false,
-                                                      );
-                                                      final locationBloc =
-                                                          getIt<LocationBloc>();
-                                                      locationBloc.add(
-                                                        const CurrentLocationRequested(
-                                                          fromAddress: true,
-                                                        ),
-                                                      );
-                                                      await locationBloc.stream
-                                                          .firstWhere(
-                                                            (s) => !s.loading,
-                                                          );
-                                                      _address = locationBloc
-                                                          .buildAddressModel(
-                                                            fromAddress: true,
-                                                          );
-                                                      _controller.text =
-                                                          _address!.address ??
-                                                          '';
-                                                      Get.back();
-                                                    },
-                                                    icon: Icon(
-                                                      Icons.my_location,
-                                                      color: Theme.of(
-                                                        context,
-                                                      ).primaryColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .displayMedium!
-                                                    .copyWith(
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyLarge!
-                                                          .color,
-                                                      fontSize: Dimensions
-                                                          .fontSizeLarge,
-                                                    ),
-                                              ),
+                                                );
+                                              },
                                               suggestionsCallback:
                                                   (pattern) async {
                                                     if (pattern.isEmpty) {
@@ -407,7 +410,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                       ),
                                                     );
                                                   },
-                                              onSuggestionSelected:
+                                              onSelected:
                                                   (
                                                     PredictionModel suggestion,
                                                   ) async {
@@ -537,7 +540,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                               )) {
                                                 showGeneralDialog(
                                                   context: context,
-                                                  pageBuilder: (_, __, ___) {
+                                                  pageBuilder: (_, _, _) {
                                                     return SizedBox(
                                                       height: 300,
                                                       width: 300,
@@ -694,15 +697,39 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                             padding:
                                                                 EdgeInsets.zero,
                                                             child: Html(
-                                                                data: splashController.moduleList![index].description ?? '',
-                                                                shrinkWrap: true,
-                                                                onLinkTap: (url, attributes, element) {
-                                                                  if (url == null || url.isEmpty) return;
-                                                                  final link = url.startsWith('www.') ? 'https://$url' : url;
-                                                                  if (kDebugMode) print('Redirect to url: $link');
-                                                                  html.window.open(link, '_blank');
-                                                                },
-                                                              )
+                                                              data:
+                                                                  splashController
+                                                                      .moduleList![index]
+                                                                      .description ??
+                                                                  '',
+                                                              shrinkWrap: true,
+                                                              onLinkTap:
+                                                                  (
+                                                                    url,
+                                                                    attributes,
+                                                                    element,
+                                                                  ) {
+                                                                    if (url ==
+                                                                            null ||
+                                                                        url.isEmpty)
+                                                                      return;
+                                                                    final link =
+                                                                        url.startsWith(
+                                                                          'www.',
+                                                                        )
+                                                                        ? 'https://$url'
+                                                                        : url;
+                                                                    if (kDebugMode)
+                                                                      print(
+                                                                        'Redirect to url: $link',
+                                                                      );
+                                                                    html.window
+                                                                        .open(
+                                                                          link,
+                                                                          '_blank',
+                                                                        );
+                                                                  },
+                                                            ),
                                                           ),
                                                         ),
                                                       ],

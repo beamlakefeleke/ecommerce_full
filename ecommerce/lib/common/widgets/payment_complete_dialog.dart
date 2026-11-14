@@ -1,8 +1,9 @@
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
@@ -81,9 +82,9 @@ class PaymentCompleteDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                GetBuilder<OrderController>(
-                  builder: (orderController) {
-                    return !orderController.isLoading
+                BlocBuilder<OrderBloc, OrderState>(
+                  builder: (context, orderState) {
+                    return !orderState.isLoading
                         ? CustomButton(
                             buttonText: isLogOut ? 'no'.tr : 'ok'.tr,
                             onPressed: () =>

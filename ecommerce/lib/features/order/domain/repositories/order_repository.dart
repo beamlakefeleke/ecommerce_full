@@ -1,178 +1,48 @@
-import 'package:get/get_connect/connect.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ecommerce/api/api_client.dart';
+import 'package:ecommerce/core/error/failure.dart';
 import 'package:ecommerce/features/order/domain/models/order_cancellation_body.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
-import 'package:ecommerce/features/order/domain/models/refund_model.dart';
-import 'package:ecommerce/features/order/domain/repositories/order_repository_interface.dart';
-import 'package:ecommerce/helper/auth_helper.dart';
-import 'package:ecommerce/util/app_constants.dart';
-import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 
-class OrderRepository implements OrderRepositoryInterface {
-  final ApiClient apiClient;
-  OrderRepository({required this.apiClient});
+/// Abstract contract for the order feature. Implemented in the data layer.
+/// Every method returns `Either<Failure, T>` — no throwing across the boundary,
+/// and no GetX `Response` type leaks above the data source.
+///
+/// Note (rule 7): `OrderModel`/`PaginatedOrderModel`/`OrderDetailsModel` are the
+/// single shared models kept in `domain/models/` because they are consumed
+/// app-wide by still-GetX features (checkout, payment, taxi, review, dashboard,
+/// route_helper). They are NOT split into separate entities during this
+/// migration — same precedent as the `item` feature.
+abstract class OrderRepository {
+  Future<Either<Failure, PaginatedOrderModel>> getRunningOrders(int offset);
 
-  @override
-  Future<Response> submitRefundRequest(
-    Map<String, String> body,
-    XFile? data,
-  ) async {
-    return apiClient.postMultipartData(AppConstants.refundRequestUri, body, [
-      MultipartBody('image[]', data),
-    ]);
-  }
+  Future<Either<Failure, PaginatedOrderModel>> getHistoryOrders(int offset);
 
-  @override
-  Future<Response> trackOrder(
-    String? orderID,
+  Future<Either<Failure, List<OrderDetailsModel>>> getOrderDetails(
+    String orderId,
+    String? guestId,
+  );
+
+  Future<Either<Failure, OrderModel>> trackOrder(
+    String? orderId,
     String? guestId, {
     String? contactNumber,
-  }) async {
-    return await apiClient.getData(
-      '${AppConstants.trackUri}$orderID${guestId != null ? '&guest_id=$guestId' : ''}'
-      '${contactNumber != null ? '&contact_number=$contactNumber' : ''}',
-    );
-  }
+  });
 
-  @override
-  Future<Response> switchToCOD(String? orderID) async {
-    Map<String, String> data = {'_method': 'put', 'order_id': orderID!};
-    if (AuthHelper.isGuestLoggedIn()) {
-      data.addAll({'guest_id': AuthHelper.getGuestId()});
-    }
-    return await apiClient.postData(AppConstants.codSwitchUri, data);
-  }
+  Future<Either<Failure, List<CancellationData>>> getCancelReasons();
 
-  @override
-  Future add(value) {
-    throw UnimplementedError();
-  }
+  Future<Either<Failure, List<String?>>> getRefundReasons();
 
-  @override
-  Future delete(int? id) {
-    throw UnimplementedError();
-  }
+  /// Returns the success message on 200.
+  Future<Either<Failure, String>> submitRefundRequest(
+    Map<String, String> body,
+    XFile? image,
+  );
 
-  @override
-  Future<bool> cancelOrder(String orderID, String? reason) async {
-    bool success = false;
-    Map<String, String> data = {
-      '_method': 'put',
-      'order_id': orderID,
-      'reason': reason!,
-    };
-    if (AuthHelper.isGuestLoggedIn()) {
-      data.addAll({'guest_id': AuthHelper.getGuestId()});
-    }
-    Response response = await apiClient.postData(
-      AppConstants.orderCancelUri,
-      data,
-    );
-    if (response.statusCode == 200) {
-      success = true;
-      showCustomSnackBar(response.body['message'], isError: false);
-    }
-    return success;
-  }
+  /// Returns the success message on 200.
+  Future<Either<Failure, String>> cancelOrder(String orderId, String? reason);
 
-  @override
-  Future get(String? id, {String? guestId}) async {
-    return await _getOrderDetails(id!, guestId);
-  }
-
-  Future<List<OrderDetailsModel>?> _getOrderDetails(
-    String orderID,
-    String? guestId,
-  ) async {
-    List<OrderDetailsModel>? orderDetails;
-    Response response = await apiClient.getData(
-      '${AppConstants.orderDetailsUri}$orderID${guestId != null ? '&guest_id=$guestId' : ''}',
-    );
-    if (response.statusCode == 200) {
-      orderDetails = [];
-      response.body.forEach(
-        (orderDetail) =>
-            orderDetails!.add(OrderDetailsModel.fromJson(orderDetail)),
-      );
-    }
-    return orderDetails;
-  }
-
-  @override
-  Future getList({
-    int? offset,
-    bool isRunningOrder = false,
-    bool isHistoryOrder = false,
-    bool isCancelReasons = false,
-    bool isRefundReasons = false,
-  }) async {
-    if (isRunningOrder) {
-      return await _getRunningOrderList(offset!);
-    } else if (isHistoryOrder) {
-      return await _getHistoryOrderList(offset!);
-    } else if (isCancelReasons) {
-      return await _getCancelReasons();
-    } else if (isRefundReasons) {
-      return await _getRefundReasons();
-    }
-  }
-
-  Future<PaginatedOrderModel?> _getRunningOrderList(int offset) async {
-    PaginatedOrderModel? runningOrderModel;
-    Response response = await apiClient.getData(
-      '${AppConstants.runningOrderListUri}?offset=$offset&limit=${50}',
-    );
-    if (response.statusCode == 200) {
-      runningOrderModel = PaginatedOrderModel.fromJson(response.body);
-    }
-    return runningOrderModel;
-  }
-
-  Future<PaginatedOrderModel?> _getHistoryOrderList(int offset) async {
-    PaginatedOrderModel? historyOrderModel;
-    Response response = await apiClient.getData(
-      '${AppConstants.historyOrderListUri}?offset=$offset&limit=10',
-    );
-    if (response.statusCode == 200) {
-      historyOrderModel = PaginatedOrderModel.fromJson(response.body);
-    }
-    return historyOrderModel;
-  }
-
-  Future<List<CancellationData>?> _getCancelReasons() async {
-    List<CancellationData>? orderCancelReasons;
-    Response response = await apiClient.getData(
-      '${AppConstants.orderCancellationUri}?offset=1&limit=30&type=customer',
-    );
-    if (response.statusCode == 200) {
-      OrderCancellationBody orderCancellationBody =
-          OrderCancellationBody.fromJson(response.body);
-      orderCancelReasons = [];
-      for (var element in orderCancellationBody.reasons!) {
-        orderCancelReasons.add(element);
-      }
-    }
-    return orderCancelReasons;
-  }
-
-  Future<List<String?>?> _getRefundReasons() async {
-    List<String?>? refundReasons;
-    Response response = await apiClient.getData(AppConstants.refundReasonUri);
-    if (response.statusCode == 200) {
-      RefundModel refundModel = RefundModel.fromJson(response.body);
-      refundReasons = [];
-      refundReasons.insert(0, 'select_an_option');
-      for (var element in refundModel.refundReasons!) {
-        refundReasons.add(element.reason);
-      }
-    }
-    return refundReasons;
-  }
-
-  @override
-  Future update(Map<String, dynamic> body, int? id) {
-    throw UnimplementedError();
-  }
+  /// Returns the success message on 200.
+  Future<Either<Failure, String>> switchToCOD(String? orderId);
 }

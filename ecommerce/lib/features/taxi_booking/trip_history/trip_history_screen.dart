@@ -6,7 +6,7 @@ import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/not_logged_in_screen.dart';
-import 'package:ecommerce/features/order/widgets/order_view_widget.dart';
+import 'package:ecommerce/features/order/presentation/widgets/order_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/taxi_booking/trip_history/widget/trip_history_list.dart';

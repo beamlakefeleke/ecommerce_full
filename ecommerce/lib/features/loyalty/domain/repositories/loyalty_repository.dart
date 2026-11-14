@@ -1,53 +1,14 @@
-import 'package:get/get_connect.dart';
-import 'package:ecommerce/common/models/transaction_model.dart';
-import 'package:ecommerce/api/api_client.dart';
-import 'package:ecommerce/features/loyalty/domain/repositories/loyalty_repository_interface.dart';
-import 'package:ecommerce/util/app_constants.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:ecommerce/core/error/failure.dart';
+import 'package:ecommerce/features/loyalty/domain/entities/loyalty_transaction_page.dart';
 
-class LoyaltyRepository implements LoyaltyRepositoryInterface {
-  final ApiClient apiClient;
-  LoyaltyRepository({required this.apiClient});
+/// Abstract contract for the loyalty feature. Implemented in the data layer.
+/// Every method returns `Either<Failure, T>` — no throwing across the boundary.
+abstract class LoyaltyRepository {
+  /// One page (10 items) of the user's loyalty-point transactions at [offset].
+  Future<Either<Failure, LoyaltyTransactionPage>> getTransactions(int offset);
 
-  @override
-  Future<Response> pointToWallet({int? point}) async {
-    return await apiClient.postData(AppConstants.loyaltyPointTransferUri, {
-      "point": point,
-    });
-  }
-
-  @override
-  Future add(value) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future delete(int? id) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future get(String? id) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future getList({int? offset}) async {
-    return await _getLoyaltyTransactionList(offset);
-  }
-
-  Future<TransactionModel?> _getLoyaltyTransactionList(int? offset) async {
-    TransactionModel? transactionModel;
-    Response response = await apiClient.getData(
-      '${AppConstants.loyaltyTransactionUri}?offset=$offset&limit=10',
-    );
-    if (response.statusCode == 200) {
-      transactionModel = TransactionModel.fromJson(response.body);
-    }
-    return transactionModel;
-  }
-
-  @override
-  Future update(Map<String, dynamic> body, int? id) {
-    throw UnimplementedError();
-  }
+  /// Convert [point] loyalty points into wallet money. Success carries no
+  /// payload — the UI refreshes the list + profile on success.
+  Future<Either<Failure, Unit>> pointToWallet(int point);
 }

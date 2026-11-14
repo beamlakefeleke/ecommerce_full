@@ -6,9 +6,9 @@ import 'package:ecommerce/core/di/injection.dart' as clean_di;
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
-import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
+import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -18,7 +18,7 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:ecommerce/features/dashboard/screens/dashboard_screen.dart';
-import 'package:ecommerce/features/notification/widgets/notifiation_popup_dialog_widget.dart';
+import 'package:ecommerce/features/notification/presentation/widgets/notifiation_popup_dialog_widget.dart';
 
 class NotificationHelper {
   static Future<void> initialize(
@@ -139,9 +139,11 @@ class NotificationHelper {
           false,
         );
         if (AuthHelper.isLoggedIn()) {
-          Get.find<OrderController>().getRunningOrders(1);
-          Get.find<OrderController>().getHistoryOrders(1);
-          Get.find<NotificationController>().getNotificationList(true);
+          clean_di.getIt<OrderBloc>().add(const RunningOrdersRequested(1));
+          clean_di.getIt<OrderBloc>().add(const HistoryOrdersRequested(1));
+          clean_di.getIt<NotificationBloc>().add(
+            const NotificationListRequested(reload: true),
+          );
         }
       }
 

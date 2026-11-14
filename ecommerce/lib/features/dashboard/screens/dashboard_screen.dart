@@ -24,8 +24,8 @@ import 'package:ecommerce/features/dashboard/widgets/address_bottom_sheet_widget
 import 'package:ecommerce/features/dashboard/widgets/parcel_bottom_sheet_widget.dart';
 import 'package:ecommerce/features/favourite/presentation/pages/favourite_screen.dart';
 import 'package:ecommerce/features/home/screens/home_screen.dart';
-import 'package:ecommerce/features/menu/screens/menu_screen.dart';
-import 'package:ecommerce/features/order/screens/order_screen.dart';
+import 'package:ecommerce/features/menu/presentation/pages/menu_screen.dart';
+import 'package:ecommerce/features/order/presentation/pages/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

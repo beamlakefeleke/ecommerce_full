@@ -19,26 +19,6 @@ import 'package:ecommerce/features/auth/domain/services/deliveryman_registration
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
-import 'package:ecommerce/features/loyalty/controllers/loyalty_controller.dart';
-import 'package:ecommerce/features/loyalty/domain/repositories/loyalty_repository.dart';
-import 'package:ecommerce/features/loyalty/domain/repositories/loyalty_repository_interface.dart';
-import 'package:ecommerce/features/loyalty/domain/services/loyalty_service.dart';
-import 'package:ecommerce/features/loyalty/domain/services/loyalty_service_interface.dart';
-import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
-import 'package:ecommerce/features/notification/domain/repository/notification_repository.dart';
-import 'package:ecommerce/features/notification/domain/repository/notification_repository_interface.dart';
-import 'package:ecommerce/features/notification/domain/service/notification_service.dart';
-import 'package:ecommerce/features/notification/domain/service/notification_service_interface.dart';
-import 'package:ecommerce/features/onboard/controllers/onboard_controller.dart';
-import 'package:ecommerce/features/onboard/domain/repository/onboard_repository.dart';
-import 'package:ecommerce/features/onboard/domain/repository/onboard_repository_interface.dart';
-import 'package:ecommerce/features/onboard/domain/service/onboard_service.dart';
-import 'package:ecommerce/features/onboard/domain/service/onboard_service_interface.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
-import 'package:ecommerce/features/order/domain/repositories/order_repository.dart';
-import 'package:ecommerce/features/order/domain/repositories/order_repository_interface.dart';
-import 'package:ecommerce/features/order/domain/services/order_service.dart';
-import 'package:ecommerce/features/order/domain/services/order_service_interface.dart';
 import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
 import 'package:ecommerce/features/parcel/domain/repositories/parcel_repository.dart';
 import 'package:ecommerce/features/parcel/domain/repositories/parcel_repository_interface.dart';
@@ -128,26 +108,11 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => parcelRepositoryInterface);
 
-  OrderRepositoryInterface orderRepositoryInterface = OrderRepository(
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => orderRepositoryInterface);
-
   PaymentRepositoryInterface paymentRepositoryInterface = PaymentRepository(
     apiClient: Get.find(),
     sharedPreferences: Get.find(),
   );
   Get.lazyPut(() => paymentRepositoryInterface);
-
-  NotificationRepositoryInterface notificationRepositoryInterface =
-      NotificationRepository(
-        sharedPreferences: Get.find(),
-        apiClient: Get.find(),
-      );
-  Get.lazyPut(() => notificationRepositoryInterface);
-
-  OnboardRepositoryInterface onboardRepositoryInterface = OnboardRepository();
-  Get.lazyPut(() => onboardRepositoryInterface);
 
   ProfileRepositoryInterface profileRepositoryInterface = ProfileRepository(
     apiClient: Get.find(),
@@ -183,11 +148,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => walletRepositoryInterface);
 
-  LoyaltyRepositoryInterface loyaltyRepositoryInterface = LoyaltyRepository(
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => loyaltyRepositoryInterface);
-
   VerificationRepositoryInterface verificationRepositoryInterface =
       VerificationRepository(
         apiClient: Get.find(),
@@ -216,24 +176,10 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => parcelServiceInterface);
 
-  OrderServiceInterface orderServiceInterface = OrderService(
-    orderRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => orderServiceInterface);
-
   PaymentServiceInterface paymentServiceInterface = PaymentService(
     paymentRepositoryInterface: Get.find(),
   );
   Get.lazyPut(() => paymentServiceInterface);
-
-  NotificationServiceInterface notificationServiceInterface =
-      NotificationService(notificationRepositoryInterface: Get.find());
-  Get.lazyPut(() => notificationServiceInterface);
-
-  OnboardServiceInterface onboardServiceInterface = OnboardService(
-    onboardRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => onboardServiceInterface);
 
   ProfileServiceInterface profileServiceInterface = ProfileService(
     profileRepositoryInterface: Get.find(),
@@ -265,11 +211,6 @@ Future<Map<String, Map<String, String>>> init() async {
   );
   Get.lazyPut(() => walletServiceInterface);
 
-  LoyaltyServiceInterface loyaltyServiceInterface = LoyaltyService(
-    loyaltyRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => loyaltyServiceInterface);
-
   VerificationServiceInterface verificationServiceInterface =
       VerificationService(
         verificationRepoInterface: Get.find(),
@@ -280,7 +221,6 @@ Future<Map<String, Map<String, String>>> init() async {
   /// Controller
   Get.lazyPut(() => ThemeController(sharedPreferences: Get.find()));
   Get.lazyPut(() => SplashController(splashServiceInterface: Get.find()));
-  Get.lazyPut(() => OnBoardingController(onboardServiceInterface: Get.find()));
   Get.lazyPut(
     () => DeliverymanRegistrationController(
       deliverymanRegistrationServiceInterface: Get.find(),
@@ -294,10 +234,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => ProfileController(profileServiceInterface: Get.find()));
   Get.lazyPut(() => StoreController(storeServiceInterface: Get.find()));
   Get.lazyPut(() => SearchController(searchServiceInterface: Get.find()));
-  Get.lazyPut(() => OrderController(orderServiceInterface: Get.find()));
-  Get.lazyPut(
-    () => NotificationController(notificationServiceInterface: Get.find()),
-  );
   Get.lazyPut(() => ParcelController(parcelServiceInterface: Get.find()));
   Get.lazyPut(() => WalletController(walletServiceInterface: Get.find()));
   Get.lazyPut(() => RiderController(riderRepo: Get.find()));
@@ -305,7 +241,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => BookingCheckoutController(riderRepo: Get.find()));
   Get.lazyPut(() => PaymentController(paymentServiceInterface: Get.find()));
   Get.lazyPut(() => ReviewController(reviewServiceInterface: Get.find()));
-  Get.lazyPut(() => LoyaltyController(loyaltyServiceInterface: Get.find()));
   Get.lazyPut(
     () => VerificationController(verificationServiceInterface: Get.find()),
   );

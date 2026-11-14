@@ -107,6 +107,28 @@ import 'package:ecommerce/features/location/data/repositories/location_repositor
 import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
 import 'package:ecommerce/features/location/domain/usecases/location_usecases.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/notification/data/datasources/notification_local_data_source.dart';
+import 'package:ecommerce/features/notification/data/datasources/notification_remote_data_source.dart';
+import 'package:ecommerce/features/notification/data/repositories/notification_repository_impl.dart';
+import 'package:ecommerce/features/notification/domain/repositories/notification_repository.dart';
+import 'package:ecommerce/features/notification/domain/usecases/get_notifications_usecase.dart';
+import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
+import 'package:ecommerce/features/onboard/data/datasources/onboard_local_data_source.dart';
+import 'package:ecommerce/features/onboard/data/repositories/onboard_repository_impl.dart';
+import 'package:ecommerce/features/onboard/domain/repositories/onboard_repository.dart';
+import 'package:ecommerce/features/onboard/domain/usecases/get_onboarding_list_usecase.dart';
+import 'package:ecommerce/features/onboard/presentation/bloc/onboard_bloc.dart';
+import 'package:ecommerce/features/order/data/datasources/order_remote_data_source.dart';
+import 'package:ecommerce/features/order/data/repositories/order_repository_impl.dart';
+import 'package:ecommerce/features/order/domain/repositories/order_repository.dart';
+import 'package:ecommerce/features/order/domain/usecases/order_usecases.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
+import 'package:ecommerce/features/loyalty/data/datasources/loyalty_remote_data_source.dart';
+import 'package:ecommerce/features/loyalty/data/repositories/loyalty_repository_impl.dart';
+import 'package:ecommerce/features/loyalty/domain/repositories/loyalty_repository.dart';
+import 'package:ecommerce/features/loyalty/domain/usecases/convert_point_to_wallet_usecase.dart';
+import 'package:ecommerce/features/loyalty/domain/usecases/get_loyalty_transactions_usecase.dart';
+import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:ecommerce/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -154,6 +176,91 @@ void configureDependencies() {
   _registerItem();
   _registerLanguage();
   _registerLocation();
+  _registerLoyalty();
+  _registerNotification();
+  _registerOnboard();
+  _registerOrder();
+}
+
+void _registerOrder() {
+  getIt.registerLazySingleton<OrderRemoteDataSource>(
+    () => OrderRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<OrderRepository>(
+    () => OrderRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetRunningOrdersUseCase(getIt()));
+  getIt.registerFactory(() => GetHistoryOrdersUseCase(getIt()));
+  getIt.registerFactory(() => GetOrderDetailsUseCase(getIt()));
+  getIt.registerFactory(() => TrackOrderUseCase(getIt()));
+  getIt.registerFactory(() => GetCancelReasonsUseCase(getIt()));
+  getIt.registerFactory(() => GetRefundReasonsUseCase(getIt()));
+  getIt.registerFactory(() => SubmitRefundRequestUseCase(getIt()));
+  getIt.registerFactory(() => CancelOrderUseCase(getIt()));
+  getIt.registerFactory(() => SwitchToCodUseCase(getIt()));
+  // app-wide: the running-order bottom sheet (dashboard) + order-success /
+  // payment dialogs (checkout/payment) read order state across screens.
+  getIt.registerLazySingleton(
+    () => OrderBloc(
+      getRunningOrders: getIt(),
+      getHistoryOrders: getIt(),
+      getOrderDetails: getIt(),
+      trackOrder: getIt(),
+      getCancelReasons: getIt(),
+      getRefundReasons: getIt(),
+      submitRefundRequest: getIt(),
+      cancelOrder: getIt(),
+      switchToCod: getIt(),
+    ),
+  );
+}
+
+void _registerOnboard() {
+  getIt.registerLazySingleton<OnboardLocalDataSource>(
+    () => OnboardLocalDataSourceImpl(),
+  );
+  getIt.registerLazySingleton<OnboardRepository>(
+    () => OnboardRepositoryImpl(localDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetOnBoardingListUseCase(getIt()));
+  // screen-scoped: a fresh bloc per onboarding screen.
+  getIt.registerFactory(() => OnboardBloc(getOnBoardingList: getIt()));
+}
+
+void _registerNotification() {
+  getIt.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<NotificationLocalDataSource>(
+    () => NotificationLocalDataSourceImpl(sharedPreferences: getIt()),
+  );
+  getIt.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(
+      remoteDataSource: getIt(),
+      localDataSource: getIt(),
+    ),
+  );
+  getIt.registerFactory(() => GetNotificationsUseCase(getIt()));
+  // app-wide: the list + unread badge are read on home and the parcel/taxi
+  // app bars.
+  getIt.registerLazySingleton(
+    () => NotificationBloc(getNotifications: getIt(), repository: getIt()),
+  );
+}
+
+void _registerLoyalty() {
+  getIt.registerLazySingleton<LoyaltyRemoteDataSource>(
+    () => LoyaltyRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<LoyaltyRepository>(
+    () => LoyaltyRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetLoyaltyTransactionsUseCase(getIt()));
+  getIt.registerFactory(() => ConvertPointToWalletUseCase(getIt()));
+  // screen-scoped: a fresh bloc per loyalty screen (not cross-cutting).
+  getIt.registerFactory(
+    () => LoyaltyBloc(getTransactions: getIt(), convertPointToWallet: getIt()),
+  );
 }
 
 void _registerLocation() {

@@ -1,11 +1,12 @@
 import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 
@@ -66,8 +67,10 @@ class NotLoggedInScreen extends StatelessWidget {
                         ),
                       ).then((value) => callBack(true));
                     }
-                    if (Get.find<OrderController>().showBottomSheet) {
-                      Get.find<OrderController>().showRunningOrders();
+                    if (context.read<OrderBloc>().state.showBottomSheet) {
+                      context.read<OrderBloc>().add(
+                        const RunningOrderSheetToggled(),
+                      );
                     }
                     callBack(true);
                   },
