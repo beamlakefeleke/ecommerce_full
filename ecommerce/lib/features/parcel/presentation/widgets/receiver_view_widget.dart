@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
 import 'package:ecommerce/features/location/presentation/widgets/serach_location_widget.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -39,14 +44,14 @@ class _ReceiverViewWidgetState extends State<ReceiverViewWidget> {
   void initState() {
     super.initState();
 
-    Get.find<ParcelController>().setPickupAddress(
-      AddressHelper.getUserAddressFromSharedPref(),
-      false,
+    final parcelBloc = context.read<ParcelBloc>();
+    parcelBloc.add(
+      PickupAddressSet(AddressHelper.getUserAddressFromSharedPref()),
     );
-    Get.find<ParcelController>().setIsPickedUp(false, false);
+    parcelBloc.add(const IsPickedUpToggled(false));
     if (AuthHelper.isLoggedIn() &&
-        Get.find<AddressController>().addressList == null) {
-      Get.find<AddressController>().getAddressList();
+        context.read<AddressBloc>().state.status != AddressStatus.loaded) {
+      context.read<AddressBloc>().add(const AddressListRequested());
     }
     if (AuthHelper.isLoggedIn() &&
         Get.find<ProfileController>().userInfoModel == null) {
@@ -67,8 +72,8 @@ class _ReceiverViewWidgetState extends State<ReceiverViewWidget> {
     return Scaffold(
       body: SizedBox(
         width: Dimensions.webMaxWidth,
-        child: GetBuilder<ParcelController>(
-          builder: (parcelController) {
+        child: BlocBuilder<ParcelBloc, ParcelState>(
+          builder: (context, parcelController) {
             return Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: Dimensions.paddingSizeSmall,
@@ -110,16 +115,16 @@ class _ReceiverViewWidgetState extends State<ReceiverViewWidget> {
                                       route: '',
                                       onPicked: (AddressModel address) {
                                         if (parcelController.isPickedUp!) {
-                                          parcelController.setPickupAddress(
-                                            address,
-                                            true,
+                                          context.read<ParcelBloc>().add(
+                                            PickupAddressSet(address),
                                           );
                                           _streetNumberController.text = '';
                                           _houseController.text = '';
                                           _floorController.text = '';
                                         } else {
-                                          parcelController
-                                              .setDestinationAddress(address);
+                                          context.read<ParcelBloc>().add(
+                                            DestinationAddressSet(address),
+                                          );
                                         }
                                       },
                                     ),
@@ -136,16 +141,15 @@ class _ReceiverViewWidgetState extends State<ReceiverViewWidget> {
                                   route: '',
                                   onPicked: (AddressModel address) {
                                     if (parcelController.isPickedUp!) {
-                                      parcelController.setPickupAddress(
-                                        address,
-                                        true,
+                                      context.read<ParcelBloc>().add(
+                                        PickupAddressSet(address),
                                       );
                                       _streetNumberController.text = '';
                                       _houseController.text = '';
                                       _floorController.text = '';
                                     } else {
-                                      parcelController.setDestinationAddress(
-                                        address,
+                                      context.read<ParcelBloc>().add(
+                                        DestinationAddressSet(address),
                                       );
                                     }
                                   },

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/features/location/presentation/widgets/location_search_dialog_widget.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 
@@ -34,7 +36,7 @@ class SearchLocationWidget extends StatelessWidget {
           ),
         );
         if (isEnabled != null) {
-          Get.find<ParcelController>().setIsPickedUp(isPickedUp, true);
+          context.read<ParcelBloc>().add(IsPickedUpToggled(isPickedUp));
         }
       },
       child: Container(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
@@ -16,24 +19,31 @@ class DeliveryInstructionBottomSheetWidget extends StatefulWidget {
 
 class _DeliveryInstructionBottomSheetWidgetState
     extends State<DeliveryInstructionBottomSheetWidget> {
+  // The note's text field is owned by this State, not the bloc (rule 4).
+  final TextEditingController _customNoteController = TextEditingController();
+
   @override
   void initState() {
-    Get.find<ParcelController>().getParcelInstruction();
-    Get.find<ParcelController>().setInstructionselectedIndex(
-      Get.find<ParcelController>().selectedIndexNote ?? -1,
-      notify: false,
-    );
-    Get.find<ParcelController>().setCustomNoteController(
-      Get.find<ParcelController>().customNote ?? '',
-      notify: false,
-    );
     super.initState();
+    final parcelBloc = context.read<ParcelBloc>();
+    parcelBloc.add(const ParcelInstructionRequested());
+    // seed selection + note text from current bloc state
+    parcelBloc.add(
+      InstructionSelectedIndexSet(parcelBloc.state.selectedIndexNote),
+    );
+    _customNoteController.text = parcelBloc.state.customNote;
+  }
+
+  @override
+  void dispose() {
+    _customNoteController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ParcelController>(
-      builder: (parcelController) {
+    return BlocBuilder<ParcelBloc, ParcelState>(
+      builder: (context, parcelState) {
         return Container(
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.8,
@@ -48,7 +58,7 @@ class _DeliveryInstructionBottomSheetWidgetState
               topRight: Radius.circular(Dimensions.radiusExtraLarge),
             ),
           ),
-          child: parcelController.parcelInstructionList != null
+          child: parcelState.parcelInstructionList != null
               ? SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -70,7 +80,7 @@ class _DeliveryInstructionBottomSheetWidgetState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          parcelController.parcelInstructionList!.isNotEmpty
+                          parcelState.parcelInstructionList!.isNotEmpty
                               ? Text(
                                   "choose_delivery_instructions".tr,
                                   style: robotoMedium,
@@ -91,11 +101,10 @@ class _DeliveryInstructionBottomSheetWidgetState
                       ),
                       const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                      parcelController.parcelInstructionList!.isNotEmpty
+                      parcelState.parcelInstructionList!.isNotEmpty
                           ? ListView.builder(
-                              itemCount: parcelController
-                                  .parcelInstructionList!
-                                  .length,
+                              itemCount:
+                                  parcelState.parcelInstructionList!.length,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemBuilder: (context, index) {
@@ -105,16 +114,17 @@ class _DeliveryInstructionBottomSheetWidgetState
                                   ),
                                   child: InkWell(
                                     onTap: () {
-                                      parcelController
-                                          .setInstructionselectedIndex(index);
+                                      context.read<ParcelBloc>().add(
+                                        InstructionSelectedIndexSet(index),
+                                      );
                                     },
                                     child: SelectedCardWidget(
-                                      title: parcelController
+                                      title: parcelState
                                           .parcelInstructionList![index]
                                           .instruction!,
                                       isSelect:
-                                          parcelController
-                                              .instructionselectedIndex ==
+                                          parcelState
+                                              .instructionSelectedIndex ==
                                           index,
                                     ),
                                   ),
@@ -126,14 +136,11 @@ class _DeliveryInstructionBottomSheetWidgetState
 
                       Row(
                         children: [
-                          parcelController.parcelInstructionList!.isNotEmpty
+                          parcelState.parcelInstructionList!.isNotEmpty
                               ? Text("or".tr, style: robotoMedium)
                               : const SizedBox(),
                           SizedBox(
-                            width:
-                                parcelController
-                                    .parcelInstructionList!
-                                    .isNotEmpty
+                            width: parcelState.parcelInstructionList!.isNotEmpty
                                 ? Dimensions.paddingSizeExtraSmall
                                 : 0,
                           ),
@@ -146,23 +153,32 @@ class _DeliveryInstructionBottomSheetWidgetState
                       CustomTextField(
                         titleText: "please_maintain_the_hygine".tr,
                         maxLines: 3,
-                        controller: parcelController.customNoteController,
+                        controller: _customNoteController,
                         onChanged: (value) {
-                          parcelController.setCustomNoteController(value);
+                          // keep the button's enabled state in sync
+                          setState(() {});
                         },
                       ),
                       const SizedBox(height: Dimensions.paddingSizeDefault),
 
                       CustomButton(
                         onPressed:
-                            (parcelController.instructionselectedIndex != -1 ||
-                                parcelController
-                                    .customNoteController
-                                    .text
-                                    .isNotEmpty)
+                            (parcelState.instructionSelectedIndex != -1 ||
+                                _customNoteController.text.isNotEmpty)
                             ? () {
-                                parcelController.setselectedIndex(null);
-                                parcelController.setCustomNote(null);
+                                // commit the selected instruction index, then
+                                // the custom note (fallback to field text),
+                                // mirroring the legacy setselectedIndex(null) +
+                                // setCustomNote(null).
+                                context.read<ParcelBloc>().add(
+                                  const SelectedNoteIndexSet(null),
+                                );
+                                context.read<ParcelBloc>().add(
+                                  CustomNoteSet(
+                                    null,
+                                    controllerText: _customNoteController.text,
+                                  ),
+                                );
                                 Get.back();
                               }
                             : null,

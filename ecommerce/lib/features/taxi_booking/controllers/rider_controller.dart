@@ -10,7 +10,7 @@ import 'package:ecommerce/features/location/controllers/location_controller.dart
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/api/api_checker.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/parcel/domain/models/place_details_model.dart';
+import 'package:ecommerce/features/parcel/data/models/place_details_model.dart';
 import 'package:ecommerce/features/taxi_booking/models/trip_model.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';

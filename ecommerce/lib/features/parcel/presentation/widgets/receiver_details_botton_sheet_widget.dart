@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
-import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -38,12 +40,10 @@ class _ReceiverDetailsBottomSheetWidgetState
   void initState() {
     super.initState();
 
-    _streetNumberController.text =
-        Get.find<ParcelController>().destinationAddress!.streetNumber!;
-    _houseController.text =
-        Get.find<ParcelController>().destinationAddress!.house!;
-    _floorController.text =
-        Get.find<ParcelController>().destinationAddress!.floor!;
+    final destination = context.read<ParcelBloc>().state.destinationAddress!;
+    _streetNumberController.text = destination.streetNumber ?? '';
+    _houseController.text = destination.house ?? '';
+    _floorController.text = destination.floor ?? '';
   }
 
   @override
@@ -151,18 +151,16 @@ class _ReceiverDetailsBottomSheetWidgetState
                 } else if (phone.isEmpty) {
                   showCustomSnackBar('enter_receiver_phone_number'.tr);
                 } else {
-                  AddressModel address =
-                      Get.find<ParcelController>().destinationAddress!;
+                  final parcelBloc = context.read<ParcelBloc>();
+                  AddressModel address = parcelBloc.state.destinationAddress!;
                   address.contactPersonName = name;
                   address.contactPersonNumber = phone;
                   address.streetNumber = streetNumber;
                   address.house = house;
                   address.floor = floor;
 
-                  // _address.additionalAddress = _additional;
-                  Get.find<ParcelController>().setDestinationAddress(address);
-                  AddressModel pickedAddress =
-                      Get.find<ParcelController>().pickupAddress!;
+                  parcelBloc.add(DestinationAddressSet(address));
+                  AddressModel pickedAddress = parcelBloc.state.pickupAddress!;
                   if ((pickedAddress.contactPersonName == null ||
                           pickedAddress.contactPersonName!.isEmpty) &&
                       Get.find<ProfileController>().userInfoModel != null) {
@@ -176,11 +174,12 @@ class _ReceiverDetailsBottomSheetWidgetState
                     pickedAddress.contactPersonNumber =
                         Get.find<ProfileController>().userInfoModel!.phone;
                   }
+                  parcelBloc.add(PickupAddressSet(pickedAddress));
                   Get.toNamed(
                     RouteHelper.getParcelRequestRoute(
                       widget.category,
-                      Get.find<ParcelController>().pickupAddress!,
-                      Get.find<ParcelController>().destinationAddress!,
+                      parcelBloc.state.pickupAddress!,
+                      parcelBloc.state.destinationAddress!,
                     ),
                   );
                 }

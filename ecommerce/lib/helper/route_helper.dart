@@ -14,7 +14,7 @@ import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart'
 import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
-import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/features/address/presentation/pages/add_address_screen.dart';
@@ -63,9 +63,9 @@ import 'package:ecommerce/features/order/presentation/pages/order_details_screen
 import 'package:ecommerce/features/order/presentation/pages/order_screen.dart';
 import 'package:ecommerce/features/order/presentation/pages/order_tracking_screen.dart';
 import 'package:ecommerce/features/order/presentation/pages/refund_request_screen.dart';
-import 'package:ecommerce/features/parcel/screens/parcel_category_screen.dart';
-import 'package:ecommerce/features/parcel/screens/parcel_location_screen.dart';
-import 'package:ecommerce/features/parcel/screens/parcel_request_screen.dart';
+import 'package:ecommerce/features/parcel/presentation/pages/parcel_category_screen.dart';
+import 'package:ecommerce/features/parcel/presentation/pages/parcel_location_screen.dart';
+import 'package:ecommerce/features/parcel/presentation/pages/parcel_request_screen.dart';
 import 'package:ecommerce/features/profile/screens/profile_screen.dart';
 import 'package:ecommerce/features/profile/screens/update_profile_screen.dart';
 import 'package:ecommerce/features/store/screens/all_store_screen.dart';

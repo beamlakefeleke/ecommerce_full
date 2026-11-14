@@ -1,13 +1,18 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import 'package:ecommerce/common/widgets/address_widget.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/location/domain/entities/zone_response.dart';
+import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -69,14 +74,17 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
 
     return SizedBox(
       width: Dimensions.webMaxWidth,
-      child: GetBuilder<AddressController>(
-        builder: (addressController) {
-          return GetBuilder<ParcelController>(
-            builder: (parcelController) {
+      child: BlocBuilder<AddressBloc, AddressState>(
+        builder: (context, addressState) {
+          final List<AddressModel> savedAddressList = addressState.addresses
+              .map((e) => AddressModel.fromEntity(e))
+              .toList();
+          return BlocBuilder<ParcelBloc, ParcelState>(
+            builder: (context, parcelController) {
               List<DropdownItem<int>> senderAddressList =
                   _getDropdownAddressList(
                     context: context,
-                    addressList: addressController.addressList,
+                    addressList: savedAddressList,
                     isSender: true,
                     pickupAddress: parcelController.pickupAddress,
                     destinationAddress: parcelController.destinationAddress,
@@ -84,19 +92,19 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
               List<DropdownItem<int>> receiverAddressList =
                   _getDropdownAddressList(
                     context: context,
-                    addressList: addressController.addressList,
+                    addressList: savedAddressList,
                     isSender: false,
                     pickupAddress: parcelController.pickupAddress,
                     destinationAddress: parcelController.destinationAddress,
                   );
               List<AddressModel> senderAddress = _getAddressList(
-                addressList: addressController.addressList,
+                addressList: savedAddressList,
                 isSender: true,
                 pickupAddress: parcelController.pickupAddress,
                 destinationAddress: parcelController.destinationAddress,
               );
               List<AddressModel> receiverAddress = _getAddressList(
-                addressList: addressController.addressList,
+                addressList: savedAddressList,
                 isSender: false,
                 pickupAddress: parcelController.pickupAddress,
                 destinationAddress: parcelController.destinationAddress,
@@ -151,10 +159,9 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                     fromAddAddress: false,
                                                     route: '',
                                                     onPicked: (AddressModel address) async {
-                                                      ZoneResponseModel
-                                                      responseModel =
-                                                          await Get.find<
-                                                                LocationController
+                                                      final zoneEither =
+                                                          await getIt<
+                                                                LocationRepository
                                                               >()
                                                               .getZone(
                                                                 address.latitude
@@ -162,8 +169,12 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                                 address
                                                                     .longitude
                                                                     .toString(),
-                                                                false,
                                                               );
+                                                      final ZoneResult? zone =
+                                                          zoneEither.fold(
+                                                            (_) => null,
+                                                            (z) => z,
+                                                          );
 
                                                       AddressModel
                                                       a = AddressModel(
@@ -181,10 +192,9 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                         longitude:
                                                             address.longitude,
                                                         zoneId:
-                                                            responseModel
-                                                                .isSuccess
-                                                            ? responseModel
-                                                                  .zoneIds[0]
+                                                            (zone?.isSuccess ??
+                                                                false)
+                                                            ? zone!.zoneIds[0]
                                                             : 0,
                                                         zoneIds:
                                                             address.zoneIds,
@@ -195,17 +205,25 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                         floor: address.floor,
                                                       );
 
+                                                      if (!context.mounted) {
+                                                        return;
+                                                      }
                                                       if (parcelController
                                                           .isPickedUp!) {
-                                                        parcelController
-                                                            .setPickupAddress(
-                                                              a,
-                                                              true,
+                                                        context
+                                                            .read<ParcelBloc>()
+                                                            .add(
+                                                              PickupAddressSet(
+                                                                a,
+                                                              ),
                                                             );
                                                       } else {
-                                                        parcelController
-                                                            .setDestinationAddress(
-                                                              a,
+                                                        context
+                                                            .read<ParcelBloc>()
+                                                            .add(
+                                                              DestinationAddressSet(
+                                                                a,
+                                                              ),
                                                             );
                                                       }
                                                     },
@@ -225,20 +243,24 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                 canRoute: false,
                                                 route: '',
                                                 onPicked: (AddressModel address) async {
+                                                  final zoneEither =
+                                                      await getIt<
+                                                            LocationRepository
+                                                          >()
+                                                          .getZone(
+                                                            address.latitude
+                                                                .toString(),
+                                                            address.longitude
+                                                                .toString(),
+                                                          );
+                                                  final ZoneResult? zone =
+                                                      zoneEither.fold(
+                                                        (_) => null,
+                                                        (z) => z,
+                                                      );
+                                                  if (!context.mounted) return;
                                                   if (parcelController
                                                       .isPickedUp!) {
-                                                    ZoneResponseModel
-                                                    responseModel =
-                                                        await Get.find<
-                                                              LocationController
-                                                            >()
-                                                            .getZone(
-                                                              address.latitude
-                                                                  .toString(),
-                                                              address.longitude
-                                                                  .toString(),
-                                                              false,
-                                                            );
                                                     AddressModel
                                                     pickupAddress = AddressModel(
                                                       id: address.id,
@@ -254,41 +276,30 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                       longitude:
                                                           address.longitude,
                                                       zoneId:
-                                                          responseModel
-                                                              .isSuccess
-                                                          ? responseModel
-                                                                .zoneIds[0]
+                                                          (zone?.isSuccess ??
+                                                              false)
+                                                          ? zone!.zoneIds[0]
                                                           : 0,
-                                                      zoneIds:
-                                                          responseModel.zoneIds,
+                                                      zoneIds: zone?.zoneIds,
                                                       method: address.method,
                                                       streetNumber:
                                                           address.streetNumber,
                                                       house: address.house,
                                                       floor: address.floor,
                                                     );
-                                                    parcelController
-                                                        .setPickupAddress(
-                                                          pickupAddress,
-                                                          true,
+                                                    context
+                                                        .read<ParcelBloc>()
+                                                        .add(
+                                                          PickupAddressSet(
+                                                            pickupAddress,
+                                                          ),
                                                         );
-                                                    parcelController
-                                                        .setSenderAddressIndex(
-                                                          0,
-                                                        );
+                                                    context.read<ParcelBloc>().add(
+                                                      const SenderAddressIndexSet(
+                                                        0,
+                                                      ),
+                                                    );
                                                   } else {
-                                                    ZoneResponseModel
-                                                    responseModel =
-                                                        await Get.find<
-                                                              LocationController
-                                                            >()
-                                                            .getZone(
-                                                              address.latitude
-                                                                  .toString(),
-                                                              address.longitude
-                                                                  .toString(),
-                                                              false,
-                                                            );
                                                     AddressModel
                                                     a = AddressModel(
                                                       id: address.id,
@@ -304,27 +315,29 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                       longitude:
                                                           address.longitude,
                                                       zoneId:
-                                                          responseModel
-                                                              .isSuccess
-                                                          ? responseModel
-                                                                .zoneIds[0]
+                                                          (zone?.isSuccess ??
+                                                              false)
+                                                          ? zone!.zoneIds[0]
                                                           : 0,
-                                                      zoneIds:
-                                                          responseModel.zoneIds,
+                                                      zoneIds: zone?.zoneIds,
                                                       method: address.method,
                                                       streetNumber:
                                                           address.streetNumber,
                                                       house: address.house,
                                                       floor: address.floor,
                                                     );
-                                                    parcelController
-                                                        .setDestinationAddress(
-                                                          a,
+                                                    context
+                                                        .read<ParcelBloc>()
+                                                        .add(
+                                                          DestinationAddressSet(
+                                                            a,
+                                                          ),
                                                         );
-                                                    parcelController
-                                                        .setReceiverAddressIndex(
-                                                          0,
-                                                        );
+                                                    context.read<ParcelBloc>().add(
+                                                      const ReceiverAddressIndexSet(
+                                                        0,
+                                                      ),
+                                                    );
                                                   }
                                                 },
                                               ),
@@ -359,13 +372,17 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                     ),
                                     child: CustomDropdown<int>(
                                       onChange: (int? value, int index) async {
+                                        final parcelBloc = context
+                                            .read<ParcelBloc>();
                                         if (parcelController.isSender) {
-                                          parcelController.setPickupAddress(
-                                            senderAddress[index],
-                                            true,
+                                          parcelBloc.add(
+                                            PickupAddressSet(
+                                              senderAddress[index],
+                                            ),
                                           );
-                                          parcelController
-                                              .setSenderAddressIndex(index);
+                                          parcelBloc.add(
+                                            SenderAddressIndexSet(index),
+                                          );
                                           widget.streetController.text =
                                               senderAddress[index]
                                                   .streetNumber ??
@@ -383,19 +400,25 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                                     .contactPersonNumber ??
                                                 '',
                                           );
-                                          parcelController.setCountryCode(
-                                            _addressCountryCode!,
-                                            true,
-                                          );
+                                          if (_addressCountryCode != null) {
+                                            parcelBloc.add(
+                                              CountryCodeSet(
+                                                _addressCountryCode!,
+                                                true,
+                                              ),
+                                            );
+                                          }
 
                                           // widget.phoneController.text = senderAddress[index].contactPersonNumber ?? '';
                                         } else {
-                                          parcelController
-                                              .setDestinationAddress(
-                                                receiverAddress[index],
-                                              );
-                                          parcelController
-                                              .setReceiverAddressIndex(index);
+                                          parcelBloc.add(
+                                            DestinationAddressSet(
+                                              receiverAddress[index],
+                                            ),
+                                          );
+                                          parcelBloc.add(
+                                            ReceiverAddressIndexSet(index),
+                                          );
                                           widget.streetController.text =
                                               receiverAddress[index]
                                                   .streetNumber ??
@@ -587,9 +610,11 @@ class _ParcelViewWidgetState extends State<ParcelViewWidget> {
                                         (CountryCode countryCode) {
                                           countryDialCode =
                                               countryCode.dialCode;
-                                          parcelController.setCountryCode(
-                                            countryDialCode!,
-                                            parcelController.isSender,
+                                          context.read<ParcelBloc>().add(
+                                            CountryCodeSet(
+                                              countryDialCode!,
+                                              parcelController.isSender,
+                                            ),
                                           );
                                         },
                                     countryDialCode:

@@ -5,7 +5,7 @@ import 'package:ecommerce/core/error/exceptions.dart';
 import 'package:ecommerce/features/location/domain/entities/zone_response.dart';
 import 'package:ecommerce/features/location/domain/models/prediction_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_model.dart';
-import 'package:ecommerce/features/parcel/domain/models/place_details_model.dart';
+import 'package:ecommerce/features/parcel/data/models/place_details_model.dart';
 import 'package:ecommerce/util/app_constants.dart';
 
 /// Raw API access for the location feature. Throws [ServerException] /

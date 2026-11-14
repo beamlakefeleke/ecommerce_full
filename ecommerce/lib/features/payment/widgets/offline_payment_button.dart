@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/checkout/controllers/checkout_controller.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
 import 'package:ecommerce/features/payment/domain/models/offline_method_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -14,8 +12,12 @@ class OfflinePaymentButton extends StatelessWidget {
   final List<OfflineMethodModel>? offlineMethodList;
   final bool isOfflinePaymentActive;
   final Function onTap;
-  final CheckoutController checkoutController;
-  final ParcelController? parcelController;
+
+  /// Currently selected offline-bank index (from checkout/parcel state).
+  final int selectedOfflineBankIndex;
+
+  /// Dispatched when the user taps an offline bank tile.
+  final void Function(int index) onBankSelected;
   final bool forParcel;
   final JustTheController tooltipController;
   const OfflinePaymentButton({
@@ -24,8 +26,8 @@ class OfflinePaymentButton extends StatelessWidget {
     required this.offlineMethodList,
     required this.isOfflinePaymentActive,
     required this.onTap,
-    required this.checkoutController,
-    this.parcelController,
+    required this.selectedOfflineBankIndex,
+    required this.onBankSelected,
     this.forParcel = false,
     required this.tooltipController,
   });
@@ -170,11 +172,7 @@ class OfflinePaymentButton extends StatelessWidget {
                           shrinkWrap: true,
                           itemCount: offlineMethodList!.length,
                           itemBuilder: (context, index) {
-                            bool isSelected = !forParcel
-                                ? checkoutController.selectedOfflineBankIndex ==
-                                      index
-                                : parcelController?.selectedOfflineBankIndex ==
-                                      index;
+                            bool isSelected = selectedOfflineBankIndex == index;
                             return Container(
                               decoration: BoxDecoration(
                                 color: isSelected
@@ -185,13 +183,7 @@ class OfflinePaymentButton extends StatelessWidget {
                                 ),
                               ),
                               child: CustomInkWell(
-                                onTap: () {
-                                  if (!forParcel) {
-                                    checkoutController.selectOfflineBank(index);
-                                  } else {
-                                    parcelController?.selectOfflineBank(index);
-                                  }
-                                },
+                                onTap: () => onBankSelected(index),
                                 radius: Dimensions.radiusLarge,
                                 child: Center(
                                   child: Text(

@@ -123,6 +123,12 @@ import 'package:ecommerce/features/order/data/repositories/order_repository_impl
 import 'package:ecommerce/features/order/domain/repositories/order_repository.dart';
 import 'package:ecommerce/features/order/domain/usecases/order_usecases.dart';
 import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
+import 'package:ecommerce/features/parcel/data/datasources/parcel_remote_data_source.dart';
+import 'package:ecommerce/features/parcel/data/repositories/parcel_repository_impl.dart';
+import 'package:ecommerce/features/parcel/domain/repositories/parcel_repository.dart';
+import 'package:ecommerce/features/parcel/domain/usecases/parcel_usecases.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/features/loyalty/data/datasources/loyalty_remote_data_source.dart';
 import 'package:ecommerce/features/loyalty/data/repositories/loyalty_repository_impl.dart';
 import 'package:ecommerce/features/loyalty/domain/repositories/loyalty_repository.dart';
@@ -180,6 +186,40 @@ void configureDependencies() {
   _registerNotification();
   _registerOnboard();
   _registerOrder();
+  _registerParcel();
+}
+
+void _registerParcel() {
+  getIt.registerLazySingleton<ParcelRemoteDataSource>(
+    () => ParcelRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<ParcelRepository>(
+    () => ParcelRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetParcelCategoryUseCase(getIt()));
+  getIt.registerFactory(() => GetParcelInstructionUseCase(getIt()));
+  getIt.registerFactory(() => GetWhyChooseDetailsUseCase(getIt()));
+  getIt.registerFactory(() => GetVideoContentDetailsUseCase(getIt()));
+  getIt.registerFactory(() => GetPlaceDetailsUseCase(getIt()));
+  // app-wide: pickup/destination addresses, payer/payment/tip selection and the
+  // category list are read across the parcel category/location/request screens.
+  getIt.registerLazySingleton(
+    () => ParcelBloc(
+      getParcelCategory: getIt(),
+      getParcelInstruction: getIt(),
+      getWhyChooseDetails: getIt(),
+      getVideoContentDetails: getIt(),
+      getPlaceDetails: getIt(),
+      checkoutRepository: getIt(),
+      locationRepository: getIt(),
+      currentZoneIds: () =>
+          AddressHelper.getUserAddressFromSharedPref()?.zoneIds ?? const [],
+      currentContactPersonName: () =>
+          AddressHelper.getUserAddressFromSharedPref()?.contactPersonName,
+      currentContactPersonNumber: () =>
+          AddressHelper.getUserAddressFromSharedPref()?.contactPersonNumber,
+    ),
+  );
 }
 
 void _registerOrder() {

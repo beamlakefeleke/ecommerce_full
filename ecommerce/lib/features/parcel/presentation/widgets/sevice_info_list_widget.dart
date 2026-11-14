@@ -1,38 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/parcel/data/models/video_content_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 
 class ServiceInfoListWidget extends StatelessWidget {
-  final ParcelController parcelController;
-  const ServiceInfoListWidget({super.key, required this.parcelController});
+  final VideoContentModel? videoContentDetails;
+  const ServiceInfoListWidget({super.key, required this.videoContentDetails});
 
   @override
   Widget build(BuildContext context) {
     List<String>? title;
     List<String>? subTitle;
-    if (parcelController.videoContentDetails != null) {
+    if (videoContentDetails != null) {
       title = [];
       subTitle = [];
-      for (
-        int i = 0;
-        i < parcelController.videoContentDetails!.bannerContents!.length;
-        i++
-      ) {
+      for (int i = 0; i < videoContentDetails!.bannerContents!.length; i++) {
         if (i % 2 == 0) {
-          title.add(
-            parcelController.videoContentDetails!.bannerContents![i].value ??
-                '',
-          );
+          title.add(videoContentDetails!.bannerContents![i].value ?? '');
         } else {
-          subTitle.add(
-            parcelController.videoContentDetails!.bannerContents![i].value ??
-                '',
-          );
+          subTitle.add(videoContentDetails!.bannerContents![i].value ?? '');
         }
       }
     }
-    return parcelController.videoContentDetails != null
+    return videoContentDetails != null
         ? ListView.builder(
             physics: const ScrollPhysics(),
             shrinkWrap: true,

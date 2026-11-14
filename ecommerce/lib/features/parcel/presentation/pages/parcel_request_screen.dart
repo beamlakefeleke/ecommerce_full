@@ -1,16 +1,20 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
+import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
-import 'package:ecommerce/features/checkout/controllers/checkout_controller.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
-import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/domain/helpers/parcel_helper.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -33,9 +37,9 @@ import 'package:ecommerce/features/checkout/presentation/widgets/condition_check
 import 'package:ecommerce/features/payment/widgets/offline_payment_button.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/payment_button.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/tips_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/card_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/delivery_instruction_bottom_sheet_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/details_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/card_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/delivery_instruction_bottom_sheet_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/details_widget.dart';
 
 class ParcelRequestScreen extends StatefulWidget {
   final ParcelCategoryModel parcelCategory;
@@ -68,15 +72,18 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
   }
 
   void initCall() {
-    Get.find<ParcelController>().getOfflineMethodList();
-    Get.find<ParcelController>().getDmTipMostTapped();
-    Get.find<ParcelController>().setPaymentIndex(-1, false);
-    Get.find<ParcelController>().getDistance(
-      widget.pickedUpAddress,
-      widget.destinationAddress,
+    final parcelBloc = context.read<ParcelBloc>();
+    parcelBloc.add(const OfflineMethodListRequested());
+    parcelBloc.add(const DmTipMostTappedRequested());
+    parcelBloc.add(const PaymentIndexSet(-1));
+    parcelBloc.add(
+      DistanceRequested(
+        pickupAddress: widget.pickedUpAddress,
+        destinationAddress: widget.destinationAddress,
+      ),
     );
-    Get.find<ParcelController>().setPayerIndex(0, false);
-    Get.find<ParcelController>().startLoader(false, canUpdate: false);
+    parcelBloc.add(const PayerIndexSet(0));
+    parcelBloc.add(const LoaderToggled(false));
     for (ZoneData zData
         in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
       if (zData.id == AddressHelper.getUserAddressFromSharedPref()!.zoneId) {
@@ -91,17 +98,14 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
     if (Get.find<ProfileController>().userInfoModel == null && _isLoggedIn) {
       Get.find<ProfileController>().getUserInfo();
     }
-    Get.find<ParcelController>().updateTips(
-      Get.find<AuthController>().getDmTipIndex().isNotEmpty
-          ? int.parse(Get.find<AuthController>().getDmTipIndex())
-          : 0,
-      notify: false,
+    final String dmTipIndex = getIt<AuthRepository>().getDmTipIndex();
+    parcelBloc.add(
+      TipsIndexUpdated(dmTipIndex.isNotEmpty ? int.parse(dmTipIndex) : 0),
     );
 
-    Get.find<ParcelController>().setInstructionselectedIndex(-1, notify: false);
-    Get.find<ParcelController>().setCustomNoteController('', notify: false);
-    Get.find<ParcelController>().setselectedIndex(-1);
-    Get.find<ParcelController>().setCustomNote('');
+    parcelBloc.add(const InstructionSelectedIndexSet(-1));
+    parcelBloc.add(const SelectedNoteIndexSet(-1));
+    parcelBloc.add(const CustomNoteSet(''));
   }
 
   @override
@@ -117,8 +121,30 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
       endDrawerEnableOpenDragGesture: false,
       body: SafeArea(
         child: guestCheckoutPermission || _isLoggedIn
-            ? GetBuilder<ParcelController>(
-                builder: (parcelController) {
+            ? BlocConsumer<ParcelBloc, ParcelState>(
+                listenWhen: (prev, curr) =>
+                    prev.actionStatus != curr.actionStatus &&
+                    curr.actionStatus != ParcelActionStatus.inProgress,
+                listener: (context, parcelController) {
+                  if (parcelController.actionStatus ==
+                      ParcelActionStatus.success) {
+                    // actionMessage carries the placed order id
+                    ParcelHelper.onOrderPlaced(
+                      orderId: parcelController.actionMessage ?? '-1',
+                      paymentIndex: parcelController.paymentIndex,
+                      digitalPaymentName: parcelController.digitalPaymentName,
+                      orderAmount: 0,
+                      isCashOnDeliveryActive: false,
+                      isDmTipSave: parcelController.isDmTipSave,
+                      selectedTips: parcelController.selectedTips,
+                      contactNumber: widget.pickedUpAddress.contactPersonNumber,
+                    );
+                  } else if (parcelController.actionStatus ==
+                      ParcelActionStatus.failure) {
+                    showCustomSnackBar(parcelController.actionMessage);
+                  }
+                },
+                builder: (context, parcelController) {
                   double charge = -1;
                   double total = 0;
                   double dmTips = 0;
@@ -480,27 +506,25 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
 
                                                                     InkWell(
                                                                       onTap: () {
-                                                                        parcelController.setInstructionselectedIndex(
-                                                                          -1,
-                                                                          notify:
-                                                                              false,
+                                                                        final b = context
+                                                                            .read<
+                                                                              ParcelBloc
+                                                                            >();
+                                                                        b.add(
+                                                                          const InstructionSelectedIndexSet(
+                                                                            -1,
+                                                                          ),
                                                                         );
-                                                                        parcelController
-                                                                            .setCustomNoteController(
-                                                                              '',
-                                                                            );
-                                                                        Get.find<
-                                                                              ParcelController
-                                                                            >()
-                                                                            .setselectedIndex(
-                                                                              -1,
-                                                                            );
-                                                                        Get.find<
-                                                                              ParcelController
-                                                                            >()
-                                                                            .setCustomNote(
-                                                                              '',
-                                                                            );
+                                                                        b.add(
+                                                                          const SelectedNoteIndexSet(
+                                                                            -1,
+                                                                          ),
+                                                                        );
+                                                                        b.add(
+                                                                          const CustomNoteSet(
+                                                                            '',
+                                                                          ),
+                                                                        );
                                                                       },
                                                                       child: Icon(
                                                                         Icons
@@ -635,40 +659,44 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                                         .mostDmTipAmount
                                                                         .toString(),
                                                             onTap: () {
-                                                              parcelController
-                                                                  .updateTips(
-                                                                    index,
-                                                                  );
-                                                              if (parcelController
-                                                                          .selectedTips !=
-                                                                      0 &&
-                                                                  parcelController
-                                                                          .selectedTips !=
+                                                              final b = context
+                                                                  .read<
+                                                                    ParcelBloc
+                                                                  >();
+                                                              b.add(
+                                                                TipsIndexUpdated(
+                                                                  index,
+                                                                ),
+                                                              );
+                                                              if (index != 0 &&
+                                                                  index !=
                                                                       AppConstants
                                                                               .tips
                                                                               .length -
                                                                           1) {
-                                                                parcelController.addTips(
-                                                                  double.parse(
-                                                                    AppConstants
-                                                                        .tips[index],
+                                                                b.add(
+                                                                  TipsAmountSet(
+                                                                    double.parse(
+                                                                      AppConstants
+                                                                          .tips[index],
+                                                                    ),
                                                                   ),
                                                                 );
                                                               }
-                                                              if (parcelController
-                                                                      .selectedTips ==
+                                                              if (index ==
                                                                   AppConstants
                                                                           .tips
                                                                           .length -
                                                                       1) {
-                                                                parcelController
-                                                                    .showTipsField();
+                                                                b.add(
+                                                                  const TipsFieldToggled(),
+                                                                );
                                                               }
                                                               _tipController
-                                                                      .text =
-                                                                  parcelController
-                                                                      .tips
-                                                                      .toString();
+                                                                  .text = b
+                                                                  .state
+                                                                  .tips
+                                                                  .toString();
                                                             },
                                                           );
                                                         },
@@ -694,9 +722,11 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                           1
                                                   ? const SizedBox()
                                                   : ListTile(
-                                                      onTap: () =>
-                                                          parcelController
-                                                              .toggleDmTipSave(),
+                                                      onTap: () => context
+                                                          .read<ParcelBloc>()
+                                                          .add(
+                                                            const DmTipSaveToggled(),
+                                                          ),
                                                       leading: Checkbox(
                                                         visualDensity:
                                                             const VisualDensity(
@@ -711,8 +741,13 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                         onChanged:
                                                             (
                                                               bool? isChecked,
-                                                            ) => parcelController
-                                                                .toggleDmTipSave(),
+                                                            ) => context
+                                                                .read<
+                                                                  ParcelBloc
+                                                                >()
+                                                                .add(
+                                                                  const DmTipSaveToggled(),
+                                                                ),
                                                       ),
                                                       title: Text(
                                                         'save_for_later'.tr,
@@ -771,10 +806,15 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                                       value,
                                                                     ) >=
                                                                     0) {
-                                                                  parcelController
-                                                                      .addTips(
-                                                                        double.parse(
-                                                                          value,
+                                                                  context
+                                                                      .read<
+                                                                        ParcelBloc
+                                                                      >()
+                                                                      .add(
+                                                                        TipsAmountSet(
+                                                                          double.parse(
+                                                                            value,
+                                                                          ),
                                                                         ),
                                                                       );
                                                                 } else {
@@ -784,9 +824,14 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                                   );
                                                                 }
                                                               } else {
-                                                                parcelController
-                                                                    .addTips(
-                                                                      0.0,
+                                                                context
+                                                                    .read<
+                                                                      ParcelBloc
+                                                                    >()
+                                                                    .add(
+                                                                      const TipsAmountSet(
+                                                                        0.0,
+                                                                      ),
                                                                     );
                                                               }
                                                             },
@@ -797,10 +842,15 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                                       value,
                                                                     ) >=
                                                                     0) {
-                                                                  parcelController
-                                                                      .addTips(
-                                                                        double.parse(
-                                                                          value,
+                                                                  context
+                                                                      .read<
+                                                                        ParcelBloc
+                                                                      >()
+                                                                      .add(
+                                                                        TipsAmountSet(
+                                                                          double.parse(
+                                                                            value,
+                                                                          ),
                                                                         ),
                                                                       );
                                                                 } else {
@@ -810,9 +860,14 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                                   );
                                                                 }
                                                               } else {
-                                                                parcelController
-                                                                    .addTips(
-                                                                      0.0,
+                                                                context
+                                                                    .read<
+                                                                      ParcelBloc
+                                                                    >()
+                                                                    .add(
+                                                                      const TipsAmountSet(
+                                                                        0.0,
+                                                                      ),
                                                                     );
                                                               }
                                                             },
@@ -825,10 +880,18 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
 
                                                         InkWell(
                                                           onTap: () {
-                                                            parcelController
-                                                                .updateTips(0);
-                                                            parcelController
-                                                                .showTipsField();
+                                                            final b = context
+                                                                .read<
+                                                                  ParcelBloc
+                                                                >();
+                                                            b.add(
+                                                              const TipsIndexUpdated(
+                                                                0,
+                                                              ),
+                                                            );
+                                                            b.add(
+                                                              const TipsFieldToggled(),
+                                                            );
                                                           },
                                                           child: Container(
                                                             decoration: BoxDecoration(
@@ -878,8 +941,9 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                     children: [
                                       Expanded(
                                         child: InkWell(
-                                          onTap: () => parcelController
-                                              .setPayerIndex(0, true),
+                                          onTap: () => context
+                                              .read<ParcelBloc>()
+                                              .add(const PayerIndexSet(0)),
                                           child: Row(
                                             children: [
                                               Radio<String>(
@@ -893,12 +957,15 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                   context,
                                                 ).primaryColor,
                                                 onChanged:
-                                                    (String? payerType) =>
-                                                        parcelController
-                                                            .setPayerIndex(
-                                                              0,
-                                                              true,
-                                                            ),
+                                                    (
+                                                      String? payerType,
+                                                    ) => context
+                                                        .read<ParcelBloc>()
+                                                        .add(
+                                                          const PayerIndexSet(
+                                                            0,
+                                                          ),
+                                                        ),
                                               ),
                                               Text(
                                                 parcelController
@@ -913,8 +980,11 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                       _isCashOnDeliveryActive!
                                           ? Expanded(
                                               child: InkWell(
-                                                onTap: () => parcelController
-                                                    .setPayerIndex(1, true),
+                                                onTap: () => context
+                                                    .read<ParcelBloc>()
+                                                    .add(
+                                                      const PayerIndexSet(1),
+                                                    ),
                                                 child: Row(
                                                   children: [
                                                     Radio<String>(
@@ -930,10 +1000,14 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                       onChanged:
                                                           (
                                                             String? payerType,
-                                                          ) => parcelController
-                                                              .setPayerIndex(
-                                                                1,
-                                                                true,
+                                                          ) => context
+                                                              .read<
+                                                                ParcelBloc
+                                                              >()
+                                                              .add(
+                                                                const PayerIndexSet(
+                                                                  1,
+                                                                ),
                                                               ),
                                                     ),
                                                     Text(
@@ -967,8 +1041,11 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                     parcelController
                                                         .paymentIndex ==
                                                     0,
-                                                onTap: () => parcelController
-                                                    .setPaymentIndex(0, true),
+                                                onTap: () => context
+                                                    .read<ParcelBloc>()
+                                                    .add(
+                                                      const PaymentIndexSet(0),
+                                                    ),
                                               ),
                                             )
                                           : const SizedBox(),
@@ -1003,8 +1080,11 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                     parcelController
                                                         .paymentIndex ==
                                                     1,
-                                                onTap: () => parcelController
-                                                    .setPaymentIndex(1, true),
+                                                onTap: () => context
+                                                    .read<ParcelBloc>()
+                                                    .add(
+                                                      const PaymentIndexSet(1),
+                                                    ),
                                               ),
                                             )
                                           : const SizedBox(),
@@ -1067,20 +1147,21 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                             .digitalPaymentName;
                                                 return InkWell(
                                                   onTap: () {
-                                                    parcelController
-                                                        .setPaymentIndex(
-                                                          2,
-                                                          true,
-                                                        );
-                                                    parcelController
-                                                        .changeDigitalPaymentName(
-                                                          Get.find<
-                                                                SplashController
-                                                              >()
-                                                              .configModel!
-                                                              .activePaymentMethodList![index]
-                                                              .getWay!,
-                                                        );
+                                                    final b = context
+                                                        .read<ParcelBloc>();
+                                                    b.add(
+                                                      const PaymentIndexSet(2),
+                                                    );
+                                                    b.add(
+                                                      DigitalPaymentNameChanged(
+                                                        Get.find<
+                                                              SplashController
+                                                            >()
+                                                            .configModel!
+                                                            .activePaymentMethodList![index]
+                                                            .getWay!,
+                                                      ),
+                                                    );
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -1181,15 +1262,17 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                           isOfflinePaymentActive:
                                               isOfflinePaymentActive,
                                           onTap: () {
-                                            parcelController.setPaymentIndex(
-                                              3,
-                                              true,
+                                            context.read<ParcelBloc>().add(
+                                              const PaymentIndexSet(3),
                                             );
                                           },
-                                          parcelController: parcelController,
+                                          selectedOfflineBankIndex:
+                                              parcelController
+                                                  .selectedOfflineBankIndex,
+                                          onBankSelected: (index) => context
+                                              .read<ParcelBloc>()
+                                              .add(OfflineBankSelected(index)),
                                           forParcel: true,
-                                          checkoutController:
-                                              Get.find<CheckoutController>(),
                                           tooltipController: tooltipController,
                                         )
                                       : const SizedBox(),
@@ -1353,9 +1436,9 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
     );
   }
 
-  Widget _bottomButton(ParcelController parcelController, double charge) {
+  Widget _bottomButton(ParcelState parcelController, double charge) {
     bool isInstructionSelected = parcelController.selectedIndexNote != -1;
-    bool isCustomNote = parcelController.customNote!.isNotEmpty;
+    bool isCustomNote = parcelController.customNote.isNotEmpty;
 
     return CustomButton(
       buttonText: 'confirm_parcel_request'.tr,
@@ -1412,15 +1495,13 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                   unavailableItemNote: '',
                   deliveryInstruction:
                       (isInstructionSelected
-                          ? '${parcelController.parcelInstructionList![parcelController.selectedIndexNote!].instruction}'
+                          ? '${parcelController.parcelInstructionList![parcelController.selectedIndexNote].instruction}'
                           : '') +
                       (isInstructionSelected
                           ? (isCustomNote
                                 ? " (${parcelController.customNote})"
                                 : '')
-                          : (isCustomNote
-                                ? parcelController.customNote ?? ''
-                                : '')),
+                          : (isCustomNote ? parcelController.customNote : '')),
                   partialPayment: 0,
                   guestId: AuthHelper.isGuestLoggedIn()
                       ? int.parse(AuthHelper.getGuestId())
@@ -1442,15 +1523,8 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                     ),
                   );
                 } else {
-                  parcelController.startLoader(true);
-                  parcelController.placeOrder(
-                    placeOrderBody,
-                    widget.pickedUpAddress.zoneId,
-                    0,
-                    0,
-                    false,
-                    false,
-                    forParcel: true,
+                  context.read<ParcelBloc>().add(
+                    ParcelOrderPlaced(placeOrderBody: placeOrderBody),
                   );
                 }
               }
@@ -1460,7 +1534,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
   }
 
   double _calculateParcelDeliveryCharge({
-    required ParcelController parcelController,
+    required ParcelState parcelController,
     required ParcelCategoryModel parcelCategory,
     required int zoneId,
   }) {

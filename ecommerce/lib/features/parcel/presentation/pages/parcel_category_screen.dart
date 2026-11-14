@@ -1,12 +1,17 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_state.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -15,10 +20,10 @@ import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/features/home/widgets/bad_weather_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/parcel_app_bar_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/deliver_item_card_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/get_service_video_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/sevice_info_list_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/parcel_app_bar_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/deliver_item_card_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/get_service_video_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/sevice_info_list_widget.dart';
 
 class ParcelCategoryScreen extends StatefulWidget {
   const ParcelCategoryScreen({super.key});
@@ -35,9 +40,13 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
         Get.find<ProfileController>().userInfoModel == null) {
       Get.find<ProfileController>().getUserInfo();
     }
-    Get.find<BannerController>().getParcelOtherBannerList(true);
-    Get.find<ParcelController>().getWhyChooseDetails();
-    Get.find<ParcelController>().getVideoContentDetails();
+    final parcelBloc = context.read<ParcelBloc>();
+    context.read<BannerBloc>().add(
+      const ParcelOtherBannerRequested(reload: true),
+    );
+    parcelBloc.add(const ParcelCategoryListRequested());
+    parcelBloc.add(const WhyChooseDetailsRequested());
+    parcelBloc.add(const VideoContentDetailsRequested());
   }
 
   @override
@@ -46,10 +55,10 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
       appBar: ResponsiveHelper.isDesktop(context)
           ? null
           : const ParcelAppBarWidget(),
-      body: GetBuilder<ParcelController>(
-        builder: (parcelController) {
-          return GetBuilder<BannerController>(
-            builder: (bannerController) {
+      body: BlocBuilder<ParcelBloc, ParcelState>(
+        builder: (context, parcelController) {
+          return BlocBuilder<BannerBloc, BannerState>(
+            builder: (context, bannerController) {
               bool showVideoAndServices =
                   parcelController.videoContentDetails != null &&
                   (parcelController.videoContentDetails!.bannerVideo != null ||
@@ -60,13 +69,13 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                 children: [
                   RefreshIndicator(
                     onRefresh: () async {
-                      await Get.find<ParcelController>()
-                          .getParcelCategoryList();
-                      await Get.find<BannerController>()
-                          .getParcelOtherBannerList(true);
-                      await Get.find<ParcelController>().getWhyChooseDetails();
-                      await Get.find<ParcelController>()
-                          .getVideoContentDetails();
+                      final parcelBloc = context.read<ParcelBloc>();
+                      parcelBloc.add(const ParcelCategoryListRequested());
+                      context.read<BannerBloc>().add(
+                        const ParcelOtherBannerRequested(reload: true),
+                      );
+                      parcelBloc.add(const WhyChooseDetailsRequested());
+                      parcelBloc.add(const VideoContentDetailsRequested());
                     },
                     child: SingleChildScrollView(
                       padding: EdgeInsets.all(
@@ -83,15 +92,15 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                 ? CrossAxisAlignment.center
                                 : CrossAxisAlignment.start,
                             children: [
-                              bannerController.parcelOtherBannerModel != null
+                              bannerController.parcelOtherBanner != null
                                   ? bannerController
-                                            .parcelOtherBannerModel!
-                                            .banners!
+                                            .parcelOtherBanner!
+                                            .banners
                                             .isNotEmpty
                                         ? CarouselSlider.builder(
                                             itemCount: bannerController
-                                                .parcelOtherBannerModel!
-                                                .banners!
+                                                .parcelOtherBanner!
+                                                .banners
                                                 .length,
                                             options: CarouselOptions(
                                               autoPlay: true,
@@ -108,11 +117,9 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                                 seconds: 5,
                                               ),
                                               onPageChanged: (index, reason) {
-                                                bannerController
-                                                    .setCurrentIndex(
-                                                      index,
-                                                      false,
-                                                    );
+                                                context.read<BannerBloc>().add(
+                                                  BannerIndexChanged(index),
+                                                );
                                               },
                                             ),
                                             itemBuilder: (context, index, realIndex) {
@@ -123,8 +130,8 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                                     ),
                                                 child: CustomImage(
                                                   image:
-                                                      '${bannerController.parcelOtherBannerModel!.promotionalBannerUrl}'
-                                                      '/${bannerController.parcelOtherBannerModel!.banners![index].image}',
+                                                      '${bannerController.parcelOtherBanner!.promotionalBannerUrl}'
+                                                      '/${bannerController.parcelOtherBanner!.banners[index].image}',
                                                 ),
                                               );
                                             },
@@ -399,8 +406,9 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
 
                                               Expanded(
                                                 child: ServiceInfoListWidget(
-                                                  parcelController:
-                                                      parcelController,
+                                                  videoContentDetails:
+                                                      parcelController
+                                                          .videoContentDetails,
                                                 ),
                                               ),
                                             ],
@@ -446,8 +454,9 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                               ),
 
                                               ServiceInfoListWidget(
-                                                parcelController:
-                                                    parcelController,
+                                                videoContentDetails:
+                                                    parcelController
+                                                        .videoContentDetails,
                                               ),
                                             ],
                                           )

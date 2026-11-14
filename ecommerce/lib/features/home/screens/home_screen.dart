@@ -34,7 +34,7 @@ import 'package:ecommerce/features/home/widgets/filter_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/home/widgets/module_view.dart';
-import 'package:ecommerce/features/parcel/screens/parcel_category_screen.dart';
+import 'package:ecommerce/features/parcel/presentation/pages/parcel_category_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

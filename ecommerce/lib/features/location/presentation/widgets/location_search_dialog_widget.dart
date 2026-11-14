@@ -4,7 +4,8 @@ import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart
 import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
 import 'package:ecommerce/features/location/domain/models/prediction_model.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:flutter/material.dart';
@@ -125,10 +126,12 @@ class LocationSearchDialogWidget extends StatelessWidget {
                     ),
                   );
                 } else {
-                  Get.find<ParcelController>().setLocationFromPlace(
-                    suggestion.placeId,
-                    suggestion.description,
-                    isPickedUp,
+                  getIt<ParcelBloc>().add(
+                    LocationFromPlaceRequested(
+                      placeId: suggestion.placeId,
+                      address: suggestion.description,
+                      isPickedUp: isPickedUp!,
+                    ),
                   );
                 }
               }

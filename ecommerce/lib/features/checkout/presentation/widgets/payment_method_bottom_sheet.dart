@@ -419,7 +419,11 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                               CheckoutPaymentMethodSet(3),
                             );
                           },
-                          checkoutController: checkoutController,
+                          selectedOfflineBankIndex:
+                              checkoutController.selectedOfflineBankIndex,
+                          onBankSelected: (index) => context
+                              .read<CheckoutBloc>()
+                              .add(CheckoutOfflineBankSelected(index)),
                           tooltipController: tooltipController,
                         ),
                       ],

@@ -1,14 +1,20 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
+import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
-import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/custom_validator.dart';
@@ -20,7 +26,7 @@ import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
-import 'package:ecommerce/features/parcel/widgets/parcel_view_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/parcel_view_widget.dart';
 
 class ParcelLocationScreen extends StatefulWidget {
   final ParcelCategoryModel category;
@@ -61,30 +67,28 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
   Future<void> initCall() async {
     _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
 
-    _countryDialCode =
-        Get.find<AuthController>().getUserCountryCode().isNotEmpty
-        ? Get.find<AuthController>().getUserCountryCode()
+    final parcelBloc = context.read<ParcelBloc>();
+    _countryDialCode = getIt<AuthRepository>().getUserCountryCode().isNotEmpty
+        ? getIt<AuthRepository>().getUserCountryCode()
         : CountryCode.fromCountryCode(
             Get.find<SplashController>().configModel!.country!,
           ).dialCode;
 
-    Get.find<ParcelController>().setPickupAddress(
-      AddressHelper.getUserAddressFromSharedPref(),
-      false,
+    parcelBloc.add(
+      PickupAddressSet(AddressHelper.getUserAddressFromSharedPref()),
     );
-    Get.find<ParcelController>().setDestinationAddress(
-      AddressHelper.getUserAddressFromSharedPref(),
-      notify: false,
+    parcelBloc.add(
+      DestinationAddressSet(AddressHelper.getUserAddressFromSharedPref()),
     );
-    Get.find<ParcelController>().setIsPickedUp(true, false);
-    Get.find<ParcelController>().setIsSender(true, false);
-    Get.find<ParcelController>().setSenderAddressIndex(0, canUpdate: false);
-    Get.find<ParcelController>().setReceiverAddressIndex(0, canUpdate: false);
-    Get.find<ParcelController>().setCountryCode(_countryDialCode!, true);
-    Get.find<ParcelController>().setCountryCode(_countryDialCode!, false);
+    parcelBloc.add(const IsPickedUpToggled(true));
+    parcelBloc.add(const IsSenderToggled(true));
+    parcelBloc.add(const SenderAddressIndexSet(0));
+    parcelBloc.add(const ReceiverAddressIndexSet(0));
+    parcelBloc.add(CountryCodeSet(_countryDialCode!, true));
+    parcelBloc.add(CountryCodeSet(_countryDialCode!, false));
     if (AuthHelper.isLoggedIn() &&
-        Get.find<AddressController>().addressList == null) {
-      Get.find<AddressController>().getAddressList();
+        context.read<AddressBloc>().state.status != AddressStatus.loaded) {
+      context.read<AddressBloc>().add(const AddressListRequested());
     }
     if (AuthHelper.isLoggedIn()) {
       if (Get.find<ProfileController>().userInfoModel == null) {
@@ -121,20 +125,14 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
           false,
         );
       }
-      Get.find<ParcelController>().setCountryCode(_countryDialCode!, true);
-      Get.find<ParcelController>().setCountryCode(_countryDialCode!, false);
+      parcelBloc.add(CountryCodeSet(_countryDialCode!, true));
+      parcelBloc.add(CountryCodeSet(_countryDialCode!, false));
       setState(() {});
     }
 
     _tabController?.addListener(() {
-      Get.find<ParcelController>().setIsPickedUp(
-        _tabController!.index == 0,
-        false,
-      );
-      Get.find<ParcelController>().setIsSender(
-        _tabController!.index == 0,
-        true,
-      );
+      parcelBloc.add(IsPickedUpToggled(_tabController!.index == 0));
+      parcelBloc.add(IsSenderToggled(_tabController!.index == 0));
     });
   }
 
@@ -178,123 +176,133 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
       endDrawer: const MenuDrawer(),
       endDrawerEnableOpenDragGesture: false,
       body: SafeArea(
-        child: GetBuilder<ParcelController>(
-          builder: (parcelController) {
-            return Column(
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Dimensions.paddingSizeSmall,
-                          ),
-                          width: Dimensions.webMaxWidth,
-                          color: Theme.of(context).cardColor,
-                          child: Column(
-                            children: [
-                              TabBar(
-                                controller: _tabController,
-                                labelColor: Theme.of(context).primaryColor,
-                                unselectedLabelColor: Colors.black,
-                                onTap: (int index) {
-                                  if (index == 1) {
-                                    _validateSender(parcelController);
-                                  }
-                                },
-                                unselectedLabelStyle: robotoRegular.copyWith(
-                                  color: Theme.of(context).disabledColor,
-                                  fontSize: Dimensions.fontSizeSmall,
-                                ),
-                                labelStyle: robotoBold.copyWith(
-                                  fontSize: Dimensions.fontSizeSmall,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                                tabs: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: Dimensions.paddingSizeSmall,
+        child: BlocListener<ParcelBloc, ParcelState>(
+          listenWhen: (prev, curr) =>
+              prev.actionStatus != curr.actionStatus &&
+              curr.actionStatus == ParcelActionStatus.failure &&
+              curr.actionMessage != null,
+          listener: (context, state) {
+            showCustomSnackBar(state.actionMessage!.tr);
+          },
+          child: BlocBuilder<ParcelBloc, ParcelState>(
+            builder: (context, parcelController) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: Dimensions.paddingSizeSmall,
+                            ),
+                            width: Dimensions.webMaxWidth,
+                            color: Theme.of(context).cardColor,
+                            child: Column(
+                              children: [
+                                TabBar(
+                                  controller: _tabController,
+                                  labelColor: Theme.of(context).primaryColor,
+                                  unselectedLabelColor: Colors.black,
+                                  onTap: (int index) {
+                                    if (index == 1) {
+                                      _validateSender(parcelController);
+                                    }
+                                  },
+                                  unselectedLabelStyle: robotoRegular.copyWith(
+                                    color: Theme.of(context).disabledColor,
+                                    fontSize: Dimensions.fontSizeSmall,
+                                  ),
+                                  labelStyle: robotoBold.copyWith(
+                                    fontSize: Dimensions.fontSizeSmall,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  tabs: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: Dimensions.paddingSizeSmall,
+                                      ),
+                                      child: Text(
+                                        'sender_info'.tr,
+                                        style: robotoMedium.copyWith(
+                                          fontSize: Dimensions.fontSizeLarge,
+                                          color: parcelController.isSender
+                                              ? Theme.of(context).primaryColor
+                                              : Theme.of(
+                                                  context,
+                                                ).textTheme.bodyMedium!.color,
+                                        ),
+                                      ),
                                     ),
-                                    child: Text(
-                                      'sender_info'.tr,
+                                    Text(
+                                      'receiver_info'.tr,
                                       style: robotoMedium.copyWith(
                                         fontSize: Dimensions.fontSizeLarge,
-                                        color: parcelController.isSender
+                                        color: !parcelController.isSender
                                             ? Theme.of(context).primaryColor
                                             : Theme.of(
                                                 context,
                                               ).textTheme.bodyMedium!.color,
                                       ),
                                     ),
-                                  ),
-                                  Text(
-                                    'receiver_info'.tr,
-                                    style: robotoMedium.copyWith(
-                                      fontSize: Dimensions.fontSizeLarge,
-                                      color: !parcelController.isSender
-                                          ? Theme.of(context).primaryColor
-                                          : Theme.of(
-                                              context,
-                                            ).textTheme.bodyMedium!.color,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                // Container(height: 3, width: Dimensions.webMaxWidth, decoration: BoxDecoration(color: Theme.of(context).primaryColor))
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [
+                              ParcelViewWidget(
+                                isSender: true,
+                                nameController: _senderNameController,
+                                phoneController: _senderPhoneController,
+                                bottomButton: _bottomButton(),
+                                streetController: _senderStreetNumberController,
+                                floorController: _senderFloorController,
+                                houseController: _senderHouseController,
+                                countryCode: parcelController
+                                    .senderCountryCode /* _countryDialCode*/,
                               ),
-                              // Container(height: 3, width: Dimensions.webMaxWidth, decoration: BoxDecoration(color: Theme.of(context).primaryColor))
+                              ParcelViewWidget(
+                                isSender: false,
+                                nameController: _receiverNameController,
+                                phoneController: _receiverPhoneController,
+                                bottomButton: _bottomButton(),
+                                streetController:
+                                    _receiverStreetNumberController,
+                                floorController: _receiverFloorController,
+                                houseController: _receiverHouseController,
+                                countryCode: parcelController
+                                    .receiverCountryCode /*_countryDialCode*/,
+                              ),
                             ],
                           ),
                         ),
-                      ),
-
-                      Expanded(
-                        child: TabBarView(
-                          controller: _tabController,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            ParcelViewWidget(
-                              isSender: true,
-                              nameController: _senderNameController,
-                              phoneController: _senderPhoneController,
-                              bottomButton: _bottomButton(),
-                              streetController: _senderStreetNumberController,
-                              floorController: _senderFloorController,
-                              houseController: _senderHouseController,
-                              countryCode: parcelController
-                                  .senderCountryCode /* _countryDialCode*/,
-                            ),
-                            ParcelViewWidget(
-                              isSender: false,
-                              nameController: _receiverNameController,
-                              phoneController: _receiverPhoneController,
-                              bottomButton: _bottomButton(),
-                              streetController: _receiverStreetNumberController,
-                              floorController: _receiverFloorController,
-                              houseController: _receiverHouseController,
-                              countryCode: parcelController
-                                  .receiverCountryCode /*_countryDialCode*/,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                ResponsiveHelper.isDesktop(context)
-                    ? const SizedBox()
-                    : _bottomButton(),
-              ],
-            );
-          },
+                  ResponsiveHelper.isDesktop(context)
+                      ? const SizedBox()
+                      : _bottomButton(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
   Widget _bottomButton() {
-    return GetBuilder<ParcelController>(
-      builder: (parcelController) {
+    return BlocBuilder<ParcelBloc, ParcelState>(
+      builder: (context, parcelController) {
         return CustomButton(
           margin: ResponsiveHelper.isDesktop(context)
               ? null
@@ -340,13 +348,15 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
                   floor: _receiverFloorController.text.trim(),
                 );
 
-                parcelController.setDestinationAddress(destination);
+                context.read<ParcelBloc>().add(
+                  DestinationAddressSet(destination),
+                );
 
                 Get.toNamed(
                   RouteHelper.getParcelRequestRoute(
                     widget.category,
-                    parcelController.pickupAddress!,
-                    parcelController.destinationAddress!,
+                    context.read<ParcelBloc>().state.pickupAddress!,
+                    destination,
                   ),
                 );
               }
@@ -357,7 +367,7 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
     );
   }
 
-  Future<void> _validateSender(ParcelController parcelController) async {
+  Future<void> _validateSender(ParcelState parcelController) async {
     String numberWithCountryCode =
         '${parcelController.senderCountryCode ?? ''}${_senderPhoneController.text.trim()}';
     PhoneValid phoneValid = await CustomValidator.isPhoneValid(
@@ -394,7 +404,8 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
         house: _senderHouseController.text.trim(),
         floor: _senderFloorController.text.trim(),
       );
-      parcelController.setPickupAddress(pickup, true);
+      if (!mounted) return;
+      context.read<ParcelBloc>().add(PickupAddressSet(pickup));
       _tabController!.animateTo(1);
     }
   }

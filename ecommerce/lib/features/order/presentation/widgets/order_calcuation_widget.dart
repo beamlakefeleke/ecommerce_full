@@ -9,7 +9,7 @@ import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_item_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/details_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/details_widget.dart';
 
 class OrderCalculationWidget extends StatelessWidget {
   final List<OrderDetailsModel>? orderDetails;
@@ -79,8 +79,7 @@ class OrderCalculationWidget extends StatelessWidget {
         ),
         child: Column(
           children: [
-            (ResponsiveHelper.isDesktop(context) &&
-                    orderDetails!.isNotEmpty)
+            (ResponsiveHelper.isDesktop(context) && orderDetails!.isNotEmpty)
                 ? Container(
                     decoration: BoxDecoration(
                       borderRadius: const BorderRadius.vertical(
@@ -130,8 +129,7 @@ class OrderCalculationWidget extends StatelessWidget {
                                 itemBuilder: (context, index) {
                                   return OrderItemWidget(
                                     order: order,
-                                    orderDetails:
-                                        orderDetails![index],
+                                    orderDetails: orderDetails![index],
                                   );
                                 },
                               ),

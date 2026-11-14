@@ -22,7 +22,7 @@ import 'package:ecommerce/features/order/presentation/widgets/delivery_details_w
 import 'package:ecommerce/features/payment/widgets/offline_info_edit_dialog_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_banner_view_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_item_widget.dart';
-import 'package:ecommerce/features/parcel/widgets/details_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/details_widget.dart';
 import 'package:ecommerce/features/store/widgets/review_dialog_widget.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 

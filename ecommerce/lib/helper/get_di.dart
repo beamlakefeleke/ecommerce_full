@@ -19,11 +19,6 @@ import 'package:ecommerce/features/auth/domain/services/deliveryman_registration
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
-import 'package:ecommerce/features/parcel/domain/repositories/parcel_repository.dart';
-import 'package:ecommerce/features/parcel/domain/repositories/parcel_repository_interface.dart';
-import 'package:ecommerce/features/parcel/domain/services/parcel_service.dart';
-import 'package:ecommerce/features/parcel/domain/services/parcel_service_interface.dart';
 import 'package:ecommerce/features/payment/controllers/payment_controller.dart';
 import 'package:ecommerce/features/payment/domain/repositories/payement_repository.dart';
 import 'package:ecommerce/features/payment/domain/repositories/payment_repository_interface.dart';
@@ -103,11 +98,6 @@ Future<Map<String, Map<String, String>>> init() async {
       StoreRegistrationRepository(apiClient: Get.find());
   Get.lazyPut(() => storeRegistrationRepositoryInterface);
 
-  ParcelRepositoryInterface parcelRepositoryInterface = ParcelRepository(
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => parcelRepositoryInterface);
-
   PaymentRepositoryInterface paymentRepositoryInterface = PaymentRepository(
     apiClient: Get.find(),
     sharedPreferences: Get.find(),
@@ -170,12 +160,6 @@ Future<Map<String, Map<String, String>>> init() async {
       );
   Get.lazyPut(() => storeRegistrationServiceInterface);
 
-  ParcelServiceInterface parcelServiceInterface = ParcelService(
-    parcelRepositoryInterface: Get.find(),
-    checkoutRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => parcelServiceInterface);
-
   PaymentServiceInterface paymentServiceInterface = PaymentService(
     paymentRepositoryInterface: Get.find(),
   );
@@ -234,7 +218,6 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => ProfileController(profileServiceInterface: Get.find()));
   Get.lazyPut(() => StoreController(storeServiceInterface: Get.find()));
   Get.lazyPut(() => SearchController(searchServiceInterface: Get.find()));
-  Get.lazyPut(() => ParcelController(parcelServiceInterface: Get.find()));
   Get.lazyPut(() => WalletController(walletServiceInterface: Get.find()));
   Get.lazyPut(() => RiderController(riderRepo: Get.find()));
   Get.lazyPut(() => CarSelectionController(carSelectionRepo: Get.find()));

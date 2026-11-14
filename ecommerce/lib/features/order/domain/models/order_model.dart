@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 
 class PaginatedOrderModel {

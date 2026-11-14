@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/parcel/domain/models/parcel_category_model.dart';
+import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
-import 'package:ecommerce/features/parcel/widgets/deliver_item_card_widget.dart';
+import 'package:ecommerce/features/parcel/presentation/widgets/deliver_item_card_widget.dart';
 
 class ParcelBottomSheetWidget extends StatelessWidget {
   final List<ParcelCategoryModel>? parcelCategoryList;
