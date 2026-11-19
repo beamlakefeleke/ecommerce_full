@@ -15,7 +15,7 @@ import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
-import 'package:ecommerce/features/payment/widgets/offline_payment_button.dart';
+import 'package:ecommerce/features/payment/presentation/widgets/offline_payment_button.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/payment_button_new.dart';
 
 class PaymentMethodBottomSheet extends StatefulWidget {

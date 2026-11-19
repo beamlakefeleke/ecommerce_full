@@ -1,4 +1,5 @@
 import 'package:ecommerce/features/address/data/models/address_model.dart';
+import 'package:ecommerce/features/order/presentation/widgets/address_details_widget.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -10,7 +11,7 @@ import 'package:get/get.dart';
 import 'dart:ui';
 
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
-import 'package:ecommerce/features/order/widgets/address_details_widget.dart';
+
 
 class MapScreen extends StatefulWidget {
   final AddressModel address;

@@ -11,7 +11,7 @@ import 'package:ecommerce/features/checkout/data/models/distance_model.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/checkout/domain/entities/time_slot.dart';
 import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository.dart';
-import 'package:ecommerce/features/payment/domain/models/offline_method_model.dart';
+import 'package:ecommerce/features/payment/data/models/offline_method_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 

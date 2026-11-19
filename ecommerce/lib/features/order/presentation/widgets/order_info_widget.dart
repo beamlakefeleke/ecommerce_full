@@ -19,7 +19,7 @@ import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:ecommerce/features/chat/widgets/image_dialog_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/delivery_details_widget.dart';
-import 'package:ecommerce/features/payment/widgets/offline_info_edit_dialog_widget.dart';
+import 'package:ecommerce/features/payment/presentation/widgets/offline_info_edit_dialog_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_banner_view_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_item_widget.dart';
 import 'package:ecommerce/features/parcel/presentation/widgets/details_widget.dart';

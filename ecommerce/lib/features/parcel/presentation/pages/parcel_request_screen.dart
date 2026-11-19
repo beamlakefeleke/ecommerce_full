@@ -34,7 +34,7 @@ import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/not_logged_in_screen.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/condition_check_box.dart';
-import 'package:ecommerce/features/payment/widgets/offline_payment_button.dart';
+import 'package:ecommerce/features/payment/presentation/widgets/offline_payment_button.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/payment_button.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/tips_widget.dart';
 import 'package:ecommerce/features/parcel/presentation/widgets/card_widget.dart';
@@ -541,12 +541,11 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                               : const SizedBox(),
 
                                                           parcelController
-                                                                  .customNote!
+                                                                  .customNote
                                                                   .isNotEmpty
                                                               ? Text(
                                                                   parcelController
-                                                                          .customNote ??
-                                                                      '',
+                                                                          .customNote,                                   
                                                                   style: robotoMedium.copyWith(
                                                                     color: Theme.of(
                                                                       context,

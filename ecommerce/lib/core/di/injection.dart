@@ -128,6 +128,18 @@ import 'package:ecommerce/features/parcel/data/repositories/parcel_repository_im
 import 'package:ecommerce/features/parcel/domain/repositories/parcel_repository.dart';
 import 'package:ecommerce/features/parcel/domain/usecases/parcel_usecases.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/payment/data/datasources/payment_remote_data_source.dart';
+import 'package:ecommerce/features/payment/data/repositories/payment_repository_impl.dart';
+import 'package:ecommerce/features/payment/domain/repositories/payment_repository.dart';
+import 'package:ecommerce/features/payment/domain/usecases/get_offline_method_list_usecase.dart';
+import 'package:ecommerce/features/payment/domain/usecases/save_offline_info_usecase.dart';
+import 'package:ecommerce/features/payment/domain/usecases/update_offline_info_usecase.dart';
+import 'package:ecommerce/features/payment/presentation/bloc/payment_bloc.dart';
+import 'package:ecommerce/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:ecommerce/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:ecommerce/features/profile/domain/repositories/profile_repository.dart';
+import 'package:ecommerce/features/profile/domain/usecases/profile_usecases.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/features/loyalty/data/datasources/loyalty_remote_data_source.dart';
 import 'package:ecommerce/features/loyalty/data/repositories/loyalty_repository_impl.dart';
@@ -187,6 +199,52 @@ void configureDependencies() {
   _registerOnboard();
   _registerOrder();
   _registerParcel();
+  _registerPayment();
+  _registerProfile();
+}
+
+void _registerProfile() {
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetUserInfoUseCase(getIt()));
+  getIt.registerFactory(() => UpdateProfileUseCase(getIt()));
+  getIt.registerFactory(() => ChangePasswordUseCase(getIt()));
+  getIt.registerFactory(() => DeleteUserUseCase(getIt()));
+  // app-wide: userInfoModel is read across checkout/chat/loyalty/menu/home +
+  // the profile screens.
+  getIt.registerLazySingleton(
+    () => ProfileBloc(
+      getUserInfo: getIt(),
+      updateProfile: getIt(),
+      changePassword: getIt(),
+      deleteUser: getIt(),
+    ),
+  );
+}
+
+void _registerPayment() {
+  getIt.registerLazySingleton<PaymentRemoteDataSource>(
+    () => PaymentRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<PaymentRepository>(
+    () => PaymentRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetOfflineMethodListUseCase(getIt()));
+  getIt.registerFactory(() => SaveOfflineInfoUseCase(getIt()));
+  getIt.registerFactory(() => UpdateOfflineInfoUseCase(getIt()));
+  // screen-scoped: a fresh bloc per offline-payment screen / edit dialog
+  // (not cross-cutting).
+  getIt.registerFactory(
+    () => PaymentBloc(
+      getOfflineMethodList: getIt(),
+      saveOfflineInfo: getIt(),
+      updateOfflineInfo: getIt(),
+    ),
+  );
 }
 
 void _registerParcel() {

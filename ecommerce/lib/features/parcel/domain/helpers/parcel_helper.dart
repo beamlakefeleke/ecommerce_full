@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 
@@ -37,7 +37,7 @@ class ParcelHelper {
       Get.offNamed(
         RouteHelper.getPaymentRoute(
           orderId,
-          Get.find<ProfileController>().userInfoModel?.id ??
+          getIt<ProfileBloc>().state.userInfoModel?.id ??
               int.tryParse(AuthHelper.getGuestId()) ??
               0,
           'parcel',

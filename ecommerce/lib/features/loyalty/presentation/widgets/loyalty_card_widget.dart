@@ -5,7 +5,8 @@ import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_bloc.dart';
 import 'package:ecommerce/features/loyalty/presentation/widgets/loyalty_bottom_sheet_widget.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
@@ -16,16 +17,16 @@ import 'package:ecommerce/common/widgets/custom_button.dart';
 /// `Get.dialog` subtree (which is built outside the screen's provider).
 void showLoyaltyConvertDialog(BuildContext context) {
   final loyaltyBloc = context.read<LoyaltyBloc>();
-  final profile = Get.find<ProfileController>();
+  final userInfo = context.read<ProfileBloc>().state.userInfoModel;
   Get.dialog(
     Dialog(
       backgroundColor: Colors.transparent,
       child: BlocProvider.value(
         value: loyaltyBloc,
         child: LoyaltyBottomSheetWidget(
-          amount: profile.userInfoModel!.loyaltyPoint == null
+          amount: userInfo?.loyaltyPoint == null
               ? '0'
-              : profile.userInfoModel!.loyaltyPoint.toString(),
+              : userInfo!.loyaltyPoint.toString(),
         ),
       ),
     ),
@@ -38,8 +39,8 @@ class LoyaltyCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ProfileController>(
-      builder: (profileController) {
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, profileController) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

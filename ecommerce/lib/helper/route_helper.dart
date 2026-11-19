@@ -37,10 +37,10 @@ import 'package:ecommerce/features/category/presentation/pages/category_item_scr
 import 'package:ecommerce/features/chat/presentation/pages/chat_screen.dart';
 import 'package:ecommerce/features/chat/presentation/pages/conversation_screen.dart';
 import 'package:ecommerce/features/checkout/presentation/pages/checkout_screen.dart';
-import 'package:ecommerce/features/payment/screens/offline_payment_screen.dart';
+import 'package:ecommerce/features/payment/presentation/pages/offline_payment_screen.dart';
 import 'package:ecommerce/features/checkout/presentation/pages/order_successful_screen.dart';
-import 'package:ecommerce/features/payment/screens/payment_screen.dart';
-import 'package:ecommerce/features/payment/screens/payment_webview_screen.dart';
+import 'package:ecommerce/features/payment/presentation/pages/payment_screen.dart';
+import 'package:ecommerce/features/payment/presentation/pages/payment_webview_screen.dart';
 import 'package:ecommerce/features/coupon/presentation/pages/coupon_screen.dart';
 import 'package:ecommerce/features/dashboard/screens/dashboard_screen.dart';
 import 'package:ecommerce/features/favourite/presentation/pages/favourite_screen.dart';
@@ -66,8 +66,8 @@ import 'package:ecommerce/features/order/presentation/pages/refund_request_scree
 import 'package:ecommerce/features/parcel/presentation/pages/parcel_category_screen.dart';
 import 'package:ecommerce/features/parcel/presentation/pages/parcel_location_screen.dart';
 import 'package:ecommerce/features/parcel/presentation/pages/parcel_request_screen.dart';
-import 'package:ecommerce/features/profile/screens/profile_screen.dart';
-import 'package:ecommerce/features/profile/screens/update_profile_screen.dart';
+import 'package:ecommerce/features/profile/presentation/pages/profile_screen.dart';
+import 'package:ecommerce/features/profile/presentation/pages/update_profile_screen.dart';
 import 'package:ecommerce/features/store/screens/all_store_screen.dart';
 import 'package:ecommerce/features/store/screens/store_item_search_screen.dart';
 import 'package:ecommerce/features/store/screens/store_screen.dart';

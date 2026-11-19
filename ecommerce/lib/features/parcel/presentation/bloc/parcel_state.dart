@@ -4,7 +4,7 @@ import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart
 import 'package:ecommerce/features/parcel/data/models/parcel_instruction_model.dart';
 import 'package:ecommerce/features/parcel/data/models/video_content_model.dart';
 import 'package:ecommerce/features/parcel/data/models/why_choose_model.dart';
-import 'package:ecommerce/features/payment/domain/models/offline_method_model.dart';
+import 'package:ecommerce/features/payment/data/models/offline_method_model.dart';
 
 /// Load status for the parcel category list (parcel landing).
 enum ParcelStatus { initial, loading, loaded, error }

@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ecommerce/core/error/failure.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/checkout/domain/entities/time_slot.dart';
-import 'package:ecommerce/features/payment/domain/models/offline_method_model.dart';
+import 'package:ecommerce/features/payment/data/models/offline_method_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 
 /// Result of placing an order.

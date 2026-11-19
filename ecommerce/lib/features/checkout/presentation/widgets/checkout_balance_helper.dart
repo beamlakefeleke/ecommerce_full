@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/partial_pay_dialog_widget.dart';
@@ -21,8 +21,11 @@ void checkoutCheckBalanceStatus(
   }
   bloc.add(const CheckoutPaymentMethodSet(-1));
 
-  final double walletBalance =
-      Get.find<ProfileController>().userInfoModel!.walletBalance!;
+  final double walletBalance = context
+      .read<ProfileBloc>()
+      .state
+      .userInfoModel!
+      .walletBalance!;
   Get.dialog(
     PartialPayDialogWidget(
       isPartialPay: walletBalance < amount && walletBalance != 0.0,
