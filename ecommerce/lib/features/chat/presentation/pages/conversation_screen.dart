@@ -23,7 +23,7 @@ import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/not_logged_in_screen.dart';
 import 'package:ecommerce/common/widgets/paginated_list_view.dart';
-import 'package:ecommerce/features/search/widgets/search_field_widget.dart';
+import 'package:ecommerce/features/search/presentation/widgets/search_field_widget.dart';
 import 'package:ecommerce/features/chat/presentation/widgets/web_chat_view_widget.dart';
 import 'package:get/get.dart';
 

@@ -140,6 +140,17 @@ import 'package:ecommerce/features/profile/data/repositories/profile_repository_
 import 'package:ecommerce/features/profile/domain/repositories/profile_repository.dart';
 import 'package:ecommerce/features/profile/domain/usecases/profile_usecases.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/review/data/datasources/review_remote_data_source.dart';
+import 'package:ecommerce/features/review/data/repositories/review_repository_impl.dart';
+import 'package:ecommerce/features/review/domain/repositories/review_repository.dart';
+import 'package:ecommerce/features/review/domain/usecases/review_usecases.dart';
+import 'package:ecommerce/features/review/presentation/bloc/review_bloc.dart';
+import 'package:ecommerce/features/search/data/datasources/search_local_data_source.dart';
+import 'package:ecommerce/features/search/data/datasources/search_remote_data_source.dart';
+import 'package:ecommerce/features/search/data/repositories/search_repository_impl.dart';
+import 'package:ecommerce/features/search/domain/repositories/search_repository.dart';
+import 'package:ecommerce/features/search/domain/usecases/search_usecases.dart';
+import 'package:ecommerce/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/features/loyalty/data/datasources/loyalty_remote_data_source.dart';
 import 'package:ecommerce/features/loyalty/data/repositories/loyalty_repository_impl.dart';
@@ -201,6 +212,55 @@ void configureDependencies() {
   _registerParcel();
   _registerPayment();
   _registerProfile();
+  _registerReview();
+  _registerSearch();
+}
+
+void _registerSearch() {
+  getIt.registerLazySingleton<SearchRemoteDataSource>(
+    () => SearchRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<SearchLocalDataSource>(
+    () => SearchLocalDataSourceImpl(sharedPreferences: getIt()),
+  );
+  getIt.registerLazySingleton<SearchRepository>(
+    () => SearchRepositoryImpl(
+      remoteDataSource: getIt(),
+      localDataSource: getIt(),
+    ),
+  );
+  getIt.registerFactory(() => SearchItemsUseCase(getIt()));
+  getIt.registerFactory(() => SearchStoresUseCase(getIt()));
+  getIt.registerFactory(() => GetSuggestedItemsUseCase(getIt()));
+  // screen-scoped: a fresh bloc per search screen.
+  getIt.registerFactory(
+    () => SearchBloc(
+      searchItems: getIt(),
+      searchStores: getIt(),
+      getSuggestedItems: getIt(),
+      repository: getIt(),
+    ),
+  );
+}
+
+void _registerReview() {
+  getIt.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetStoreReviewListUseCase(getIt()));
+  getIt.registerFactory(() => SubmitReviewUseCase(getIt()));
+  getIt.registerFactory(() => SubmitDeliveryManReviewUseCase(getIt()));
+  // screen-scoped: a fresh bloc per review / rate-review screen.
+  getIt.registerFactory(
+    () => ReviewBloc(
+      getStoreReviewList: getIt(),
+      submitReview: getIt(),
+      submitDeliveryManReview: getIt(),
+    ),
+  );
 }
 
 void _registerProfile() {

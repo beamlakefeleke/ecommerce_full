@@ -19,16 +19,6 @@ import 'package:ecommerce/features/auth/domain/services/deliveryman_registration
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
-import 'package:ecommerce/features/review/controllers/review_controller.dart';
-import 'package:ecommerce/features/review/domain/repositories/review_repository.dart';
-import 'package:ecommerce/features/review/domain/repositories/review_repository_interface.dart';
-import 'package:ecommerce/features/review/domain/services/review_service.dart';
-import 'package:ecommerce/features/review/domain/services/review_service_interface.dart';
-import 'package:ecommerce/features/search/controllers/search_controller.dart';
-import 'package:ecommerce/features/search/domain/repositories/search_repository.dart';
-import 'package:ecommerce/features/search/domain/repositories/search_repository_interface.dart';
-import 'package:ecommerce/features/search/domain/services/search_service.dart';
-import 'package:ecommerce/features/search/domain/services/search_service_interface.dart';
 import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/features/splash/domain/repositories/splash_repository.dart';
 import 'package:ecommerce/features/splash/domain/repositories/splash_repository_interface.dart';
@@ -88,22 +78,11 @@ Future<Map<String, Map<String, String>>> init() async {
       StoreRegistrationRepository(apiClient: Get.find());
   Get.lazyPut(() => storeRegistrationRepositoryInterface);
 
-  SearchRepositoryInterface searchRepositoryInterface = SearchRepository(
-    apiClient: Get.find(),
-    sharedPreferences: Get.find(),
-  );
-  Get.lazyPut(() => searchRepositoryInterface);
-
   SplashRepositoryInterface splashRepositoryInterface = SplashRepository(
     sharedPreferences: Get.find(),
     apiClient: Get.find(),
   );
   Get.lazyPut(() => splashRepositoryInterface);
-
-  ReviewRepositoryInterface reviewRepositoryInterface = ReviewRepository(
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => reviewRepositoryInterface);
 
   StoreRepositoryInterface storeRepositoryInterface = StoreRepository(
     apiClient: Get.find(),
@@ -139,20 +118,10 @@ Future<Map<String, Map<String, String>>> init() async {
       );
   Get.lazyPut(() => storeRegistrationServiceInterface);
 
-  SearchServiceInterface searchServiceInterface = SearchService(
-    searchRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => searchServiceInterface);
-
   SplashServiceInterface splashServiceInterface = SplashService(
     splashRepositoryInterface: Get.find(),
   );
   Get.lazyPut(() => splashServiceInterface);
-
-  ReviewServiceInterface reviewServiceInterface = ReviewService(
-    reviewRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => reviewServiceInterface);
 
   StoreServiceInterface storeServiceInterface = StoreService(
     storeRepositoryInterface: Get.find(),
@@ -185,12 +154,10 @@ Future<Map<String, Map<String, String>>> init() async {
     ),
   );
   Get.lazyPut(() => StoreController(storeServiceInterface: Get.find()));
-  Get.lazyPut(() => SearchController(searchServiceInterface: Get.find()));
   Get.lazyPut(() => WalletController(walletServiceInterface: Get.find()));
   Get.lazyPut(() => RiderController(riderRepo: Get.find()));
   Get.lazyPut(() => CarSelectionController(carSelectionRepo: Get.find()));
   Get.lazyPut(() => BookingCheckoutController(riderRepo: Get.find()));
-  Get.lazyPut(() => ReviewController(reviewServiceInterface: Get.find()));
   Get.lazyPut(
     () => VerificationController(verificationServiceInterface: Get.find()),
   );

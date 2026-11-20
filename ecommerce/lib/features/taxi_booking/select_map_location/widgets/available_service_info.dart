@@ -10,7 +10,7 @@ import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
-import 'package:ecommerce/features/search/widgets/custom_check_box_widget.dart';
+import 'package:ecommerce/features/search/presentation/widgets/custom_check_box_widget.dart';
 import 'package:ecommerce/features/taxi_booking/select_map_location/widgets/service_type_card.dart';
 import 'dotted_line.dart';
 import 'pick_and_destination_address_info.dart';

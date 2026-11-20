@@ -25,7 +25,7 @@ import 'package:ecommerce/features/checkout/presentation/widgets/offline_success
 import 'package:ecommerce/features/order/presentation/widgets/cancellation_dialogue_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_calcuation_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_info_widget.dart';
-import 'package:ecommerce/features/review/screens/rate_review_screen.dart';
+import 'package:ecommerce/features/review/presentation/pages/rate_review_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
