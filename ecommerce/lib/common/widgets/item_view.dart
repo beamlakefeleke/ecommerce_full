@@ -1,5 +1,7 @@
 import 'package:ecommerce/common/widgets/card_design/store_card_with_distance.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -128,7 +130,7 @@ class _ItemsViewState extends State<ItemsView> {
                       text:
                           widget.noDataText ??
                           (widget.isStore
-                              ? Get.find<SplashController>()
+                              ? getIt<SplashBloc>().state
                                         .configModel!
                                         .moduleConfig!
                                         .module!

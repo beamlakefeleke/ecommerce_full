@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -105,7 +107,7 @@ class ParcelBottomSheetWidget extends StatelessWidget {
                                           child: DeliverItemCardWidget(
                                             isDeliverItem: true,
                                             image:
-                                                '${Get.find<SplashController>().configModel!.baseUrls!.parcelCategoryImageUrl}'
+                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.parcelCategoryImageUrl}'
                                                 '/${parcelCategoryList![index].image}',
                                             itemName: parcelCategoryList![index]
                                                 .name!,

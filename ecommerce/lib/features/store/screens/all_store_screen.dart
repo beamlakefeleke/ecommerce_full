@@ -1,5 +1,7 @@
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
@@ -50,7 +52,7 @@ class _AllStoreScreenState extends State<AllStoreScreen> {
             title: widget.isFeatured
                 ? 'featured_stores'.tr
                 : widget.isPopular
-                ? Get.find<SplashController>()
+                ? getIt<SplashBloc>().state
                           .configModel!
                           .moduleConfig!
                           .module!
@@ -108,7 +110,7 @@ class _AllStoreScreenState extends State<AllStoreScreen> {
                       title: widget.isFeatured
                           ? 'featured_stores'.tr
                           : widget.isPopular
-                          ? Get.find<SplashController>()
+                          ? getIt<SplashBloc>().state
                                     .configModel!
                                     .moduleConfig!
                                     .module!
@@ -127,7 +129,7 @@ class _AllStoreScreenState extends State<AllStoreScreen> {
                             isFeatured: widget.isFeatured,
                             noDataText: widget.isFeatured
                                 ? 'no_store_available'.tr
-                                : Get.find<SplashController>()
+                                : getIt<SplashBloc>().state
                                       .configModel!
                                       .moduleConfig!
                                       .module!

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
@@ -6,9 +6,10 @@ import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_state.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
+import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
@@ -83,7 +84,7 @@ class WebProfileWidget extends StatelessWidget {
                         child: CustomImage(
                           placeholder: Images.guestIcon,
                           image:
-                              '${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}'
+                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.customerImageUrl}'
                               '/${(profileController.userInfoModel != null && isLoggedIn) ? profileController.userInfoModel!.image : ''}',
                           height: 120,
                           width: 120,
@@ -185,7 +186,7 @@ class WebProfileWidget extends StatelessWidget {
                             child: CustomImage(
                               placeholder: Images.guestIcon,
                               image:
-                                  '${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}'
+                                  '${getIt<SplashBloc>().state.configModel!.baseUrls!.customerImageUrl}'
                                   '/${(profileController.userInfoModel != null && isLoggedIn) ? profileController.userInfoModel!.image : ''}',
                               height: 30,
                               width: 30,
@@ -218,15 +219,15 @@ class WebProfileWidget extends StatelessWidget {
                     ),
                   ),
 
-                  // Get.find<SplashController>().configModel!.customerWalletStatus == 1 ? Expanded(child: ProfileCard(
+                  // getIt<SplashBloc>().state.configModel!.customerWalletStatus == 1 ? Expanded(child: ProfileCard(
                   //   image: Images.walletProfile,
                   //   data: DateConverter.containTAndZToUTCFormat(profileController.userInfoModel!.createdAt!),
                   //   title: 'since_joining'.tr,
                   // )) : const SizedBox(),
                   const SizedBox(width: Dimensions.paddingSizeExtremeLarge),
 
-                  //SizedBox(width: Get.find<SplashController>().configModel!.customerWalletStatus == 1 ? Dimensions.paddingSizeSmall : 0),
-                  Get.find<SplashController>()
+                  //SizedBox(width: getIt<SplashBloc>().state.configModel!.customerWalletStatus == 1 ? Dimensions.paddingSizeSmall : 0),
+                  getIt<SplashBloc>().state
                               .configModel!
                               .customerWalletStatus ==
                           1
@@ -242,7 +243,7 @@ class WebProfileWidget extends StatelessWidget {
                       : const SizedBox(),
                   SizedBox(
                     width:
-                        Get.find<SplashController>()
+                        getIt<SplashBloc>().state
                                 .configModel!
                                 .customerWalletStatus ==
                             1
@@ -262,7 +263,7 @@ class WebProfileWidget extends StatelessWidget {
                       : const SizedBox(),
                   SizedBox(
                     width:
-                        Get.find<SplashController>()
+                        getIt<SplashBloc>().state
                                 .configModel!
                                 .customerWalletStatus ==
                             1
@@ -270,7 +271,7 @@ class WebProfileWidget extends StatelessWidget {
                         : 0,
                   ),
 
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>().state
                               .configModel!
                               .loyaltyPointStatus ==
                           1
@@ -289,7 +290,7 @@ class WebProfileWidget extends StatelessWidget {
                       : const SizedBox(),
                   SizedBox(
                     width:
-                        Get.find<SplashController>()
+                        getIt<SplashBloc>().state
                                 .configModel!
                                 .loyaltyPointStatus ==
                             1

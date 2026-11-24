@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -44,7 +46,7 @@ class PopularStoreCard extends StatelessWidget {
             children: [
               CustomImage(
                 image:
-                    '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}'
+                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}'
                     '/${store.coverPhoto}',
                 fit: BoxFit.cover,
                 width: double.infinity,
@@ -93,7 +95,7 @@ class PopularStoreCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(100),
                               child: CustomImage(
                                 image:
-                                    '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}'
+                                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}'
                                     '/${store.logo}',
                                 height: 40,
                                 width: 40,

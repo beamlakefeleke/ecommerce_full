@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -39,7 +41,7 @@ class DeliveryManWidget extends StatelessWidget {
             leading: ClipOval(
               child: CustomImage(
                 image:
-                    '${Get.find<SplashController>().configModel!.baseUrls!.deliveryManImageUrl}/${deliveryMan!.image}',
+                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.deliveryManImageUrl}/${deliveryMan!.image}',
                 height: 40,
                 width: 40,
                 fit: BoxFit.cover,

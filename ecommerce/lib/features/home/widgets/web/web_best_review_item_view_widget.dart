@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/review_item_card_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/arrow_icon_button.dart';
@@ -59,8 +61,8 @@ class _WebBestReviewItemViewWidgetState
   @override
   Widget build(BuildContext context) {
     bool isShop =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.ecommerce;
 
     return GetBuilder<ItemController>(

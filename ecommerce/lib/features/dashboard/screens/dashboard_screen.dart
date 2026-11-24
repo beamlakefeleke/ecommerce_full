@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/address/presentation/pages/address_screen.dart';
@@ -27,6 +30,7 @@ import 'package:ecommerce/features/home/screens/home_screen.dart';
 import 'package:ecommerce/features/menu/presentation/pages/menu_screen.dart';
 import 'package:ecommerce/features/order/presentation/pages/order_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 import '../widgets/running_order_view_widget.dart';
@@ -63,7 +67,7 @@ class DashboardScreenState extends State<DashboardScreen> {
     _isLogin = AuthHelper.isLoggedIn();
 
     if (_isLogin) {
-      if (Get.find<SplashController>().configModel!.loyaltyPointStatus == 1 &&
+      if (getIt<SplashBloc>().state.configModel!.loyaltyPointStatus == 1 &&
           Get.find<AuthController>().getEarningPint().isNotEmpty &&
           !ResponsiveHelper.isDesktop(Get.context)) {
         Future.delayed(
@@ -115,8 +119,7 @@ class DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
-    return GetBuilder<SplashController>(
-      builder: (splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
         return PopScope(
           canPop: Navigator.canPop(context),
           onPopInvoked: (value) async {
@@ -130,9 +133,9 @@ class DashboardScreenState extends State<DashboardScreen> {
                 );
               }
               if (!ResponsiveHelper.isDesktop(context) &&
-                  Get.find<SplashController>().module != null &&
-                  Get.find<SplashController>().configModel!.module == null) {
-                Get.find<SplashController>().setModule(null);
+                  getIt<SplashBloc>().state.module != null &&
+                  getIt<SplashBloc>().state.configModel!.module == null) {
+                getIt<SplashBloc>().add(const SplashModuleSet(null));
               } else {
                 if (_canExit) {
                   if (GetPlatform.isAndroid) {
@@ -189,8 +192,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                           ? const SizedBox()
                           : Align(
                               alignment: Alignment.bottomCenter,
-                              child: GetBuilder<SplashController>(
-                                builder: (splashController) {
+                              child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
                                   bool isParcel =
                                       splashController.module != null &&
                                       splashController

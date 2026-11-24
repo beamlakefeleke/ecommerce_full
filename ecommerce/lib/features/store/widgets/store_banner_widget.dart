@@ -1,7 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -49,7 +51,7 @@ class StoreBannerWidget extends StatelessWidget {
                     ),
                     child: CustomImage(
                       image:
-                          '${Get.find<SplashController>().configModel!.baseUrls!.bannerImageUrl}/${storeController.storeBanners![index].image}',
+                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.bannerImageUrl}/${storeController.storeBanners![index].image}',
                     ),
                   ),
                 );

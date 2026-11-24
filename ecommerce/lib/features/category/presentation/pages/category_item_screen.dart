@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_event.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_state.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -310,7 +312,7 @@ class CategoryItemScreenState extends State<CategoryItemScreen>
                           Tab(text: 'item'.tr),
                           Tab(
                             text:
-                                Get.find<SplashController>()
+                                getIt<SplashBloc>().state
                                     .configModel!
                                     .moduleConfig!
                                     .module!
@@ -382,7 +384,7 @@ class CategoryItemScreenState extends State<CategoryItemScreen>
                                 items: null,
                                 stores: stores.isEmpty ? null : stores,
                                 noDataText:
-                                    Get.find<SplashController>()
+                                    getIt<SplashBloc>().state
                                         .configModel!
                                         .moduleConfig!
                                         .module!

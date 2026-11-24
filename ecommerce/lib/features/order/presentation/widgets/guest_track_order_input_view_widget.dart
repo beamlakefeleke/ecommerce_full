@@ -1,11 +1,12 @@
-import 'package:country_code_picker/country_code_picker.dart';
+﻿import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/helper/custom_validator.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -43,7 +44,7 @@ class _GuestTrackOrderInputViewWidgetState
     _countryDialCode = getIt<AuthRepository>().getUserCountryCode().isNotEmpty
         ? getIt<AuthRepository>().getUserCountryCode()
         : CountryCode.fromCountryCode(
-            Get.find<SplashController>().configModel!.country!,
+            getIt<SplashBloc>().state.configModel!.country!,
           ).dialCode;
   }
 

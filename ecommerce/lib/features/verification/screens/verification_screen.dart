@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:ecommerce/features/verification/controllers/verification_controller.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -108,7 +110,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                   builder: (verificationController) {
                     return Column(
                       children: [
-                        Get.find<SplashController>().configModel!.demo!
+                        getIt<SplashBloc>().state.configModel!.demo!
                             ? Text('for_demo_purpose'.tr, style: robotoRegular)
                             : RichText(
                                 text: TextSpan(

@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -71,8 +73,8 @@ class _WebBestStoreNearbyViewWidgetState
   @override
   Widget build(BuildContext context) {
     bool isPharmacy =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
 
     return Container(
@@ -248,23 +250,16 @@ class _WebBestStoreNearbyViewWidgetState
                                             : InkWell(
                                                 hoverColor: Colors.transparent,
                                                 onTap: () {
-                                                  if (Get.find<
-                                                            SplashController
-                                                          >()
+                                                  if (getIt<SplashBloc>().state
                                                           .moduleList !=
                                                       null) {
                                                     for (ModuleModel module
-                                                        in Get.find<
-                                                              SplashController
-                                                            >()
+                                                        in getIt<SplashBloc>().state
                                                             .moduleList!) {
                                                       if (module.id ==
                                                           storeList[index]
                                                               .moduleId) {
-                                                        Get.find<
-                                                              SplashController
-                                                            >()
-                                                            .setModule(module);
+                                                        getIt<SplashBloc>().add(SplashModuleSet(module);
                                                         break;
                                                       }
                                                     }
@@ -374,7 +369,7 @@ class _WebBestStoreNearbyViewWidgetState
                                                                         ),
                                                                         child: CustomImage(
                                                                           image:
-                                                                              '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}'
+                                                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}'
                                                                               '/${storeList[index].logo}',
                                                                           fit: BoxFit
                                                                               .cover,
@@ -655,8 +650,8 @@ class WebBestStoreNearbyShimmerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isPharmacy =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             'pharmacy';
 
     return ListView.builder(

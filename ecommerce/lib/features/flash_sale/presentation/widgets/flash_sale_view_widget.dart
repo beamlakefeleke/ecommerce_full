@@ -5,7 +5,9 @@ import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/flash_sale_card_widget.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -142,7 +144,7 @@ class _FlashSaleViewWidgetState extends State<FlashSaleViewWidget> {
                             height: Dimensions.paddingSizeExtraSmall,
                           ),
 
-                          (Get.find<SplashController>()
+                          (getIt<SplashBloc>().state
                                       .configModel!
                                       .moduleConfig!
                                       .module!

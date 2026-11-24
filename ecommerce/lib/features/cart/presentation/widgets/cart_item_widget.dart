@@ -4,7 +4,9 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -135,7 +137,7 @@ class CartItemWidget extends StatelessWidget {
                           ),
                           child: CustomImage(
                             image:
-                                '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}/${cart.item!.image}',
+                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}/${cart.item!.image}',
                             height: ResponsiveHelper.isDesktop(context)
                                 ? 90
                                 : 65,
@@ -193,23 +195,22 @@ class CartItemWidget extends StatelessWidget {
                               const SizedBox(
                                 width: Dimensions.paddingSizeExtraSmall,
                               ),
-                              if ((Get.find<SplashController>()
+                              if ((getIt<SplashBloc>().state
                                           .configModel!
                                           .moduleConfig!
                                           .module!
                                           .unit! &&
                                       cart.item!.unitType != null &&
-                                      !Get.find<SplashController>()
-                                          .getModuleConfig(
-                                            cart.item!.moduleType,
-                                          )
-                                          .newVariation!) ||
-                                  (Get.find<SplashController>()
+                                      !(getIt<SplashBloc>()
+                                        .getModuleConfig(cart.item!.moduleType)
+                                        ?.newVariation ??
+                                    false)) ||
+                                  (getIt<SplashBloc>().state
                                           .configModel!
                                           .moduleConfig!
                                           .module!
                                           .vegNonVeg! &&
-                                      Get.find<SplashController>()
+                                      getIt<SplashBloc>().state
                                           .configModel!
                                           .toggleVegNonVeg!))
                                 Container(
@@ -226,7 +227,7 @@ class CartItemWidget extends StatelessWidget {
                                     ).primaryColor.withValues(alpha: 0.2),
                                   ),
                                   child: Text(
-                                    Get.find<SplashController>()
+                                    getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!
@@ -282,7 +283,7 @@ class CartItemWidget extends StatelessWidget {
                           ),
 
                           if (ResponsiveHelper.isDesktop(context) &&
-                              Get.find<SplashController>()
+                              getIt<SplashBloc>().state
                                   .configModel!
                                   .moduleConfig!
                                   .module!
@@ -410,7 +411,7 @@ class CartItemWidget extends StatelessWidget {
                 ),
 
                 if (!ResponsiveHelper.isDesktop(context) &&
-                    Get.find<SplashController>()
+                    getIt<SplashBloc>().state
                         .configModel!
                         .moduleConfig!
                         .module!
@@ -503,9 +504,9 @@ class CartItemWidget extends StatelessWidget {
 
   String? _setupVariationText({required CartModel cart}) {
     String variationText = '';
-    if (Get.find<SplashController>()
+    if (getIt<SplashBloc>()
         .getModuleConfig(cart.item!.moduleType)
-        .newVariation!) {
+        ?.newVariation ?? false) {
       for (int i = 0; i < cart.foodVariations!.length; i++) {
         if (cart.foodVariations![i].contains(true)) {
           variationText =

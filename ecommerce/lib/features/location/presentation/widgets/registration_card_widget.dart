@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -9,7 +11,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class RegistrationCardWidget extends StatelessWidget {
   final bool isStore;
-  final SplashController splashController;
+  final SplashState splashController;
   const RegistrationCardWidget({
     super.key,
     required this.isStore,

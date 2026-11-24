@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/features/checkout/controllers/checkout_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/api/api_checker.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/parcel/data/models/place_details_model.dart';
@@ -28,10 +30,10 @@ class RiderController extends GetxController implements GetxService {
 
   LatLng _initialPosition = LatLng(
     double.parse(
-      Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '0',
+      getIt<SplashBloc>().state.configModel!.defaultLocation!.lat ?? '0',
     ),
     double.parse(
-      Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '0',
+      getIt<SplashBloc>().state.configModel!.defaultLocation!.lng ?? '0',
     ),
   );
 
@@ -137,7 +139,7 @@ class RiderController extends GetxController implements GetxService {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
             alwaysUse24HourFormat:
-                Get.find<SplashController>().configModel!.timeformat == '24',
+                getIt<SplashBloc>().state.configModel!.timeformat == '24',
           ),
           child: child!,
         );

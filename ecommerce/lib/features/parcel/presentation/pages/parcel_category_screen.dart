@@ -7,7 +7,9 @@ import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
 import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
 import 'package:ecommerce/features/banner/presentation/bloc/banner_state.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
@@ -245,7 +247,7 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                                 child: DeliverItemCardWidget(
                                                   isDeliverItem: true,
                                                   image:
-                                                      '${Get.find<SplashController>().configModel!.baseUrls!.parcelCategoryImageUrl}'
+                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.parcelCategoryImageUrl}'
                                                       '/${parcelController.parcelCategoryList![index].image}',
                                                   itemName: parcelController
                                                       .parcelCategoryList![index]

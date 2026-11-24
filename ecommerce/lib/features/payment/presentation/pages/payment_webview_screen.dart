@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/domain/helpers/order_helper.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
@@ -64,7 +66,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
       for (ZoneData zData
           in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
         for (Modules m in zData.modules!) {
-          if (m.id == Get.find<SplashController>().module!.id) {
+          if (m.id == getIt<SplashBloc>().state.module!.id) {
             _maximumCodOrderAmount = m.pivot!.maximumCodOrderAmount;
             break;
           }
@@ -199,7 +201,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
   Future<bool?> _exitApp() async {
     if ((widget.addFundUrl == null ||
             (widget.addFundUrl != null && widget.addFundUrl!.isEmpty)) ||
-        !Get.find<SplashController>()
+        !getIt<SplashBloc>().state
             .configModel!
             .digitalPaymentInfo!
             .pluginPaymentGateways!) {

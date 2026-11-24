@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/cart_snackbar.dart';
 import 'package:ecommerce/common/widgets/confirmation_dialog.dart';
@@ -12,7 +12,8 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/item/presentation/pages/item_details_screen.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/module_helper.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -174,11 +175,11 @@ class ItemHelper {
     List<int>? variationIndex,
   ) {
     String variationType = '';
-    if (!ModuleHelper.getModuleConfig(
+    if (!(ModuleHelper.getModuleConfig(
       ModuleHelper.getModule() != null
           ? ModuleHelper.getModule()!.moduleType
           : ModuleHelper.getCacheModule()!.moduleType,
-    ).newVariation!) {
+    )?.newVariation ?? false)) {
       final List<String> variationList = [];
       for (int index = 0; index < choiceOptions!.length; index++) {
         variationList.add(
@@ -284,7 +285,7 @@ class ItemHelper {
     return length;
   }
 
-  // ── Navigation / direct add-to-cart (ported from legacy ItemController) ────
+  // â”€â”€ Navigation / direct add-to-cart (ported from legacy ItemController) â”€â”€â”€â”€
 
   /// True when the cart already holds items from a different store/module.
   static bool existAnotherStoreItem(int? storeId, int? moduleId) {
@@ -303,7 +304,7 @@ class ItemHelper {
     bool inStore = false,
     bool isCampaign = false,
   }) {
-    if (Get.find<SplashController>()
+    if (getIt<SplashBloc>().state
             .configModel!
             .moduleConfig!
             .module!
@@ -378,14 +379,14 @@ class ItemHelper {
         price.toString(),
         '',
         null,
-        ModuleHelper.getModuleConfig(item.moduleType).newVariation! ? [] : null,
+        ModuleHelper.getModuleConfig(item.moduleType)?.newVariation ?? false ? [] : null,
         1,
         [],
         [],
         [],
         'Item',
       );
-      if (Get.find<SplashController>()
+      if (getIt<SplashBloc>().state
               .configModel!
               .moduleConfig!
               .module!
@@ -403,7 +404,7 @@ class ItemHelper {
             icon: Images.warning,
             title: 'are_you_sure_to_reset'.tr,
             description:
-                Get.find<SplashController>()
+                getIt<SplashBloc>().state
                     .configModel!
                     .moduleConfig!
                     .module!
@@ -423,7 +424,7 @@ class ItemHelper {
         getIt<CartBloc>().add(CartOnlineSynced(onlineCart));
         showCartSnackBar();
       }
-    } else if (Get.find<SplashController>()
+    } else if (getIt<SplashBloc>().state
             .configModel!
             .moduleConfig!
             .module!

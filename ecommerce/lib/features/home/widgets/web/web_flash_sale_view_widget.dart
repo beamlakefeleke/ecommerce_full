@@ -123,11 +123,11 @@ class _WebFlashSaleViewWidgetState extends State<WebFlashSaleViewWidget> {
                             height: Dimensions.paddingSizeExtraSmall,
                           ),
 
-                          /*(Get.find<SplashController>().configModel!.moduleConfig!.module!.unit! && item.unitType != null) ? Text(
+                          (getIt<SplashBloc>().state.configModel!.moduleConfig!.module!.unit! && item.unitType != null) ? Text(
             '(${ item.unitType ?? ''})',
             style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
           ) : const SizedBox(),
-          const SizedBox(height: Dimensions.paddingSizeExtraSmall),*/
+          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

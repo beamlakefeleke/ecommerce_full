@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
@@ -38,7 +40,7 @@ class NoteAndPrescriptionSection extends StatelessWidget {
         const SizedBox(height: Dimensions.paddingSizeLarge),
 
         storeId == null &&
-                Get.find<SplashController>()
+                getIt<SplashBloc>().state
                     .configModel!
                     .moduleConfig!
                     .module!

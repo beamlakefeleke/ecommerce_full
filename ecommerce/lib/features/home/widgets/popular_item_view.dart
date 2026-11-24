@@ -3,7 +3,9 @@ import 'package:ecommerce/common/widgets/corner_banner/corner_discount_tag.dart'
 import 'package:ecommerce/common/widgets/title_widget.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -116,7 +118,7 @@ class PopularItemView extends StatelessWidget {
                                                       ),
                                                   child: CustomImage(
                                                     image:
-                                                        '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}'
+                                                        '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}'
                                                         '/${itemList[index].image}',
                                                     height: 80,
                                                     width: 80,
@@ -180,16 +182,16 @@ class PopularItemView extends StatelessWidget {
                                                               .paddingSizeExtraSmall,
                                                         ),
 
-                                                        (Get.find<
-                                                                      SplashController
-                                                                    >()
+                                                        (getIt<SplashBloc>()
+                                                                    .state
                                                                     .configModel!
                                                                     .moduleConfig!
                                                                     .module!
                                                                     .vegNonVeg! &&
-                                                                Get.find<
-                                                                      SplashController
+                                                                getIt<
+                                                                      SplashBloc
                                                                     >()
+                                                                    .state
                                                                     .configModel!
                                                                     .toggleVegNonVeg!)
                                                             ? Image.asset(
@@ -237,9 +239,7 @@ class PopularItemView extends StatelessWidget {
                                                               .ratingCount,
                                                     ),
 
-                                                    (Get.find<
-                                                                  SplashController
-                                                                >()
+                                                    (getIt<SplashBloc>().state
                                                                 .configModel!
                                                                 .moduleConfig!
                                                                 .module!

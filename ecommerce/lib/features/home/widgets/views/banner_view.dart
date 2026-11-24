@@ -1,7 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -64,11 +66,11 @@ class BannerView extends StatelessWidget {
                               itemBuilder: (context, index, _) {
                                 String? baseUrl =
                                     bannerDataList![index] is BasicCampaignModel
-                                    ? Get.find<SplashController>()
+                                    ? getIt<SplashBloc>().state
                                           .configModel!
                                           .baseUrls!
                                           .campaignImageUrl
-                                    : Get.find<SplashController>()
+                                    : getIt<SplashBloc>().state
                                           .configModel!
                                           .baseUrls!
                                           .bannerImageUrl;
@@ -81,15 +83,14 @@ class BannerView extends StatelessWidget {
                                     } else if (bannerDataList[index] is Store) {
                                       Store? store = bannerDataList[index];
                                       if (isFeatured &&
-                                          Get.find<SplashController>()
+                                          getIt<SplashBloc>().state
                                                   .moduleList !=
                                               null) {
                                         for (ModuleModel module
-                                            in Get.find<SplashController>()
+                                            in getIt<SplashBloc>().state
                                                 .moduleList!) {
                                           if (module.id == store!.moduleId) {
-                                            Get.find<SplashController>()
-                                                .setModule(module);
+                                            getIt<SplashBloc>().add(SplashModuleSet(module);
                                             break;
                                           }
                                         }
@@ -150,8 +151,7 @@ class BannerView extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(
                                         Dimensions.radiusLarge,
                                       ),
-                                      child: GetBuilder<SplashController>(
-                                        builder: (splashController) {
+                                      child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
                                           return CustomImage(
                                             image:
                                                 '$baseUrl/${bannerList[index]}',

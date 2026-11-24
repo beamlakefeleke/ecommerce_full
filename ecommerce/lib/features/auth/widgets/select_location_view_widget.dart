@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
 import 'package:ecommerce/features/auth/widgets/module_view_widget.dart';
 import 'package:ecommerce/features/location/presentation/widgets/location_search_dialog_widget.dart';
@@ -288,14 +290,14 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                       initialCameraPosition: CameraPosition(
                         target: LatLng(
                           double.parse(
-                            Get.find<SplashController>()
+                            getIt<SplashBloc>().state
                                     .configModel!
                                     .defaultLocation!
                                     .lat ??
                                 '0',
                           ),
                           double.parse(
-                            Get.find<SplashController>()
+                            getIt<SplashBloc>().state
                                     .configModel!
                                     .defaultLocation!
                                     .lng ??

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/review/domain/models/review_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -35,7 +37,7 @@ class ReviewDialogWidget extends StatelessWidget {
                     ClipOval(
                       child: CustomImage(
                         image:
-                            '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}/${review.itemImage ?? ''}',
+                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}/${review.itemImage ?? ''}',
                         height: 60,
                         width: 60,
                         fit: BoxFit.cover,

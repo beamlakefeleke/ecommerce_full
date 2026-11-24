@@ -4,7 +4,9 @@ import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -26,12 +28,12 @@ class VisitAgainCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isPharmacy =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
     bool isFood =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.food;
 
     return Stack(
@@ -152,7 +154,7 @@ class VisitAgainCard extends StatelessWidget {
                               ),
                               child: CustomImage(
                                 image:
-                                    '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}'
+                                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}'
                                     '/${store.items![index].image}',
                                 fit: BoxFit.cover,
                                 height: 25,
@@ -222,7 +224,7 @@ class VisitAgainCard extends StatelessWidget {
               ),
               child: CustomImage(
                 image:
-                    '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}'
+                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}'
                     '/${store.coverPhoto}',
                 fit: BoxFit.cover,
                 height: 54,

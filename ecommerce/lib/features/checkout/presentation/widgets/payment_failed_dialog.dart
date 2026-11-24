@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -94,7 +96,7 @@ class PaymentFailedDialog extends StatelessWidget {
                                           if (success) {
                                             double total =
                                                 ((orderAmount! / 100) *
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>().state
                                                     .configModel!
                                                     .loyaltyPointItemPurchasePoint!);
                                             Get.find<AuthController>()
@@ -118,7 +120,7 @@ class PaymentFailedDialog extends StatelessWidget {
                                 : const SizedBox(),
                             SizedBox(
                               height:
-                                  Get.find<SplashController>()
+                                  getIt<SplashBloc>().state
                                       .configModel!
                                       .cashOnDelivery!
                                   ? Dimensions.paddingSizeLarge

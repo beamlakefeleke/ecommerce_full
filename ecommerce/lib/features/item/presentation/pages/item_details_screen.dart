@@ -5,7 +5,9 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/cart/domain/entities/cart_item.dart';
@@ -189,7 +191,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
               );
               priceWithAddons =
                   priceWithQuantity +
-                  (Get.find<SplashController>()
+                  (getIt<SplashBloc>().state
                           .configModel!
                           .moduleConfig!
                           .module!
@@ -245,7 +247,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                                       .availableDateStarts !=
                                                   null,
                                               inStock:
-                                                  (Get.find<SplashController>()
+                                                  (getIt<SplashBloc>().state
                                                       .configModel!
                                                       .moduleConfig!
                                                       .module!
@@ -665,7 +667,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                   child: CustomButton(
                                     isLoading: cartController.isLoading,
                                     buttonText:
-                                        (Get.find<SplashController>()
+                                        (getIt<SplashBloc>().state
                                                 .configModel!
                                                 .moduleConfig!
                                                 .module!
@@ -681,7 +683,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                         ? 'update_in_cart'.tr
                                         : 'add_to_cart'.tr,
                                     onPressed:
-                                        (!Get.find<SplashController>()
+                                        (!getIt<SplashBloc>().state
                                                 .configModel!
                                                 .moduleConfig!
                                                 .module!
@@ -731,7 +733,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
             icon: Images.warning,
             title: 'are_you_sure_to_reset'.tr,
             description:
-                Get.find<SplashController>()
+                getIt<SplashBloc>().state
                     .configModel!
                     .moduleConfig!
                     .module!
@@ -764,9 +766,9 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
   }
 
   bool _existAnotherStore(CartModel? cartModel) {
-    final int? moduleId = Get.find<SplashController>().module == null
-        ? Get.find<SplashController>().cacheModule!.id
-        : Get.find<SplashController>().module!.id;
+    final int? moduleId = getIt<SplashBloc>().state.module == null
+        ? getIt<SplashBloc>().state.cacheModule!.id
+        : getIt<SplashBloc>().state.module!.id;
     final cartList = context.read<CartBloc>().state.cartList;
     for (var cart in cartList) {
       if (cart.item!.storeId != cartModel!.item!.storeId ||

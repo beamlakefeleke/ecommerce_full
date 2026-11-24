@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/domain/models/store_body_model.dart';
 import 'package:ecommerce/common/models/translation.dart';
 import 'package:ecommerce/common/models/config_model.dart';
@@ -55,7 +57,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
   final FocusNode _passwordFocus = FocusNode();
   final FocusNode _confirmPasswordFocus = FocusNode();
   final List<Language>? _languageList =
-      Get.find<SplashController>().configModel!.language;
+      getIt<SplashBloc>().state.configModel!.language;
 
   String? _countryDialCode;
   bool firstTime = true;
@@ -71,7 +73,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
       vsync: this,
     );
     _countryDialCode = CountryCode.fromCountryCode(
-      Get.find<SplashController>().configModel!.country!,
+      getIt<SplashBloc>().state.configModel!.country!,
     ).dialCode;
     for (var language in _languageList) {
       if (kDebugMode) {
@@ -727,7 +729,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                             countryDialCode:
                                                 _countryDialCode != null
                                                 ? CountryCode.fromCountryCode(
-                                                    Get.find<SplashController>()
+                                                    getIt<SplashBloc>().state
                                                         .configModel!
                                                         .country!,
                                                   ).code
@@ -1428,7 +1430,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                       },
                       countryDialCode: _countryDialCode != null
                           ? CountryCode.fromCountryCode(
-                              Get.find<SplashController>()
+                              getIt<SplashBloc>().state
                                   .configModel!
                                   .country!,
                             ).code

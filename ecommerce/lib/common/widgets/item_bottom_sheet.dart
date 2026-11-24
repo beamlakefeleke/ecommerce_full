@@ -1,10 +1,13 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
@@ -58,17 +61,15 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
   void initState() {
     super.initState();
 
-    if (Get.find<SplashController>().module == null) {
-      if (Get.find<SplashController>().cacheModule != null) {
-        Get.find<SplashController>().setCacheConfigModule(
-          Get.find<SplashController>().cacheModule,
-        );
+    if (getIt<SplashBloc>().state.module == null) {
+      if (getIt<SplashBloc>().state.cacheModule != null) {
+        // setCacheConfigModule handled by SplashBloc.setModule
       }
     }
     _newVariation =
-        Get.find<SplashController>()
+        getIt<SplashBloc>()
             .getModuleConfig(widget.item!.moduleType)
-            .newVariation ??
+            ?.newVariation ??
         false;
     context.read<ItemBloc>().add(
       ItemDataInitialized(widget.item!, cart: widget.cart),
@@ -272,7 +273,7 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                   ),
                                               child: CustomImage(
                                                 image:
-                                                    '${widget.isCampaign ? Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl : Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}/${widget.item!.image}',
+                                                    '${widget.isCampaign ? getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl : getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}/${widget.item!.image}',
                                                 width:
                                                     ResponsiveHelper.isMobile(
                                                       context,
@@ -506,28 +507,30 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                 ),
                                           SizedBox(
                                             height:
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>()
+                                                    .state
                                                     .configModel!
                                                     .toggleVegNonVeg!
                                                 ? 50
                                                 : 0,
                                           ),
 
-                                          ((Get.find<SplashController>()
+                                          ((getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .moduleConfig!
                                                           .module!
                                                           .unit! &&
                                                       widget.item!.unitType !=
                                                           null) ||
-                                                  (Get.find<SplashController>()
+                                                  (getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .moduleConfig!
                                                           .module!
                                                           .vegNonVeg! &&
-                                                      Get.find<
-                                                            SplashController
-                                                          >()
+                                                      getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .toggleVegNonVeg!))
                                               ? Container(
@@ -557,9 +560,8 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                     ],
                                                   ),
                                                   child:
-                                                      Get.find<
-                                                            SplashController
-                                                          >()
+                                                      getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .moduleConfig!
                                                           .module!
@@ -663,7 +665,8 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                         ),
                                   SizedBox(
                                     height:
-                                        (Get.find<SplashController>()
+                                        (getIt<SplashBloc>()
+                                                .state
                                                 .configModel!
                                                 .moduleConfig!
                                                 .module!
@@ -674,7 +677,8 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                   ),
 
                                   // Addons
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .moduleConfig!
                                               .module!
@@ -902,7 +906,8 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                               isLoading:
                                                   cartController.isLoading,
                                               buttonText:
-                                                  (Get.find<SplashController>()
+                                                  (getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .moduleConfig!
                                                           .module!
@@ -918,7 +923,8 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                   ? 'update_in_cart'.tr
                                                   : 'add_to_cart'.tr,
                                               onPressed:
-                                                  (Get.find<SplashController>()
+                                                  (getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .moduleConfig!
                                                           .module!
@@ -984,25 +990,25 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                         }
                                                       }
 
-                                                      if (Get.find<
-                                                                SplashController
-                                                              >()
+                                                      if (getIt<SplashBloc>()
+                                                              .state
                                                               .moduleList !=
                                                           null) {
                                                         for (ModuleModel module
-                                                            in Get.find<
-                                                                  SplashController
+                                                            in getIt<
+                                                                  SplashBloc
                                                                 >()
+                                                                .state
                                                                 .moduleList!) {
                                                           if (module.id ==
                                                               widget
                                                                   .item!
                                                                   .moduleId) {
-                                                            Get.find<
-                                                                  SplashController
-                                                                >()
-                                                                .setModule(
-                                                                  module,
+                                                            getIt<SplashBloc>()
+                                                                .add(
+                                                                  SplashModuleSet(
+                                                                    module,
+                                                                  ),
                                                                 );
                                                             break;
                                                           }
@@ -1046,15 +1052,9 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                         List<OrderVariation>
                                                         variations = _getSelectedVariations(
                                                           isFoodVariation:
-                                                              Get.find<
-                                                                    SplashController
-                                                                  >()
-                                                                  .getModuleConfig(
-                                                                    widget
-                                                                        .item!
-                                                                        .moduleType,
-                                                                  )
-                                                                  .newVariation!,
+                                                              getIt<SplashBloc>()
+                                                              .getModuleConfig(widget.item!.moduleType)
+                                                              ?.newVariation ?? false,
                                                           foodVariations: widget
                                                               .item!
                                                               .foodVariations!,
@@ -1075,34 +1075,20 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                                   addOnIdList,
                                                             );
 
-                                                        OnlineCart
-                                                        onlineCart = OnlineCart(
+                                                        OnlineCart onlineCart = OnlineCart(
                                                           widget.cart?.id,
-                                                          widget.isCampaign
-                                                              ? null
-                                                              : widget.item!.id,
-                                                          widget.isCampaign
-                                                              ? widget.item!.id
-                                                              : null,
-                                                          priceWithDiscountAndAddons
-                                                              .toString(),
+                                                          widget.isCampaign ? null : widget.item!.id,
+                                                          widget.isCampaign ? widget.item!.id : null,
+                                                          priceWithDiscountAndAddons.toString(),
                                                           '',
-                                                          variation != null
-                                                              ? [variation]
-                                                              : null,
-                                                          Get.find<
-                                                                    SplashController
-                                                                  >()
-                                                                  .getModuleConfig(
-                                                                    widget
-                                                                        .item!
-                                                                        .moduleType,
-                                                                  )
-                                                                  .newVariation!
+                                                          variation != null ? [variation] : null,
+                                                          (getIt<SplashBloc>()
+                                                                      .getModuleConfig(widget.item!.moduleType)
+                                                                      ?.newVariation ??
+                                                                  false)
                                                               ? variations
                                                               : null,
-                                                          itemController
-                                                              .quantity,
+                                                          itemController.quantity,
                                                           listOfAddOnId,
                                                           addOnsList,
                                                           listOfAddOnQty,
@@ -1129,19 +1115,20 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                             cartModel
                                                                 .item!
                                                                 .storeId,
-                                                            Get.find<
-                                                                          SplashController
-                                                                        >()
+                                                            getIt<SplashBloc>()
+                                                                        .state
                                                                         .module !=
                                                                     null
-                                                                ? Get.find<
-                                                                        SplashController
+                                                                ? getIt<
+                                                                        SplashBloc
                                                                       >()
+                                                                      .state
                                                                       .module!
                                                                       .id
-                                                                : Get.find<
-                                                                        SplashController
+                                                                : getIt<
+                                                                        SplashBloc
                                                                       >()
+                                                                      .state
                                                                       .cacheModule!
                                                                       .id,
                                                           )) {
@@ -1153,9 +1140,10 @@ class _ItemBottomSheetState extends State<ItemBottomSheet> {
                                                                     'are_you_sure_to_reset'
                                                                         .tr,
                                                                 description:
-                                                                    Get.find<
-                                                                          SplashController
+                                                                    getIt<
+                                                                          SplashBloc
                                                                         >()
+                                                                        .state
                                                                         .configModel!
                                                                         .moduleConfig!
                                                                         .module!

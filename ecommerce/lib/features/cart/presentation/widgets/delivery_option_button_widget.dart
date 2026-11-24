@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/checkout/controllers/checkout_controller.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -35,7 +37,7 @@ class _DeliveryOptionButtonWidgetState
 
     Future.delayed(const Duration(milliseconds: 200), () {
       Get.find<CheckoutController>().setOrderType(
-        Get.find<SplashController>().configModel!.homeDeliveryStatus == 1 &&
+        getIt<SplashBloc>().state.configModel!.homeDeliveryStatus == 1 &&
                 Get.find<CheckoutController>().store!.delivery!
             ? 'delivery'
             : 'take_away',

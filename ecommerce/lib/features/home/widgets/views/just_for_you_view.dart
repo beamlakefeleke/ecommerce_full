@@ -18,7 +18,7 @@ class JustForYouView extends StatefulWidget {
 class _JustForYouViewState extends State<JustForYouView> {
   @override
   Widget build(BuildContext context) {
-    //bool isGrocery = Get.find<SplashController>().module != null && Get.find<SplashController>().module!.moduleType.toString() == AppConstants.grocery;
+    //bool isGrocery = getIt<SplashBloc>().state.module != null && getIt<SplashBloc>().state.module!.moduleType.toString() == AppConstants.grocery;
 
     return GetBuilder<CampaignController>(
       builder: (campaignController) {
@@ -67,7 +67,7 @@ class _JustForYouViewState extends State<JustForYouView> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                             child: CustomImage(
-                              image: '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}'
+                              image: '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
                                   '/${campaignController.itemCampaignList![index].image}',
                               fit: BoxFit.cover,
                             ),

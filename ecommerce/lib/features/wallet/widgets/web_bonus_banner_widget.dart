@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/wallet/controllers/wallet_controller.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -46,10 +48,10 @@ class WebBonusBannerWidget extends StatelessWidget {
                             bool hasSecond =
                                 index2 < walletController.fundBonusList!.length;
 
-                            // String? baseUrl1 = bannerController.bannerDataList![index1] is BasicCampaignModel ? Get.find<SplashController>()
-                            //     .configModel!.baseUrls!.campaignImageUrl : Get.find<SplashController>().configModel!.baseUrls!.bannerImageUrl;
-                            // String? baseUrl2 = hasSecond ? bannerController.bannerDataList![index2] is BasicCampaignModel ? Get.find<SplashController>()
-                            //     .configModel!.baseUrls!.campaignImageUrl : Get.find<SplashController>().configModel!.baseUrls!.bannerImageUrl : '';
+                            // String? baseUrl1 = bannerController.bannerDataList![index1] is BasicCampaignModel ? getIt<SplashBloc>().state
+                            //     .configModel!.baseUrls!.campaignImageUrl : getIt<SplashBloc>().state.configModel!.baseUrls!.bannerImageUrl;
+                            // String? baseUrl2 = hasSecond ? bannerController.bannerDataList![index2] is BasicCampaignModel ? getIt<SplashBloc>().state
+                            //     .configModel!.baseUrls!.campaignImageUrl : getIt<SplashBloc>().state.configModel!.baseUrls!.bannerImageUrl : '';
 
                             return Row(
                               children: [
@@ -112,7 +114,7 @@ class WebBonusBannerWidget extends StatelessWidget {
 
                                               Text(
                                                 '${'add_fund_to_wallet_minimum'.tr} ${PriceConverter.convertPrice(walletController.fundBonusList![index1].minimumAddAmount)} ${'and_enjoy'.tr} ${walletController.fundBonusList![index1].bonusAmount} '
-                                                '${walletController.fundBonusList![index1].bonusType == 'amount' ? Get.find<SplashController>().configModel!.currencySymbol : '%'} ${'bonus'.tr}',
+                                                '${walletController.fundBonusList![index1].bonusType == 'amount' ? getIt<SplashBloc>().state.configModel!.currencySymbol : '%'} ${'bonus'.tr}',
                                                 style: robotoRegular.copyWith(
                                                   fontSize:
                                                       Dimensions.fontSizeSmall,
@@ -202,7 +204,7 @@ class WebBonusBannerWidget extends StatelessWidget {
 
                                                     Text(
                                                       '${'add_fund_to_wallet_minimum'.tr} ${PriceConverter.convertPrice(walletController.fundBonusList![index2].minimumAddAmount)} ${'and_enjoy'.tr} ${walletController.fundBonusList![index2].bonusAmount} '
-                                                      '${walletController.fundBonusList![index2].bonusType == 'amount' ? Get.find<SplashController>().configModel!.currencySymbol : '%'} ${'bonus'.tr}',
+                                                      '${walletController.fundBonusList![index2].bonusType == 'amount' ? getIt<SplashBloc>().state.configModel!.currencySymbol : '%'} ${'bonus'.tr}',
                                                       style: robotoRegular
                                                           .copyWith(
                                                             fontSize: Dimensions
@@ -300,8 +302,8 @@ class WebBonusBannerWidget extends StatelessWidget {
   //   }else if(bannerController.bannerDataList![index] is Store) {
   //     Store store = bannerController.bannerDataList![index];
   //     Get.toNamed(
-  //       RouteHelper.getStoreRoute(id: store.id, page: 'banner', moduleId: Get.find<SplashController>().module!.id, fromShare: false),
-  //       arguments: StoreScreen(store: store, fromModule: false, moduleId: Get.find<SplashController>().module!.id!, fromShare: false),
+  //       RouteHelper.getStoreRoute(id: store.id, page: 'banner', moduleId: getIt<SplashBloc>().state.module!.id, fromShare: false),
+  //       arguments: StoreScreen(store: store, fromModule: false, moduleId: getIt<SplashBloc>().state.module!.id!, fromShare: false),
   //     );
   //   }else if(bannerController.bannerDataList![index] is BasicCampaignModel) {
   //     BasicCampaignModel campaign = bannerController.bannerDataList![index];

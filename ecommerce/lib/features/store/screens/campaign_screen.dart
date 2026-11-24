@@ -1,5 +1,7 @@
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -66,7 +68,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                                       height: 200,
                                       width: 1150,
                                       image:
-                                          '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}/${widget.campaign.image}',
+                                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}/${widget.campaign.image}',
                                     ),
                                   ),
                                 ),
@@ -255,7 +257,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                         background: CustomImage(
                           fit: BoxFit.cover,
                           image:
-                              '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}/${widget.campaign.image}',
+                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}/${widget.campaign.image}',
                         ),
                       ),
                       actions: const [SizedBox()],
@@ -286,7 +288,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                                         ),
                                         child: CustomImage(
                                           image:
-                                              '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}/${campaignController.basicCampaign!.image}',
+                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}/${campaignController.basicCampaign!.image}',
                                           height: 40,
                                           width: 50,
                                           fit: BoxFit.cover,

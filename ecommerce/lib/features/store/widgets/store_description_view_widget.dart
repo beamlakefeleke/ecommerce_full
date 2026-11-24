@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
@@ -33,7 +35,7 @@ class StoreDescriptionViewWidget extends StatelessWidget {
     // Module? moduleData;
     // for(ZoneData zData in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
     //   for(Modules m in zData.modules!) {
-    //     if(m.id == Get.find<SplashController>().module!.id) {
+    //     if(m.id == getIt<SplashBloc>().state.module!.id) {
     //       moduleData = m as Module?;
     //       break;
     //     }
@@ -52,7 +54,7 @@ class StoreDescriptionViewWidget extends StatelessWidget {
                       children: [
                         CustomImage(
                           image:
-                              '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}/${store!.logo}',
+                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}/${store!.logo}',
                           height: ResponsiveHelper.isDesktop(context)
                               ? 140
                               : 60,
@@ -355,13 +357,13 @@ class StoreDescriptionViewWidget extends StatelessWidget {
                             addressType: '',
                           ),
                           'store',
-                          Get.find<SplashController>()
+                          getIt<SplashBloc>()
                               .getModuleConfig(
-                                Get.find<SplashController>()
+                                getIt<SplashBloc>().state
                                     .module!
                                     .moduleType!,
                               )
-                              .newVariation!,
+                              ?.newVariation ?? false,
                         ),
                       ),
                       child: Column(
@@ -501,11 +503,11 @@ class StoreDescriptionViewWidget extends StatelessWidget {
                           addressType: '',
                         ),
                         'store',
-                        Get.find<SplashController>()
+                        getIt<SplashBloc>()
                             .getModuleConfig(
-                              Get.find<SplashController>().module!.moduleType!,
+                              getIt<SplashBloc>().state.module!.moduleType!,
                             )
-                            .newVariation!,
+                            ?.newVariation ?? false,
                       ),
                     ),
                     child: Column(

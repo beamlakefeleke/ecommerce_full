@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -73,7 +75,7 @@ class CarFilterWidget extends StatelessWidget {
                               children: [
                                 TextSpan(
                                   text:
-                                      '${Get.find<SplashController>().configModel!.currencySymbol}',
+                                      '${getIt<SplashBloc>().state.configModel!.currencySymbol}',
                                   style: robotoRegular.copyWith(
                                     fontSize: Dimensions.fontSizeSmall,
                                   ),
@@ -112,7 +114,7 @@ class CarFilterWidget extends StatelessWidget {
                               children: [
                                 TextSpan(
                                   text:
-                                      '${Get.find<SplashController>().configModel!.currencySymbol}',
+                                      '${getIt<SplashBloc>().state.configModel!.currencySymbol}',
                                   style: robotoRegular.copyWith(
                                     fontSize: Dimensions.fontSizeSmall,
                                   ),
@@ -260,7 +262,7 @@ class CarFilterWidget extends StatelessWidget {
                                 ),
                                 child: CustomImage(
                                   image:
-                                      '${Get.find<SplashController>().configModel!.baseUrls!.vehicleBrandImageUrl}/${carSelectionController.brandModels![index].logo}',
+                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleBrandImageUrl}/${carSelectionController.brandModels![index].logo}',
                                 ),
                               ),
                             ),

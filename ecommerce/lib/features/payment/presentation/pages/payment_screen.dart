@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/domain/helpers/order_helper.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
@@ -64,7 +66,7 @@ class PaymentScreenState extends State<PaymentScreen> {
       for (ZoneData zData
           in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
         for (Modules m in zData.modules!) {
-          if (m.id == Get.find<SplashController>().module!.id) {
+          if (m.id == getIt<SplashBloc>().state.module!.id) {
             _maximumCodOrderAmount = m.pivot!.maximumCodOrderAmount;
             break;
           }

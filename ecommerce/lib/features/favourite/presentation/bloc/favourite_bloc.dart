@@ -7,7 +7,9 @@ import 'package:ecommerce/features/favourite/domain/usecases/add_favourite_useca
 import 'package:ecommerce/features/favourite/domain/usecases/get_favourite_list_usecase.dart';
 import 'package:ecommerce/features/favourite/domain/usecases/remove_favourite_usecase.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 
@@ -45,15 +47,15 @@ class FavouriteBloc extends Bloc<FavouriteEvent, FavouriteState> {
       if (body['item'] != null) {
         for (final item in body['item']) {
           if (item['module_type'] == null ||
-              !Get.find<SplashController>()
+              !(getIt<SplashBloc>()
                   .getModuleConfig(item['module_type'])
-                  .newVariation! ||
+                  ?.newVariation ?? false) ||
               item['variations'] == null ||
               item['variations'].isEmpty ||
               (item['food_variations'] != null &&
                   item['food_variations'].isNotEmpty)) {
             final Item i = Item.fromJson(item);
-            if (Get.find<SplashController>().module == null) {
+            if (getIt<SplashBloc>().state.module == null) {
               wishItemList.addAll(_wishItemList(i));
               wishItemIdList.addAll(_wishItemIdList(i));
             } else {
@@ -66,7 +68,7 @@ class FavouriteBloc extends Bloc<FavouriteEvent, FavouriteState> {
 
       if (body['store'] != null) {
         for (final store in body['store']) {
-          if (Get.find<SplashController>().module == null) {
+          if (getIt<SplashBloc>().state.module == null) {
             wishStoreList.addAll(_wishStoreList(store));
             wishStoreIdList.addAll(_wishStoreIdList(store));
           } else {
@@ -77,7 +79,7 @@ class FavouriteBloc extends Bloc<FavouriteEvent, FavouriteState> {
               debugPrint('exception create in store list create : $e');
             }
             if (s != null &&
-                Get.find<SplashController>().module!.id == s.moduleId) {
+                getIt<SplashBloc>().state.module!.id == s.moduleId) {
               wishStoreList.add(s);
               wishStoreIdList.add(s.id);
             }

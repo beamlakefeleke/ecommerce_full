@@ -95,7 +95,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     int qty = entry.quantity!;
     final bool moduleStock = ModuleHelper.getModuleConfig(
       entry.item!.moduleType,
-    ).newVariation!;
+    )?.newVariation ?? false;
     if (event.isIncrement) {
       if (moduleStock && qty >= event.stock!) {
         showCustomSnackBar('out_of_stock'.tr);
@@ -116,7 +116,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final double discountedPrice = _calculateDiscountedPrice(
       entry,
       qty,
-      ModuleHelper.getModuleConfig(entry.item!.moduleType).newVariation!,
+      ModuleHelper.getModuleConfig(entry.item!.moduleType)?.newVariation ?? false,
     );
 
     await updateCartQuantityUseCase(
@@ -205,7 +205,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   ) {
     // Module selection is a cross-feature concern handled by SplashController
     // (still GetX). This event is a no-op in the bloc — the caller uses
-    // Get.find<SplashController>().setModule(...) directly for now.
+    // getIt<SplashBloc>().add(SplashModuleSet(...)) directly for now.
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────
@@ -313,7 +313,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     for (final CartModel m in s.cartList) {
       isFoodVariation = ModuleHelper.getModuleConfig(
         m.item!.moduleType,
-      ).newVariation!;
+      )?.newVariation ?? false;
       final double? discount = m.item!.storeDiscount == 0
           ? m.item!.discount
           : m.item!.storeDiscount;

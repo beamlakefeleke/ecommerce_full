@@ -3,7 +3,9 @@ import 'package:flutter/material.dart' hide Banner;
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/corner_banner/banner.dart';
 import 'package:ecommerce/common/widgets/corner_banner/positioned_banner.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/styles.dart';
 
@@ -82,7 +84,7 @@ class CornerDiscountTag extends StatelessWidget {
               children: [
                 Text(
                   discount! > 0
-                      ? '$discount${discountType == 'percent' ? '%' : Get.find<SplashController>().configModel!.currencySymbol} ${'off'.tr}'
+                      ? '$discount${discountType == 'percent' ? '%' : getIt<SplashBloc>().state.configModel!.currencySymbol} ${'off'.tr}'
                       : 'free_delivery'.tr,
                   style: robotoMedium.copyWith(
                     color: Colors.white,

@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -27,10 +29,10 @@ class DiscountTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isRightSide =
-        Get.find<SplashController>().configModel!.currencySymbolDirection ==
+        getIt<SplashBloc>().state.configModel!.currencySymbolDirection ==
         'right';
     String currencySymbol =
-        Get.find<SplashController>().configModel!.currencySymbol!;
+        getIt<SplashBloc>().state.configModel!.currencySymbol!;
 
     return (discount! > 0 || freeDelivery!)
         ? Positioned(

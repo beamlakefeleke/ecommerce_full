@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -87,14 +89,14 @@ class CarCost extends StatelessWidget {
             ),
             children: [
               TextSpan(
-                text: Get.find<SplashController>().configModel!.currencySymbol,
+                text: getIt<SplashBloc>().state.configModel!.currencySymbol,
                 style: robotoRegular.copyWith(
                   fontSize: Dimensions.fontSizeSmall,
                 ),
               ),
               TextSpan(
                 text: insideCityCost.toStringAsFixed(
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>().state
                       .configModel!
                       .digitAfterDecimalPoint!,
                 ),
@@ -128,14 +130,14 @@ class CarCost extends StatelessWidget {
             ),
             children: [
               TextSpan(
-                text: Get.find<SplashController>().configModel!.currencySymbol,
+                text: getIt<SplashBloc>().state.configModel!.currencySymbol,
                 style: robotoRegular.copyWith(
                   fontSize: Dimensions.fontSizeSmall,
                 ),
               ),
               TextSpan(
                 text: outsideCityCost.toStringAsFixed(
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>().state
                       .configModel!
                       .digitAfterDecimalPoint!,
                 ),

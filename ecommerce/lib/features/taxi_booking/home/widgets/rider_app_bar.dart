@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -25,8 +28,7 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
             padding: const EdgeInsets.symmetric(
               horizontal: Dimensions.paddingSizeSmall,
             ),
-            child: GetBuilder<SplashController>(
-              builder: (splashController) {
+            child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
                 return Padding(
                   padding: const EdgeInsets.only(
                     top: Dimensions.paddingSizeLarge,
@@ -37,7 +39,7 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
                       (splashController.module != null &&
                               splashController.configModel!.module == null)
                           ? InkWell(
-                              onTap: () => splashController.removeModule(),
+                              onTap: () => getIt<SplashBloc>().add(const SplashModuleRemoved()),
                               child: Image.asset(
                                 Images.moduleIcon,
                                 height: 22,

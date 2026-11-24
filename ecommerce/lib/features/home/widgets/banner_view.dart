@@ -1,7 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -15,6 +18,7 @@ import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/features/store/screens/store_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -66,11 +70,11 @@ class BannerView extends StatelessWidget {
                               itemBuilder: (context, index, _) {
                                 String? baseUrl =
                                     bannerDataList![index] is BasicCampaignModel
-                                    ? Get.find<SplashController>()
+                                    ? getIt<SplashBloc>().state
                                           .configModel!
                                           .baseUrls!
                                           .campaignImageUrl
-                                    : Get.find<SplashController>()
+                                    : getIt<SplashBloc>().state
                                           .configModel!
                                           .baseUrls!
                                           .bannerImageUrl;
@@ -90,11 +94,10 @@ class BannerView extends StatelessWidget {
                                                   .zoneData!
                                                   .isNotEmpty)) {
                                         for (ModuleModel module
-                                            in Get.find<SplashController>()
+                                            in getIt<SplashBloc>().state
                                                 .moduleList!) {
                                           if (module.id == store!.moduleId) {
-                                            Get.find<SplashController>()
-                                                .setModule(module);
+                                            getIt<SplashBloc>().add(SplashModuleSet(module);
                                             break;
                                           }
                                         }
@@ -111,14 +114,14 @@ class BannerView extends StatelessWidget {
                                               (module) =>
                                                   module.id == store!.moduleId,
                                             );
-                                        Get.find<SplashController>().setModule(
+                                        getIt<SplashBloc>().add(SplashModuleSet(
                                           ModuleModel(
                                             id: module.id,
                                             moduleName: module.moduleName,
                                             moduleType: module.moduleType,
                                             themeId: module.themeId,
                                             storesCount: module.storesCount,
-                                          ),
+                                          )),
                                         );
                                       }
                                       Get.toNamed(
@@ -177,8 +180,7 @@ class BannerView extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(
                                         Dimensions.radiusDefault,
                                       ),
-                                      child: GetBuilder<SplashController>(
-                                        builder: (splashController) {
+                                      child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
                                           return CustomImage(
                                             image:
                                                 '$baseUrl/${bannerList[index]}',

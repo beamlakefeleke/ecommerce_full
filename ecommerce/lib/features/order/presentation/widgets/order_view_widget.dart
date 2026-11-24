@@ -1,5 +1,7 @@
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -240,9 +242,9 @@ class OrderViewWidget extends StatelessWidget {
                                                               ),
                                                           child: CustomImage(
                                                             image: isParcel
-                                                                ? '${Get.find<SplashController>().configModel!.baseUrls!.parcelCategoryImageUrl}'
+                                                                ? '${getIt<SplashBloc>().state.configModel!.baseUrls!.parcelCategoryImageUrl}'
                                                                       '/${paginatedOrderModel.orders![index].parcelCategory != null ? paginatedOrderModel.orders![index].parcelCategory!.image : ''}'
-                                                                : '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}/${paginatedOrderModel.orders![index].store != null ? paginatedOrderModel.orders![index].store!.logo : ''}',
+                                                                : '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}/${paginatedOrderModel.orders![index].store != null ? paginatedOrderModel.orders![index].store!.logo : ''}',
                                                             height: isParcel
                                                                 ? 35
                                                                 : ResponsiveHelper.isDesktop(

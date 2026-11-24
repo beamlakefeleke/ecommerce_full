@@ -4,7 +4,9 @@ import 'package:ecommerce/features/category/controllers/category_controller.dart
 import 'package:ecommerce/features/flash_sale/controllers/flash_sale_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/home/widgets/web/middle_section_multiple_banner_view_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/module_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/web_basic_medicine_nearby_view_widget.dart';
@@ -57,7 +59,7 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
   void initState() {
     super.initState();
     _isLogin = AuthHelper.isLoggedIn();
-    Get.find<SplashController>().getWebSuggestedLocationStatus();
+    getIt<SplashBloc>().getSuggestedLocationStatus();
 
     if (_isLogin) {
       suggestAddressBottomSheet();
@@ -65,8 +67,8 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
   }
 
   Future<void> suggestAddressBottomSheet() async {
-    active = await Get.find<LocationController>().checkLocationActive();
-    if (!Get.find<SplashController>().webSuggestedLocation && active) {
+    active = await Get.find<LocationController>().checkLocationActive();g
+    if (!getIt<SplashBloc>().state.webSuggestedLocation && active) {
       Future.delayed(const Duration(seconds: 1), () {
         Get.dialog(
           const Center(
@@ -84,16 +86,16 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
   @override
   Widget build(BuildContext context) {
     bool isPharmacy =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
     bool isFood =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.food;
     bool isShop =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.ecommerce;
     Get.find<BannerController>().setCurrentIndex(0, false);
     bool isLoggedIn = AuthHelper.isLoggedIn();
@@ -296,7 +298,7 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    '${storeController.storeModel?.totalSize ?? 0} ${Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'restaurants'.tr : 'stores'.tr}',
+                                    '${storeController.storeModel?.totalSize ?? 0} ${getIt<SplashBloc>().state.configModel!.moduleConfig!.module!.showRestaurantText! ? 'restaurants'.tr : 'stores'.tr}',
                                     style: robotoMedium.copyWith(
                                       fontSize: Dimensions.fontSizeLarge,
                                     ),

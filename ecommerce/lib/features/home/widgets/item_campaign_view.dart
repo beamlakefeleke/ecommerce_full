@@ -1,7 +1,9 @@
 import 'package:ecommerce/common/widgets/title_widget.dart';
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -105,7 +107,7 @@ class ItemCampaignView extends StatelessWidget {
                                                   ),
                                               child: CustomImage(
                                                 image:
-                                                    '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}'
+                                                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
                                                     '/${campaignController.itemCampaignList![index].image}',
                                                 height: 90,
                                                 width: 130,

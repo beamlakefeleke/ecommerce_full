@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -29,8 +31,8 @@ class StoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isPharmacy =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
     double distance = Get.find<StoreController>().getRestaurantDistance(
       LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
@@ -56,11 +58,11 @@ class StoreCard extends StatelessWidget {
           ),
           child: CustomInkWell(
             onTap: () {
-              if (Get.find<SplashController>().moduleList != null) {
+              if (getIt<SplashBloc>().state.moduleList != null) {
                 for (ModuleModel module
-                    in Get.find<SplashController>().moduleList!) {
+                    in getIt<SplashBloc>().state.moduleList!) {
                   if (module.id == store.moduleId) {
-                    Get.find<SplashController>().setModule(module);
+                    getIt<SplashBloc>().add(SplashModuleSet(module));
                     break;
                   }
                 }
@@ -87,7 +89,7 @@ class StoreCard extends StatelessWidget {
                             ),
                             child: CustomImage(
                               image:
-                                  '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}'
+                                  '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}'
                                   '/${store.logo}',
                               height: 50,
                               width: 50,

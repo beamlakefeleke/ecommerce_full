@@ -4,7 +4,9 @@ import 'dart:ui';
 
 import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
@@ -379,7 +381,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
             snippet: addressModel.address,
           ),
         ),
-        child:  GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}/${''}'),
+        child:  GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${getIt<SplashBloc>().state.configModel!.baseUrls!.customerImageUrl}/${''}'),
       )) : const SizedBox();*/
 
       ///store for normal order , but receiver for parcel order
@@ -394,7 +396,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 infoWindow: InfoWindow(
                   title: parcel
                       ? 'Receiver'
-                      : Get.find<SplashController>()
+                      : getIt<SplashBloc>().state
                             .configModel!
                             .moduleConfig!
                             .module!
@@ -414,11 +416,11 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
         marker: Marker(markerId: const MarkerId('store'),
           position: LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
           infoWindow: InfoWindow(
-            title: parcel ? 'Receiver' : Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'store'.tr : 'store'.tr,
+            title: parcel ? 'Receiver' : getIt<SplashBloc>().state.configModel!.moduleConfig!.module!.showRestaurantText! ? 'store'.tr : 'store'.tr,
             snippet: store.address,
           ),
         ),
-        child: GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}/${store.logo}'),
+        child: GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}/${store.logo}'),
       )) : const SizedBox();*/
 
       deliveryMan != null
@@ -449,7 +451,7 @@ class OrderTrackingScreenState extends State<OrderTrackingScreen> {
             snippet: deliveryMan.location,
           ),
         ),
-        child: GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${Get.find<SplashController>().configModel!.baseUrls!.deliveryManImageUrl}/${deliveryMan.image}'),
+        child: GetPlatform.isWeb ? const Icon(Icons.location_on, size: 18) : _customMarker('${getIt<SplashBloc>().state.configModel!.baseUrls!.deliveryManImageUrl}/${deliveryMan.image}'),
       )) : const SizedBox();*/
     } catch (_) {}
     setState(() {});

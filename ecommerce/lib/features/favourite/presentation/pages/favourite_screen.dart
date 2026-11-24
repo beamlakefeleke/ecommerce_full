@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -68,7 +70,7 @@ class FavouriteScreenState extends State<FavouriteScreen>
                         Tab(text: 'item'.tr),
                         Tab(
                           text:
-                              Get.find<SplashController>()
+                              getIt<SplashBloc>().state
                                   .configModel!
                                   .moduleConfig!
                                   .module!

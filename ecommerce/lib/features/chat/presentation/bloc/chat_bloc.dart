@@ -12,7 +12,9 @@ import 'package:ecommerce/features/chat/domain/usecases/send_message_usecase.dar
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 
@@ -360,7 +362,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       return (list, hasAdmin);
     }
     hasAdmin = true;
-    final splash = Get.find<SplashController>().configModel;
+    final splash = getIt<SplashBloc>().state.configModel;
     final ChatUser adminUser = ChatUser(
       id: 0,
       fName: splash?.businessName,
@@ -398,7 +400,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     // Override receiver with admin info when needed
     if (adminId != null) {
-      final splash = Get.find<SplashController>().configModel;
+      final splash = getIt<SplashBloc>().state.configModel;
       conv = conv.copyWith(
         receiver: ChatUser(
           id: 0,

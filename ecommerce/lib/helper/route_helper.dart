@@ -4,7 +4,9 @@ import 'package:meta_seo/meta_seo.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:ecommerce/features/loyalty/presentation/pages/loyalty_screen.dart';
 import 'package:ecommerce/features/refer_and_earn/presentation/pages/refer_and_earn_screen.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/auth/domain/models/social_log_in_body.dart';
@@ -73,7 +75,7 @@ import 'package:ecommerce/features/store/screens/store_item_search_screen.dart';
 import 'package:ecommerce/features/store/screens/store_screen.dart';
 import 'package:ecommerce/features/review/presentation/pages/review_screen.dart';
 import 'package:ecommerce/features/search/presentation/pages/search_screen.dart';
-import 'package:ecommerce/features/splash/screens/splash_screen.dart';
+import 'package:ecommerce/features/splash/presentation/pages/splash_screen.dart';
 import 'package:ecommerce/features/support/screens/support_screen.dart';
 import 'package:ecommerce/features/taxi_booking/booking_checkout_screen/booking_checkout_screen.dart';
 import 'package:ecommerce/features/taxi_booking/car_details_screen/car_details_screen.dart';
@@ -1144,14 +1146,14 @@ class RouteHelper {
     double? minimumVersion = 0;
     if (GetPlatform.isAndroid) {
       minimumVersion =
-          Get.find<SplashController>().configModel!.appMinimumVersionAndroid;
+          getIt<SplashBloc>().state.configModel!.appMinimumVersionAndroid;
     } else if (GetPlatform.isIOS) {
       minimumVersion =
-          Get.find<SplashController>().configModel!.appMinimumVersionIos;
+          getIt<SplashBloc>().state.configModel!.appMinimumVersionIos;
     }
     return AppConstants.appVersion < minimumVersion!
         ? const UpdateScreen(isUpdate: true)
-        : Get.find<SplashController>().configModel!.maintenanceMode!
+        : getIt<SplashBloc>().state.configModel!.maintenanceMode!
         ? const UpdateScreen(isUpdate: false)
         : (AddressHelper.getUserAddressFromSharedPref() == null && !byPuss)
         ? AccessLocationScreen(

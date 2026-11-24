@@ -5,7 +5,9 @@ import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
@@ -74,7 +76,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   label: SizedBox(
                     width: context.width * 0.75,
                     child: Text(
-                      '${'chat_with'.tr} ${Get.find<SplashController>().configModel!.businessName}',
+                      '${'chat_with'.tr} ${getIt<SplashBloc>().state.configModel!.businessName}',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: robotoMedium.copyWith(
@@ -252,18 +254,18 @@ class _ConversationTile extends StatelessWidget {
     String baseUrl = '';
     if (type == UserType.vendor.name) {
       baseUrl =
-          Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl ??
+          getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl ??
           '';
     } else if (type == UserType.delivery_man.name) {
       baseUrl =
-          Get.find<SplashController>()
+          getIt<SplashBloc>().state
               .configModel!
               .baseUrls!
               .deliveryManImageUrl ??
           '';
     } else if (type == UserType.admin.name) {
       baseUrl =
-          Get.find<SplashController>().configModel!.baseUrls!.businessLogoUrl ??
+          getIt<SplashBloc>().state.configModel!.baseUrls!.businessLogoUrl ??
           '';
     }
 

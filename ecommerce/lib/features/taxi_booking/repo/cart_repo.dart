@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
@@ -51,8 +53,8 @@ class CartRepo {
   }
 
   int getModuleId() {
-    return Get.find<SplashController>().module?.id ??
-        Get.find<SplashController>().cacheModule?.id ??
+    return getIt<SplashBloc>().state.module?.id ??
+        getIt<SplashBloc>().state.cacheModule?.id ??
         0;
   }
 
@@ -90,14 +92,14 @@ class CartRepo {
     Map<String, String>? header = {
       'Content-Type': 'application/json; charset=UTF-8',
       AppConstants.localizationKey: AppConstants.languages[0].languageCode!,
-      AppConstants.moduleId: '${Get.find<SplashController>().getCacheModule()}',
+      AppConstants.moduleId: '${getIt<SplashBloc>().getCacheModuleId()}',
       'Authorization':
           'Bearer ${sharedPreferences.getString(AppConstants.token)}',
     };
 
     return apiClient.getData(
       '${AppConstants.getCartListUri}${!AuthHelper.isLoggedIn() ? '?guest_id=${AuthHelper.getGuestId()}' : ''}',
-      headers: Get.find<SplashController>().module?.id == null ? header : null,
+      headers: getIt<SplashBloc>().state.module?.id == null ? header : null,
     );
   }
 

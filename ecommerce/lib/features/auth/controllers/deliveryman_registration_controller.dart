@@ -1,10 +1,11 @@
-import 'package:get/get.dart';
+﻿import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/location/domain/entities/zone_response.dart';
 import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_data_model.dart';
@@ -210,11 +211,11 @@ class DeliverymanRegistrationController extends GetxController
       _setLocation(
         LatLng(
           double.parse(
-            Get.find<SplashController>().configModel!.defaultLocation!.lat ??
+            getIt<SplashBloc>().state.configModel!.defaultLocation!.lat ??
                 '0',
           ),
           double.parse(
-            Get.find<SplashController>().configModel!.defaultLocation!.lng ??
+            getIt<SplashBloc>().state.configModel!.defaultLocation!.lng ??
                 '0',
           ),
         ),

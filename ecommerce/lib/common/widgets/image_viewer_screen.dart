@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 
@@ -24,8 +26,8 @@ class ImageViewerScreen extends StatelessWidget {
       body: GetBuilder<ItemController>(
         builder: (itemController) {
           String? baseUrl = item.availableDateStarts == null
-              ? Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl
-              : Get.find<SplashController>()
+              ? getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl
+              : getIt<SplashBloc>().state
                     .configModel!
                     .baseUrls!
                     .campaignImageUrl;

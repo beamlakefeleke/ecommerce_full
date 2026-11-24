@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/address_widget.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/address/controllers/address_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
@@ -60,8 +62,7 @@ class AddressBottomSheetWidget extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () {
-                            Get.find<SplashController>()
-                                .saveWebSuggestedLocationStatus(true);
+                            getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
                             Get.back();
                           },
                           icon: const Icon(Icons.clear),
@@ -178,8 +179,7 @@ class AddressBottomSheetWidget extends StatelessWidget {
                                         );
                                 if (response.isSuccess) {
                                   if (ResponsiveHelper.isDesktop(Get.context)) {
-                                    Get.find<SplashController>()
-                                        .saveWebSuggestedLocationStatus(true);
+                                    getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
                                   }
                                   Get.find<LocationController>()
                                       .saveAddressAndNavigate(
@@ -192,8 +192,7 @@ class AddressBottomSheetWidget extends StatelessWidget {
                                 } else {
                                   Get.back();
                                   if (ResponsiveHelper.isDesktop(Get.context)) {
-                                    Get.find<SplashController>()
-                                        .saveWebSuggestedLocationStatus(true);
+                                    getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
                                     showGeneralDialog(
                                       context: Get.context!,
                                       pageBuilder: (_, __, ___) {
@@ -339,8 +338,7 @@ class AddressBottomSheetWidget extends StatelessWidget {
                                                       ),
                                                     );
 
-                                                Get.find<SplashController>()
-                                                    .saveWebSuggestedLocationStatus(
+                                                getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(
                                                       true,
                                                     );
                                               },
@@ -365,8 +363,7 @@ class AddressBottomSheetWidget extends StatelessWidget {
                               addressController.addressList!.isNotEmpty
                           ? TextButton.icon(
                               onPressed: () {
-                                Get.find<SplashController>()
-                                    .saveWebSuggestedLocationStatus(true);
+                                getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
                                 Get.toNamed(
                                   RouteHelper.getAddAddressRoute(
                                     false,

@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/support/widgets/web_help_support_widget.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -56,7 +58,7 @@ class _SupportScreenState extends State<SupportScreen> {
                           title: 'address'.tr,
                           color: Colors.blue,
                           info:
-                              Get.find<SplashController>().configModel!.address,
+                              getIt<SplashBloc>().state.configModel!.address,
                           onTap: () {},
                         ),
                         const SizedBox(height: Dimensions.paddingSizeSmall),
@@ -65,17 +67,17 @@ class _SupportScreenState extends State<SupportScreen> {
                           icon: Icons.call,
                           title: 'call'.tr,
                           color: Colors.red,
-                          info: Get.find<SplashController>().configModel!.phone,
+                          info: getIt<SplashBloc>().state.configModel!.phone,
                           onTap: () async {
                             if (await canLaunchUrlString(
-                              'tel:${Get.find<SplashController>().configModel!.phone}',
+                              'tel:${getIt<SplashBloc>().state.configModel!.phone}',
                             )) {
                               launchUrlString(
-                                'tel:${Get.find<SplashController>().configModel!.phone}',
+                                'tel:${getIt<SplashBloc>().state.configModel!.phone}',
                               );
                             } else {
                               showCustomSnackBar(
-                                '${'can_not_launch'.tr} ${Get.find<SplashController>().configModel!.phone}',
+                                '${'can_not_launch'.tr} ${getIt<SplashBloc>().state.configModel!.phone}',
                               );
                             }
                           },
@@ -86,11 +88,11 @@ class _SupportScreenState extends State<SupportScreen> {
                           icon: Icons.mail_outline,
                           title: 'email_us'.tr,
                           color: Colors.green,
-                          info: Get.find<SplashController>().configModel!.email,
+                          info: getIt<SplashBloc>().state.configModel!.email,
                           onTap: () {
                             final Uri emailLaunchUri = Uri(
                               scheme: 'mailto',
-                              path: Get.find<SplashController>()
+                              path: getIt<SplashBloc>().state
                                   .configModel!
                                   .email,
                             );

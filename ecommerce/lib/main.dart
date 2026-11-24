@@ -7,7 +7,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:meta_seo/meta_seo.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -45,6 +44,9 @@ import 'package:ecommerce/features/notification/presentation/bloc/notification_b
 import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_state.dart';
 import 'package:ecommerce/features/home/screens/home_screen.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
@@ -137,7 +139,7 @@ class _MyAppState extends State<MyApp> {
   void _route() async {
     final authRepository = clean_di.getIt<AuthRepository>();
     if (GetPlatform.isWeb) {
-      Get.find<SplashController>().initSharedData();
+      clean_di.getIt<SplashBloc>().add(const SplashSharedDataInitialized());
       if (AddressHelper.getUserAddressFromSharedPref() != null &&
           AddressHelper.getUserAddressFromSharedPref()!.zoneIds == null) {
         authRepository.clearSharedAddress();
@@ -149,32 +151,36 @@ class _MyAppState extends State<MyApp> {
       }
 
       if ((AuthHelper.isLoggedIn() || AuthHelper.isGuestLoggedIn()) &&
-          Get.find<SplashController>().cacheModule != null) {
+          clean_di.getIt<SplashBloc>().state.cacheModule != null) {
         clean_di.getIt<CartBloc>().add(const CartDataOnlineRequested());
       }
     }
-    Get.find<SplashController>()
-        .getConfigData(loadLandingData: GetPlatform.isWeb)
-        .then((bool isSuccess) async {
-          if (isSuccess) {
-            if (authRepository.isLoggedIn()) {
-              authRepository.updateToken();
-              if (Get.find<SplashController>().module != null) {
-                clean_di.getIt<FavouriteBloc>().add(
-                  const FavouriteListRequested(),
-                );
-              }
-            }
-          }
-        });
+    // Dispatch config fetch; post-config side-effects (updateToken, getFavouriteList)
+    // are handled by a BlocListener on SplashConfigStatus in the splash screen.
+    clean_di.getIt<SplashBloc>().add(
+      SplashConfigRequested(loadLandingData: GetPlatform.isWeb),
+    );
+    if (authRepository.isLoggedIn()) {
+      authRepository.updateToken();
+      if (clean_di.getIt<SplashBloc>().state.module != null) {
+        clean_di.getIt<FavouriteBloc>().add(const FavouriteListRequested());
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ThemeController>(
       builder: (themeController) {
-        return BlocProvider<LanguageBloc>(
-          create: (_) => clean_di.getIt<LanguageBloc>(),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<LanguageBloc>(
+              create: (_) => clean_di.getIt<LanguageBloc>(),
+            ),
+            BlocProvider<SplashBloc>(
+              create: (_) => clean_di.getIt<SplashBloc>(),
+            ),
+          ],
           child: BlocConsumer<LanguageBloc, LanguageState>(
             listenWhen: (prev, curr) =>
                 curr.changeStatus == LanguageChangeStatus.applied,
@@ -185,12 +191,15 @@ class _MyAppState extends State<MyApp> {
               if (AddressHelper.getUserAddressFromSharedPref() != null) {
                 HomeScreen.loadData(true);
               } else {
-                Get.find<SplashController>().getLandingPageData();
+                context.read<SplashBloc>().add(
+                  const SplashLandingPageRequested(),
+                );
               }
             },
             builder: (context, languageState) {
-              return GetBuilder<SplashController>(
-                builder: (splashController) {
+              return BlocBuilder<SplashBloc, SplashState>(
+                builder: (context, splashState) {
+                  final splashController = splashState;
                   return (GetPlatform.isWeb &&
                           splashController.configModel == null)
                       ? const SizedBox()
@@ -285,16 +294,15 @@ class _MyAppState extends State<MyApp> {
                                   child: Stack(
                                     children: [
                                       widget!,
-                                      GetBuilder<SplashController>(
-                                        builder: (splashController) {
-                                          if (!splashController
-                                                  .savedCookiesData &&
-                                              !splashController
+                                      BlocBuilder<SplashBloc, SplashState>(
+                                        builder: (context, splashState) {
+                                          if (!splashState.savedCookiesData &&
+                                              !clean_di
+                                                  .getIt<SplashBloc>()
                                                   .getAcceptCookiesStatus(
-                                                    splashController
-                                                                .configModel !=
+                                                    splashState.configModel !=
                                                             null
-                                                        ? splashController
+                                                        ? splashState
                                                               .configModel!
                                                               .cookiesText!
                                                         : '',

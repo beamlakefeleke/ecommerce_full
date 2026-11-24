@@ -1,7 +1,11 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -35,8 +39,7 @@ class ModuleDialogWidget extends StatelessWidget {
                   ),
                 ),
 
-                GetBuilder<SplashController>(
-                  builder: (splashController) {
+                BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
                     return Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(
@@ -64,9 +67,9 @@ class ModuleDialogWidget extends StatelessWidget {
                               itemBuilder: (context, index) {
                                 return InkWell(
                                   onTap: () {
-                                    Get.find<SplashController>().setModule(
+                                    getIt<SplashBloc>().add(SplashModuleSet(
                                       splashController.moduleList![index],
-                                    );
+                                    ));
                                     callback();
                                   },
                                   child: Container(

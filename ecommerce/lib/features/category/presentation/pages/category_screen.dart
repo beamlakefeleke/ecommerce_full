@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_event.dart';
 import 'package:ecommerce/features/category/presentation/bloc/category_state.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -100,7 +102,7 @@ class CategoryScreen extends StatelessWidget {
                                       width: 50,
                                       fit: BoxFit.cover,
                                       image:
-                                          '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${cat.image}',
+                                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${cat.image}',
                                     ),
                                   ),
                                   const SizedBox(

@@ -151,6 +151,12 @@ import 'package:ecommerce/features/search/data/repositories/search_repository_im
 import 'package:ecommerce/features/search/domain/repositories/search_repository.dart';
 import 'package:ecommerce/features/search/domain/usecases/search_usecases.dart';
 import 'package:ecommerce/features/search/presentation/bloc/search_bloc.dart';
+import 'package:ecommerce/features/splash/data/datasources/splash_local_data_source.dart';
+import 'package:ecommerce/features/splash/data/datasources/splash_remote_data_source.dart';
+import 'package:ecommerce/features/splash/data/repositories/splash_repository_impl.dart';
+import 'package:ecommerce/features/splash/domain/repositories/splash_repository.dart';
+import 'package:ecommerce/features/splash/domain/usecases/splash_usecases.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/features/loyalty/data/datasources/loyalty_remote_data_source.dart';
 import 'package:ecommerce/features/loyalty/data/repositories/loyalty_repository_impl.dart';
@@ -169,7 +175,6 @@ import 'package:ecommerce/features/auth/domain/usecases/register_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_login_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_register_usecase.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
 
 /// Service locator for the migrated (Clean Architecture + BLoC) features.
 ///
@@ -214,6 +219,38 @@ void configureDependencies() {
   _registerProfile();
   _registerReview();
   _registerSearch();
+  _registerSplash();
+}
+
+void _registerSplash() {
+  getIt.registerLazySingleton<SplashRemoteDataSource>(
+    () => SplashRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<SplashLocalDataSource>(
+    () => SplashLocalDataSourceImpl(
+      sharedPreferences: getIt(),
+      apiClient: getIt(),
+    ),
+  );
+  getIt.registerLazySingleton<SplashRepository>(
+    () => SplashRepositoryImpl(
+      remoteDataSource: getIt(),
+      localDataSource: getIt(),
+      apiClient: getIt(),
+    ),
+  );
+  getIt.registerFactory(() => GetConfigDataUseCase(getIt()));
+  getIt.registerFactory(() => GetModulesUseCase(getIt()));
+  getIt.registerFactory(() => SubscribeEmailUseCase(getIt()));
+  // app-wide: configModel + module read across all features.
+  getIt.registerLazySingleton(
+    () => SplashBloc(
+      getConfigData: getIt(),
+      getModules: getIt(),
+      subscribeEmail: getIt(),
+      repository: getIt(),
+    ),
+  );
 }
 
 void _registerSearch() {
@@ -441,7 +478,7 @@ void _registerLocation() {
       searchLocation: getIt(),
       getLatLng: getIt(),
       configDefaultLatLng: () {
-        final config = getx.Get.find<SplashController>().configModel;
+        final config = getIt<SplashBloc>().state.configModel;
         return LatLng(
           double.parse(config?.defaultLocation?.lat ?? '0'),
           double.parse(config?.defaultLocation?.lng ?? '0'),
@@ -470,7 +507,7 @@ void _registerLanguage() {
       repository: getIt(),
       saveLanguage: getIt(),
       updateHeader: getIt(),
-      currentModuleId: () => getx.Get.find<SplashController>().module?.id,
+      currentModuleId: () => getIt<SplashBloc>().state.module?.id,
     )..add(const LanguageInitialized()),
   );
 }
@@ -730,7 +767,7 @@ void _registerAuth() {
       // Config lives in the still-GetX splash feature; read it lazily so the
       // domain layer stays decoupled from SplashController.
       isCustomerVerificationOn: () =>
-          getx.Get.find<SplashController>().configModel?.customerVerification ??
+          getIt<SplashBloc>().state.configModel?.customerVerification ??
           false,
     ),
   );

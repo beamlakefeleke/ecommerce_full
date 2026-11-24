@@ -3,7 +3,9 @@ import 'package:ecommerce/common/widgets/address_widget.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/address/controllers/address_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
@@ -20,7 +22,7 @@ import 'package:ecommerce/features/home/widgets/banner_view.dart';
 import 'package:ecommerce/features/home/widgets/popular_store_view.dart';
 
 class ModuleView extends StatelessWidget {
-  final SplashController splashController;
+  final SplashState splashController;
   const ModuleView({super.key, required this.splashController});
 
   @override
@@ -64,7 +66,7 @@ class ModuleView extends StatelessWidget {
         //                   ],
         //                 ),
         //                 child: CustomInkWell(
-        //                   onTap: () => splashController.switchModule(index, true),
+        //                   onTap: () => getIt<SplashBloc>().add(SplashModuleSwitched(index, true),
         //                   radius: Dimensions.radiusDefault,
 
         //               );

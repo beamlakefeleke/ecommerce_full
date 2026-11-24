@@ -1,5 +1,7 @@
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
@@ -37,13 +39,13 @@ class SocialLoginWidget extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, GoogleSignIn googleSignIn) {
-    return Get.find<SplashController>().configModel != null &&
-            Get.find<SplashController>().configModel!.socialLogin!.isNotEmpty &&
-            (Get.find<SplashController>()
+    return getIt<SplashBloc>().state.configModel != null &&
+            getIt<SplashBloc>().state.configModel!.socialLogin!.isNotEmpty &&
+            (getIt<SplashBloc>().state
                     .configModel!
                     .socialLogin![0]
                     .status! ||
-                Get.find<SplashController>()
+                getIt<SplashBloc>().state
                     .configModel!
                     .socialLogin![1]
                     .status!)
@@ -66,7 +68,7 @@ class SocialLoginWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>().state
                           .configModel!
                           .socialLogin![0]
                           .status!
@@ -113,7 +115,7 @@ class SocialLoginWidget extends StatelessWidget {
                       : const SizedBox(),
                   SizedBox(
                     width:
-                        Get.find<SplashController>()
+                        getIt<SplashBloc>().state
                             .configModel!
                             .socialLogin![0]
                             .status!
@@ -122,7 +124,7 @@ class SocialLoginWidget extends StatelessWidget {
                   ),
 
                   // SizedBox(width: Dimensions.PADDING_SIZE_SMALL),
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>().state
                           .configModel!
                           .socialLogin![1]
                           .status!
@@ -171,11 +173,11 @@ class SocialLoginWidget extends StatelessWidget {
                       : const SizedBox(),
                   const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>().state
                               .configModel!
                               .appleLogin!
                               .isNotEmpty &&
-                          Get.find<SplashController>()
+                          getIt<SplashBloc>().state
                               .configModel!
                               .appleLogin![0]
                               .status! &&
@@ -191,7 +193,7 @@ class SocialLoginWidget extends StatelessWidget {
                                   ],
                                   webAuthenticationOptions:
                                       WebAuthenticationOptions(
-                                        clientId: Get.find<SplashController>()
+                                        clientId: getIt<SplashBloc>().state
                                             .configModel!
                                             .appleLogin![0]
                                             .clientId!,

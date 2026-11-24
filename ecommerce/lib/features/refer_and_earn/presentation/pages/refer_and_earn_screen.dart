@@ -6,7 +6,9 @@ import 'package:get/get.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:ecommerce/features/refer_and_earn/presentation/widgets/bottom_sheet_view_widget.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
@@ -117,12 +119,10 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                                             ),
                                             Text(
                                               PriceConverter.convertPrice(
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>().state
                                                             .configModel !=
                                                         null
-                                                    ? Get.find<
-                                                            SplashController
-                                                          >()
+                                                    ? getIt<SplashBloc>().state
                                                           .configModel!
                                                           .refEarningExchangeRate!
                                                           .toDouble()
@@ -165,12 +165,10 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                                             ),
                                             Text(
                                               PriceConverter.convertPrice(
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>().state
                                                             .configModel !=
                                                         null
-                                                    ? Get.find<
-                                                            SplashController
-                                                          >()
+                                                    ? getIt<SplashBloc>().state
                                                           .configModel!
                                                           .refEarningExchangeRate!
                                                           .toDouble()

@@ -1,3 +1,4 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
@@ -5,8 +6,8 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/cart/presentation/widgets/not_available_bottom_sheet_widget.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
@@ -311,10 +312,10 @@ class _CartScreenState extends State<CartScreen> {
 
               // Cutlery toggle (mobile only)
               if (!ResponsiveHelper.isDesktop(context) &&
-                  Get.find<SplashController>()
-                      .getModuleConfig(item.moduleType)
-                      .newVariation! &&
-                  (storeController.store?.cutlery ?? false))
+                  (getIt<SplashBloc>()
+                    .getModuleConfig(item.moduleType)
+                    ?.newVariation ?? false) &&
+                (storeController.store?.cutlery ?? false))
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: Dimensions.paddingSizeDefault,
@@ -443,10 +444,10 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ],
                     ),
-                    if (Get.find<SplashController>()
-                            .getModuleConfig(item.moduleType)
-                            .newVariation! &&
-                        cartState.variationPrice > 0) ...[
+                    if ((getIt<SplashBloc>()
+                          .getModuleConfig(item.moduleType)
+                          ?.newVariation ?? false) &&
+                      cartState.variationPrice > 0) ...[
                       const SizedBox(height: Dimensions.paddingSizeSmall),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -478,7 +479,7 @@ class _CartScreenState extends State<CartScreen> {
                             : Text('calculating'.tr, style: robotoRegular),
                       ],
                     ),
-                    if (Get.find<SplashController>()
+                    if (getIt<SplashBloc>().state
                         .configModel!
                         .moduleConfig!
                         .module!
@@ -625,18 +626,18 @@ class _CheckoutButton extends StatelessWidget {
         builder: (storeController) {
           if (storeController.store != null &&
               !storeController.store!.freeDelivery! &&
-              Get.find<SplashController>().configModel!.freeDeliveryOver !=
+              getIt<SplashBloc>().state.configModel!.freeDeliveryOver !=
                   null) {
             percentage =
                 cartState.subTotal /
-                Get.find<SplashController>().configModel!.freeDeliveryOver!;
+                getIt<SplashBloc>().state.configModel!.freeDeliveryOver!;
           }
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (storeController.store != null &&
                   !storeController.store!.freeDelivery! &&
-                  Get.find<SplashController>().configModel!.freeDeliveryOver !=
+                  getIt<SplashBloc>().state.configModel!.freeDeliveryOver !=
                       null &&
                   percentage < 1) ...[
                 Row(
@@ -645,7 +646,7 @@ class _CheckoutButton extends StatelessWidget {
                     const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                     Text(
                       PriceConverter.convertPrice(
-                        Get.find<SplashController>()
+                        getIt<SplashBloc>().state
                                 .configModel!
                                 .freeDeliveryOver! -
                             cartState.subTotal,
@@ -704,9 +705,10 @@ class _CheckoutButton extends StatelessWidget {
               // Cutlery toggle (desktop)
               if (ResponsiveHelper.isDesktop(context) &&
                   cartState.cartList.isNotEmpty &&
-                  Get.find<SplashController>()
-                      .getModuleConfig(cartState.cartList[0].item!.moduleType)
-                      .newVariation! &&
+                  (getIt<SplashBloc>()
+                          .getModuleConfig(cartState.cartList[0].item!.moduleType)
+                          ?.newVariation ??
+                      false) &&
                   (storeController.store?.cutlery ?? false))
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0),
@@ -831,10 +833,10 @@ class _CheckoutButton extends StatelessWidget {
                       showCustomSnackBar('one_or_more_product_unavailable'.tr);
                       return;
                     }
-                    if (Get.find<SplashController>().module == null &&
+                    if (getIt<SplashBloc>().state.module == null &&
                         cartState.cartList.isNotEmpty) {
                       final modules =
-                          Get.find<SplashController>().moduleList ?? [];
+                          getIt<SplashBloc>().state.moduleList ?? [];
                       int i = 0;
                       for (; i < modules.length; i++) {
                         if (cartState.cartList[0].item!.moduleId ==
@@ -842,7 +844,7 @@ class _CheckoutButton extends StatelessWidget {
                           break;
                       }
                       if (i < modules.length) {
-                        Get.find<SplashController>().setModule(modules[i]);
+                        getIt<SplashBloc>().add(SplashModuleSet(modules[i]));
                         HomeScreen.loadData(true);
                       }
                     }

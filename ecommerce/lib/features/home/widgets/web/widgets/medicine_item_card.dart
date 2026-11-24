@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -24,8 +26,8 @@ class MedicineItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isShop =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.ecommerce;
     double? discount = item.storeDiscount == 0
         ? item.discount
@@ -65,7 +67,7 @@ class MedicineItemCard extends StatelessWidget {
                       child: CustomImage(
                         placeholder: Images.placeholder,
                         image:
-                            '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}'
+                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}'
                             '/${item.image}',
                         fit: BoxFit.cover,
                         width: double.infinity,
@@ -207,7 +209,7 @@ class MedicineItemCard extends StatelessWidget {
                               width: Dimensions.paddingSizeExtraSmall,
                             ),
 
-                            (Get.find<SplashController>()
+                            (getIt<SplashBloc>().state
                                         .configModel!
                                         .moduleConfig!
                                         .module!

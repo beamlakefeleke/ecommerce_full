@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
@@ -50,7 +52,7 @@ class _DeliveryManTipsSectionState extends State<DeliveryManTipsSection> {
         return Column(
           children: [
             (!widget.takeAway &&
-                    Get.find<SplashController>().configModel!.dmTipsStatus == 1)
+                    getIt<SplashBloc>().state.configModel!.dmTipsStatus == 1)
                 ? Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
@@ -388,7 +390,7 @@ class _DeliveryManTipsSectionState extends State<DeliveryManTipsSection> {
               height:
                   (!widget.takeAway &&
                       widget.storeId == null &&
-                      Get.find<SplashController>().configModel!.dmTipsStatus ==
+                      getIt<SplashBloc>().state.configModel!.dmTipsStatus ==
                           1)
                   ? Dimensions.paddingSizeSmall
                   : 0,

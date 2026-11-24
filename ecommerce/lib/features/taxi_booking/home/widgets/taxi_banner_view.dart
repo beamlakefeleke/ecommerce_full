@@ -1,10 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
@@ -44,11 +47,11 @@ class TaxiBannerView extends StatelessWidget {
                               itemBuilder: (context, index, _) {
                                 String? baseUrl =
                                     bannerDataList![index] is BasicCampaignModel
-                                    ? Get.find<SplashController>()
+                                    ? getIt<SplashBloc>().state
                                           .configModel!
                                           .baseUrls!
                                           .campaignImageUrl
-                                    : Get.find<SplashController>()
+                                    : getIt<SplashBloc>().state
                                           .configModel!
                                           .baseUrls!
                                           .bannerImageUrl;
@@ -76,8 +79,7 @@ class TaxiBannerView extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(
                                         Dimensions.radiusSmall,
                                       ),
-                                      child: GetBuilder<SplashController>(
-                                        builder: (splashController) {
+                                      child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
                                           return CustomImage(
                                             image:
                                                 '$baseUrl/${bannerList[index]}',

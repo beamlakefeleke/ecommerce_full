@@ -1,6 +1,10 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -53,17 +57,16 @@ class CustomNavigationDrawerState extends State<CustomNavigationDrawer>
       begin: maxWidth,
       end: minWidth,
     ).animate(_animationController!);
-    if (Get.find<SplashController>().moduleList == null && !mounted
+    if (getIt<SplashBloc>().state.moduleList == null && !mounted
         ? ResponsiveHelper.isDesktop(context)
         : true) {
-      Get.find<SplashController>().getModules();
+      getIt<SplashBloc>().add(const SplashModulesRequested());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SplashController>(
-      builder: (splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
         return Stack(
           children: [
             widget.child,
@@ -92,7 +95,7 @@ class CustomNavigationDrawerState extends State<CustomNavigationDrawer>
     context,
     widget,
     Color? backgroundColor,
-    SplashController splashController,
+    SplashState splashController,
   ) {
     return MouseRegion(
       onEnter: (event) {
@@ -216,7 +219,7 @@ class CollapsingListTileState extends State<CollapsingListTile> {
               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
               child: CustomImage(
                 image:
-                    '${Get.find<SplashController>().configModel!.baseUrls!.moduleImageUrl}/${widget.icon}',
+                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.moduleImageUrl}/${widget.icon}',
                 width: 25,
                 height: 25,
               ),

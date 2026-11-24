@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -85,7 +87,7 @@ class TopRatedCars extends StatelessWidget {
                                                     ),
                                                 child: CustomImage(
                                                   image:
-                                                      '${Get.find<SplashController>().configModel!.baseUrls!.vehicleImageUrl}/${riderController.topRatedVehicleModel!.vehicles![index].carImages!.isNotEmpty ? riderController.topRatedVehicleModel!.vehicles![index].carImages![0] : ''}',
+                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleImageUrl}/${riderController.topRatedVehicleModel!.vehicles![index].carImages!.isNotEmpty ? riderController.topRatedVehicleModel!.vehicles![index].carImages![0] : ''}',
                                                   height: 130,
                                                   width: Get.width,
                                                 ),
@@ -128,7 +130,7 @@ class TopRatedCars extends StatelessWidget {
                                             height: 18,
                                             width: 18,
                                             image:
-                                                '${Get.find<SplashController>().configModel!.baseUrls!.vehicleImageUrl}/'
+                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleImageUrl}/'
                                                 '${riderController.topRatedVehicleModel!.vehicles![index].provider != null ? riderController.topRatedVehicleModel!.vehicles![index].provider!.logo : ''}',
                                           ),
                                         ),

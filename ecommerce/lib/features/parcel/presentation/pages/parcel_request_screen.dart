@@ -1,11 +1,12 @@
-import 'package:dotted_border/dotted_border.dart';
+﻿import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:ecommerce/core/di/injection.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
@@ -89,10 +90,10 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
       if (zData.id == AddressHelper.getUserAddressFromSharedPref()!.zoneId) {
         _isCashOnDeliveryActive =
             zData.cashOnDelivery! &&
-            Get.find<SplashController>().configModel!.cashOnDelivery!;
+            getIt<SplashBloc>().state.configModel!.cashOnDelivery!;
         _isDigitalPaymentActive =
             zData.digitalPayment! &&
-            Get.find<SplashController>().configModel!.digitalPayment!;
+            getIt<SplashBloc>().state.configModel!.digitalPayment!;
       }
     }
     if (Get.find<ProfileController>().userInfoModel == null && _isLoggedIn) {
@@ -114,7 +115,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
     bool isGuestLoggedIn = AuthHelper.isGuestLoggedIn();
     bool guestCheckoutPermission =
         AuthHelper.isGuestLoggedIn() &&
-        Get.find<SplashController>().configModel!.guestCheckoutStatus!;
+        getIt<SplashBloc>().state.configModel!.guestCheckoutStatus!;
     return Scaffold(
       appBar: CustomAppBar(title: 'parcel_request'.tr),
       endDrawer: const MenuDrawer(),
@@ -149,14 +150,14 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                   double total = 0;
                   double dmTips = 0;
                   double additionalCharge =
-                      Get.find<SplashController>()
+                      getIt<SplashBloc>().state
                           .configModel!
                           .additionalChargeStatus!
-                      ? Get.find<SplashController>()
+                      ? getIt<SplashBloc>().state
                             .configModel!
                             .additionCharge!
                       : 0;
-                  bool isOfflinePaymentActive = Get.find<SplashController>()
+                  bool isOfflinePaymentActive = getIt<SplashBloc>().state
                       .configModel!
                       .offlinePaymentStatus! /* && CheckoutHelper.checkZoneOfflinePaymentOnOff(addressModel: AddressHelper.getUserAddressFromSharedPref())*/;
 
@@ -218,7 +219,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                             ),
                                             child: CustomImage(
                                               image:
-                                                  '${Get.find<SplashController>().configModel!.baseUrls!.parcelCategoryImageUrl}'
+                                                  '${getIt<SplashBloc>().state.configModel!.baseUrls!.parcelCategoryImageUrl}'
                                                   '/${widget.parcelCategory.image}',
                                               height: 60,
                                               width: 60,
@@ -567,7 +568,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                     height: Dimensions.paddingSizeDefault,
                                   ),
 
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>().state
                                               .configModel!
                                               .dmTipsStatus ==
                                           1)
@@ -924,7 +925,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                       : const SizedBox.shrink(),
                                   SizedBox(
                                     height:
-                                        (Get.find<SplashController>()
+                                        (getIt<SplashBloc>().state
                                                 .configModel!
                                                 .dmTipsStatus ==
                                             1)
@@ -1050,7 +1051,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                           : const SizedBox(),
                                       SizedBox(
                                         width:
-                                            (Get.find<SplashController>()
+                                            (getIt<SplashBloc>().state
                                                         .configModel!
                                                         .customerWalletStatus ==
                                                     1 &&
@@ -1061,7 +1062,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                             : 0,
                                       ),
 
-                                      (Get.find<SplashController>()
+                                      (getIt<SplashBloc>().state
                                                       .configModel!
                                                       .customerWalletStatus ==
                                                   1 &&
@@ -1126,7 +1127,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
 
                                             ListView.builder(
                                               itemCount:
-                                                  Get.find<SplashController>()
+                                                  getIt<SplashBloc>().state
                                                       .configModel!
                                                       .activePaymentMethodList!
                                                       .length,
@@ -1138,7 +1139,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                     parcelController
                                                             .paymentIndex ==
                                                         2 &&
-                                                    Get.find<SplashController>()
+                                                    getIt<SplashBloc>().state
                                                             .configModel!
                                                             .activePaymentMethodList![index]
                                                             .getWay! ==
@@ -1153,9 +1154,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                     );
                                                     b.add(
                                                       DigitalPaymentNameChanged(
-                                                        Get.find<
-                                                              SplashController
-                                                            >()
+                                                        getIt<SplashBloc>().state
                                                             .configModel!
                                                             .activePaymentMethodList![index]
                                                             .getWay!,
@@ -1221,7 +1220,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                           height: 20,
                                                           fit: BoxFit.contain,
                                                           image:
-                                                              '${Get.find<SplashController>().configModel!.baseUrls!.gatewayImageUrl}/${Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayImage!}',
+                                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.gatewayImageUrl}/${getIt<SplashBloc>().state.configModel!.activePaymentMethodList![index].getWayImage!}',
                                                         ),
                                                         const SizedBox(
                                                           width: Dimensions
@@ -1229,9 +1228,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                                         ),
 
                                                         Text(
-                                                          Get.find<
-                                                                SplashController
-                                                              >()
+                                                          getIt<SplashBloc>().state
                                                               .configModel!
                                                               .activePaymentMethodList![index]
                                                               .getWayTitle!,
@@ -1311,7 +1308,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                   ),
                                   SizedBox(
                                     height:
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                                 .configModel!
                                                 .dmTipsStatus ==
                                             1
@@ -1319,7 +1316,7 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                         : 0.0,
                                   ),
 
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>().state
                                               .configModel!
                                               .dmTipsStatus ==
                                           1)
@@ -1341,14 +1338,14 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                       : const SizedBox.shrink(),
                                   SizedBox(
                                     height:
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                             .configModel!
                                             .additionalChargeStatus!
                                         ? Dimensions.paddingSizeSmall
                                         : 0,
                                   ),
 
-                                  Get.find<SplashController>()
+                                  getIt<SplashBloc>().state
                                           .configModel!
                                           .additionalChargeStatus!
                                       ? Row(
@@ -1356,13 +1353,13 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              Get.find<SplashController>()
+                                              getIt<SplashBloc>().state
                                                   .configModel!
                                                   .additionalChargeName!,
                                               style: robotoRegular,
                                             ),
                                             Text(
-                                              '(+) ${PriceConverter.convertPrice(Get.find<SplashController>().configModel!.additionCharge)}',
+                                              '(+) ${PriceConverter.convertPrice(getIt<SplashBloc>().state.configModel!.additionCharge)}',
                                               style: robotoRegular,
                                               textDirection: TextDirection.ltr,
                                             ),
@@ -1551,13 +1548,13 @@ class _ParcelRequestScreenState extends State<ParcelRequestScreen> {
       double parcelPerKmShippingCharge =
           parcelCategory.parcelPerKmShippingCharge! > 0
           ? parcelCategory.parcelPerKmShippingCharge!
-          : Get.find<SplashController>()
+          : getIt<SplashBloc>().state
                 .configModel!
                 .parcelPerKmShippingCharge!;
       double parcelMinimumShippingCharge =
           parcelCategory.parcelMinimumShippingCharge! > 0
           ? parcelCategory.parcelMinimumShippingCharge!
-          : Get.find<SplashController>()
+          : getIt<SplashBloc>().state
                 .configModel!
                 .parcelMinimumShippingCharge!;
       charge = parcelController.distance! * parcelPerKmShippingCharge;

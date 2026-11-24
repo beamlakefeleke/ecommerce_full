@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
@@ -25,7 +27,7 @@ class MessageBubbleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BaseUrls? baseUrl = Get.find<SplashController>().configModel!.baseUrls;
+    BaseUrls? baseUrl = getIt<SplashBloc>().state.configModel!.baseUrls;
     bool isReply =
         message.senderId !=
         Get.find<ProfileController>().userInfoModel!.userInfo!.id;

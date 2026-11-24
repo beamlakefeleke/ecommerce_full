@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_bloc.dart';
 import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_event.dart';
 import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_state.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -28,9 +30,9 @@ class _LoyaltyBottomSheetWidgetState extends State<LoyaltyBottomSheetWidget> {
   final TextEditingController _amountController = TextEditingController();
 
   int? exchangePointRate =
-      Get.find<SplashController>().configModel!.loyaltyPointExchangeRate ?? 0;
+      getIt<SplashBloc>().state.configModel!.loyaltyPointExchangeRate ?? 0;
   int? minimumExchangePoint =
-      Get.find<SplashController>().configModel!.minimumPointToTransfer ?? 0;
+      getIt<SplashBloc>().state.configModel!.minimumPointToTransfer ?? 0;
 
   @override
   void initState() {

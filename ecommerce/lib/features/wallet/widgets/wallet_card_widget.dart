@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -62,10 +64,10 @@ class WalletCardWidget extends StatelessWidget {
                           ),
                           const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                          Get.find<SplashController>()
+                          getIt<SplashBloc>().state
                                       .configModel!
                                       .addFundStatus! &&
-                                  Get.find<SplashController>()
+                                  getIt<SplashBloc>().state
                                       .configModel!
                                       .digitalPayment!
                               ? JustTheTooltip(
@@ -100,8 +102,8 @@ class WalletCardWidget extends StatelessWidget {
                   ),
                 ),
 
-                Get.find<SplashController>().configModel!.addFundStatus! &&
-                        Get.find<SplashController>()
+                getIt<SplashBloc>().state.configModel!.addFundStatus! &&
+                        getIt<SplashBloc>().state
                             .configModel!
                             .digitalPayment!
                     ? Positioned(

@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/coupon/data/models/coupon_model.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -67,7 +69,7 @@ class CouponCardWidget extends StatelessWidget {
                     const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
                     Text(
-                      '${coupon.discount}${coupon.discountType == 'percent' ? '%' : Get.find<SplashController>().configModel!.currencySymbol} ${'off'.tr}',
+                      '${coupon.discount}${coupon.discountType == 'percent' ? '%' : getIt<SplashBloc>().state.configModel!.currencySymbol} ${'off'.tr}',
                       style: robotoBold.copyWith(
                         fontSize: Dimensions.fontSizeDefault,
                       ),

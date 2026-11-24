@@ -1,6 +1,8 @@
 import 'package:ecommerce/features/category/controllers/category_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -8,6 +10,7 @@ import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/features/home/widgets/category_pop_up.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:get/get.dart';
 
@@ -18,8 +21,7 @@ class CategoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     ScrollController scrollController = ScrollController();
 
-    return GetBuilder<SplashController>(
-      builder: (splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
         bool isPharmacy =
             splashController.module != null &&
             splashController.module!.moduleType.toString() == 'pharmacy';
@@ -104,7 +106,7 @@ class CategoryView extends StatelessWidget {
                                                               ),
                                                           child: CustomImage(
                                                             image:
-                                                                '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
                                                             height: 50,
                                                             width: 50,
                                                             fit: BoxFit.cover,
@@ -285,7 +287,7 @@ class PharmacyCategoryView extends StatelessWidget {
                                 ),
                                 child: CustomImage(
                                   image:
-                                      '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
                                   height: 60,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
@@ -374,7 +376,7 @@ class FoodCategoryView extends StatelessWidget {
                                     ),
                                     child: CustomImage(
                                       image:
-                                          '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
                                       height: 60,
                                       width: double.infinity,
                                       fit: BoxFit.cover,

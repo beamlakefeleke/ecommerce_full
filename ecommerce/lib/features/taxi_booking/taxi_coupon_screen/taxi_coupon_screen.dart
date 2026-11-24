@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -192,7 +194,7 @@ class _TaxiCouponScreenState extends State<TaxiCouponScreen> {
                                                             ),
 
                                                             Text(
-                                                              '${couponController.taxiCouponList![index].discount}${couponController.taxiCouponList![index].discountType == 'percent' ? '%' : Get.find<SplashController>().configModel!.currencySymbol} off',
+                                                              '${couponController.taxiCouponList![index].discount}${couponController.taxiCouponList![index].discountType == 'percent' ? '%' : getIt<SplashBloc>().state.configModel!.currencySymbol} off',
                                                               style: robotoMedium
                                                                   .copyWith(
                                                                     color: Theme.of(

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
@@ -623,7 +625,7 @@ class OrderDetailsScreenState extends State<OrderDetailsScreen> {
             : const SizedBox(),
 
         (order.orderStatus == 'failed' &&
-                Get.find<SplashController>().configModel!.cashOnDelivery!)
+                getIt<SplashBloc>().state.configModel!.cashOnDelivery!)
             ? Center(
                 child: Container(
                   width: Dimensions.webMaxWidth,

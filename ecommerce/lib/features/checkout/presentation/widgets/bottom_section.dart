@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
@@ -329,7 +331,7 @@ class BottomSection extends StatelessWidget {
               ),
 
               (!takeAway &&
-                      Get.find<SplashController>().configModel!.dmTipsStatus ==
+                      getIt<SplashBloc>().state.configModel!.dmTipsStatus ==
                           1)
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -346,7 +348,7 @@ class BottomSection extends StatelessWidget {
               SizedBox(
                 height:
                     !takeAway &&
-                        Get.find<SplashController>()
+                        getIt<SplashBloc>().state
                                 .configModel!
                                 .dmTipsStatus ==
                             1
@@ -388,7 +390,7 @@ class BottomSection extends StatelessWidget {
 
               SizedBox(
                 height:
-                    Get.find<SplashController>()
+                    getIt<SplashBloc>().state
                             .configModel!
                             .additionalChargeStatus! &&
                         !(AuthHelper.isGuestLoggedIn() &&
@@ -397,18 +399,18 @@ class BottomSection extends StatelessWidget {
                     : 0,
               ),
 
-              Get.find<SplashController>().configModel!.additionalChargeStatus!
+              getIt<SplashBloc>().state.configModel!.additionalChargeStatus!
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          Get.find<SplashController>()
+                          getIt<SplashBloc>().state
                               .configModel!
                               .additionalChargeName!,
                           style: robotoRegular,
                         ),
                         Text(
-                          '(+) ${PriceConverter.convertPrice(Get.find<SplashController>().configModel!.additionCharge)}',
+                          '(+) ${PriceConverter.convertPrice(getIt<SplashBloc>().state.configModel!.additionCharge)}',
                           style: robotoRegular,
                           textDirection: TextDirection.ltr,
                         ),

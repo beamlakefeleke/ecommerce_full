@@ -1,6 +1,10 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -28,7 +32,7 @@ class FooterView extends StatefulWidget {
 
 class _FooterViewState extends State<FooterView> {
   final TextEditingController _newsLetterController = TextEditingController();
-  final ConfigModel? _config = Get.find<SplashController>().configModel;
+  final ConfigModel? _config = getIt<SplashBloc>().state.configModel;
 
   @override
   Widget build(BuildContext context) {
@@ -144,8 +148,8 @@ class _FooterViewState extends State<FooterView> {
                                             maxLines: 1,
                                           ),
                                         ),
-                                        GetBuilder<SplashController>(
-                                          builder: (splashController) {
+                                        BlocBuilder<SplashBloc, SplashState>(
+                                          builder: (context, splashController) {
                                             return InkWell(
                                               onTap: () {
                                                 String email =
@@ -164,14 +168,11 @@ class _FooterViewState extends State<FooterView> {
                                                         .tr,
                                                   );
                                                 } else {
-                                                  Get.find<SplashController>()
-                                                      .subscribeMail(email)
-                                                      .then((value) {
-                                                        if (value) {
-                                                          _newsLetterController
-                                                              .clear();
-                                                        }
-                                                      });
+                                                  getIt<SplashBloc>().add(
+                                                    SplashEmailSubscribed(
+                                                      email,
+                                                    ),
+                                                  );
                                                 }
                                               },
                                               child: Container(
@@ -222,8 +223,8 @@ class _FooterViewState extends State<FooterView> {
                                     ),
                                   ),
 
-                                  GetBuilder<SplashController>(
-                                    builder: (splashController) {
+                                  BlocBuilder<SplashBloc, SplashState>(
+                                    builder: (context, splashController) {
                                       return SizedBox(
                                         height: 50,
                                         child: ListView.builder(

@@ -27,7 +27,8 @@ import 'package:ecommerce/features/location/presentation/bloc/location_event.dar
 import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
 import 'package:ecommerce/features/location/presentation/widgets/module_dialog_widget.dart';
 import 'package:ecommerce/features/location/presentation/widgets/permission_dialog_widget.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -168,10 +169,10 @@ class LocationHelper {
     bool canRoute,
     bool isDesktop,
   ) async {
-    final splash = Get.find<SplashController>();
+    final splash = getIt<SplashBloc>().state;
     if (isDesktop && splash.configModel!.module == null) {
       final Map<String, String> header = _prepareHeader(address!.zoneIds);
-      await splash.getModules(headers: header);
+      await getIt<SplashBloc>().add(SplashModulesRequested(headers: headers: header));
       if (Get.isDialogOpen!) {
         Get.back();
       }
@@ -210,7 +211,7 @@ class LocationHelper {
     await AddressHelper.saveUserAddressInSharedPref(address);
     final authRepo = getIt<AuthRepository>();
     if (authRepo.isLoggedIn()) {
-      if (Get.find<SplashController>().module != null) {
+      if (getIt<SplashBloc>().state.module != null) {
         getIt<FavouriteBloc>().add(const FavouriteListRequested());
       }
       await authRepo.updateZone();
@@ -280,11 +281,11 @@ class LocationHelper {
     );
     await AddressHelper.saveUserAddressInSharedPref(addressModel);
 
-    final splash = Get.find<SplashController>();
-    await splash.getModules();
+    final splash = getIt<SplashBloc>().state;
+    await getIt<SplashBloc>().add(SplashModulesRequested(headers: ));
     for (final ModuleModel m in splash.moduleList ?? const []) {
       if (m.id == Get.find<StoreController>().store!.moduleId) {
-        splash.setModule(m);
+        getIt<SplashBloc>().add(SplashModuleSet(m));
       }
     }
   }

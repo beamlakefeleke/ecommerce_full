@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+﻿import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
@@ -8,7 +10,6 @@ import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.da
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
-import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -53,8 +54,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final bool showWalletCard =
-        Get.find<SplashController>().configModel!.customerWalletStatus == 1 ||
-        Get.find<SplashController>().configModel!.loyaltyPointStatus == 1;
+        getIt<SplashBloc>().state.configModel!.customerWalletStatus == 1 ||
+        getIt<SplashBloc>().state.configModel!.loyaltyPointStatus == 1;
 
     return Scaffold(
       appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
@@ -144,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           child: CustomImage(
                                             placeholder: Images.guestIcon,
                                             image:
-                                                '${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}'
+                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.customerImageUrl}'
                                                 '/${(profileController.userInfoModel != null && isLoggedIn) ? profileController.userInfoModel!.image : ''}',
                                             height: 70,
                                             width: 70,
@@ -334,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           (showWalletCard && isLoggedIn)
                                               ? Row(
                                                   children: [
-                                                    Get.find<SplashController>()
+                                                    getIt<SplashBloc>().state
                                                                 .configModel!
                                                                 .loyaltyPointStatus ==
                                                             1
@@ -361,9 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                                                     SizedBox(
                                                       width:
-                                                          Get.find<
-                                                                    SplashController
-                                                                  >()
+                                                          getIt<SplashBloc>().state
                                                                   .configModel!
                                                                   .loyaltyPointStatus ==
                                                               1
@@ -390,9 +389,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                                                     SizedBox(
                                                       width:
-                                                          Get.find<
-                                                                    SplashController
-                                                                  >()
+                                                          getIt<SplashBloc>().state
                                                                   .configModel!
                                                                   .customerWalletStatus ==
                                                               1
@@ -401,7 +398,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                           : 0,
                                                     ),
 
-                                                    Get.find<SplashController>()
+                                                    getIt<SplashBloc>().state
                                                                 .configModel!
                                                                 .customerWalletStatus ==
                                                             1

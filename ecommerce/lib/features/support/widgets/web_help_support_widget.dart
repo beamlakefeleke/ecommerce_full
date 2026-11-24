@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -117,21 +119,21 @@ class WebSupportScreen extends StatelessWidget {
                                             image: Images.helpPhone,
                                             title: 'call'.tr,
                                             subTitle:
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>().state
                                                     .configModel!
                                                     .phone!,
                                             onTap: () async {
                                               if (await canLaunchUrlString(
-                                                'tel:${Get.find<SplashController>().configModel!.phone}',
+                                                'tel:${getIt<SplashBloc>().state.configModel!.phone}',
                                               )) {
                                                 launchUrlString(
-                                                  'tel:${Get.find<SplashController>().configModel!.phone}',
+                                                  'tel:${getIt<SplashBloc>().state.configModel!.phone}',
                                                   mode: LaunchMode
                                                       .externalApplication,
                                                 );
                                               } else {
                                                 showCustomSnackBar(
-                                                  '${'can_not_launch'.tr} ${Get.find<SplashController>().configModel!.phone}',
+                                                  '${'can_not_launch'.tr} ${getIt<SplashBloc>().state.configModel!.phone}',
                                                 );
                                               }
                                             },
@@ -151,7 +153,7 @@ class WebSupportScreen extends StatelessWidget {
                                             image: Images.helpAddress,
                                             title: 'address'.tr,
                                             subTitle:
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>().state
                                                     .configModel!
                                                     .address!,
                                             onTap: () {},
@@ -171,14 +173,14 @@ class WebSupportScreen extends StatelessWidget {
                                             image: Images.helpEmail,
                                             title: 'email_us'.tr,
                                             subTitle:
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>().state
                                                     .configModel!
                                                     .email!,
                                             onTap: () {
                                               final Uri emailLaunchUri = Uri(
                                                 scheme: 'mailto',
                                                 path:
-                                                    Get.find<SplashController>()
+                                                    getIt<SplashBloc>().state
                                                         .configModel!
                                                         .email,
                                               );

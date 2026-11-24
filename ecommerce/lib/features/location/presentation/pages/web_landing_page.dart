@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:get/get.dart';
@@ -11,7 +12,8 @@ import 'package:ecommerce/features/location/domain/repositories/location_reposit
 import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
 import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';
@@ -55,7 +57,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
   final TextEditingController _controller = TextEditingController();
   final PageController _pageController = PageController();
   AddressModel? _address;
-  final ConfigModel? _config = Get.find<SplashController>().configModel;
+  final ConfigModel? _config = getIt<SplashBloc>().state.configModel;
   Timer? _timer;
   bool? _isRtl;
 
@@ -63,13 +65,13 @@ class _WebLandingPageState extends State<WebLandingPage> {
   void initState() {
     super.initState();
 
-    if (Get.find<SplashController>().moduleList == null) {
+    if (getIt<SplashBloc>().state.moduleList == null) {
       if (kDebugMode) {
         print('-------call from web landing page------------');
       }
-      Get.find<SplashController>().getModules(
+      getIt<SplashBloc>().add(SplashModulesRequested(
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      );
+      ));
     }
   }
 
@@ -88,8 +90,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
       child: FooterView(
         child: SizedBox(
           width: Dimensions.webMaxWidth,
-          child: GetBuilder<SplashController>(
-            builder: (splashController) {
+          child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
               return splashController.landingModel == null
                   ? const WebLandingPageShimmerWidget()
                   : Column(
@@ -608,8 +609,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                         ),
                         const SizedBox(height: 40),
 
-                        GetBuilder<SplashController>(
-                          builder: (splashController) {
+                        BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
                             if (splashController.moduleList != null &&
                                 _timer == null) {
                               _timer = Timer.periodic(
@@ -621,7 +621,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                               1
                                       ? 0
                                       : splashController.moduleIndex + 1;
-                                  splashController.setModuleIndex(index);
+                                  getIt<SplashBloc>().add(SplashModuleIndexSelected(index));
                                   _pageController.animateToPage(
                                     index,
                                     duration: const Duration(seconds: 2),
@@ -641,14 +641,14 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                               .moduleList!
                                               .length,
                                           onPageChanged: (int index) =>
-                                              splashController.setModuleIndex(
+                                              getIt<SplashBloc>().add(SplashModuleIndexSelected(
                                                 index >=
                                                         splashController
                                                             .moduleList!
                                                             .length
                                                     ? 0
                                                     : index,
-                                              ),
+                                              )),
                                           itemBuilder: (context, index) {
                                             index =
                                                 splashController.moduleIndex >=
@@ -785,8 +785,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                       children: [
                                                         InkWell(
                                                           onTap: () {
-                                                            splashController
-                                                                .setModuleIndex(
+                                                            getIt<SplashBloc>().add(SplashModuleIndexSelected(
                                                                   index,
                                                                 );
                                                             _pageController
@@ -1018,7 +1017,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
     );
   }
 
-  List<Widget> _generateChooseUsList(SplashController splashController) {
+  List<Widget> _generateChooseUsList(SplashState splashController) {
     List<Widget> chooseUsList = [];
     for (
       int index = 0;

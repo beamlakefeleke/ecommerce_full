@@ -1,5 +1,8 @@
 import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -27,8 +30,8 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   void _loadData() async {
     context.read<NotificationBloc>().add(const NotificationCleared());
-    if (Get.find<SplashController>().configModel == null) {
-      await Get.find<SplashController>().getConfigData();
+    if (getIt<SplashBloc>().state.configModel == null) {
+       getIt<SplashBloc>().add(const SplashConfigRequested());
     }
     if (AuthHelper.isLoggedIn()) {
       context.read<NotificationBloc>().add(
@@ -170,7 +173,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                                           width: 40,
                                                           fit: BoxFit.cover,
                                                           image:
-                                                              '${Get.find<SplashController>().configModel!.baseUrls!.notificationImageUrl}'
+                                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.notificationImageUrl}'
                                                               '/${notifications[index].data!.image}',
                                                         ),
                                                       ),

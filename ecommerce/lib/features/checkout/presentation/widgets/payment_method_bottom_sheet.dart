@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
@@ -59,17 +61,17 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
       }
       if (context.read<CheckoutBloc>().state.isPartialPay) {
         notHideWallet = false;
-        if (Get.find<SplashController>().configModel!.partialPaymentMethod! ==
+        if (getIt<SplashBloc>().state.configModel!.partialPaymentMethod! ==
             'cod') {
           notHideCod = true;
           notHideDigital = false;
-        } else if (Get.find<SplashController>()
+        } else if (getIt<SplashBloc>().state
                 .configModel!
                 .partialPaymentMethod! ==
             'digital_payment') {
           notHideCod = false;
           notHideDigital = true;
-        } else if (Get.find<SplashController>()
+        } else if (getIt<SplashBloc>().state
                 .configModel!
                 .partialPaymentMethod! ==
             'both') {
@@ -294,7 +296,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
                                 padding: EdgeInsets.zero,
-                                itemCount: Get.find<SplashController>()
+                                itemCount: getIt<SplashBloc>().state
                                     .configModel!
                                     .activePaymentMethodList!
                                     .length,
@@ -302,7 +304,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                                   bool isSelected =
                                       checkoutController.paymentMethodIndex ==
                                           2 &&
-                                      Get.find<SplashController>()
+                                      getIt<SplashBloc>().state
                                               .configModel!
                                               .activePaymentMethodList![index]
                                               .getWay! ==
@@ -314,7 +316,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                                       );
                                       context.read<CheckoutBloc>().add(
                                         CheckoutDigitalPaymentNameChanged(
-                                          Get.find<SplashController>()
+                                          getIt<SplashBloc>().state
                                               .configModel!
                                               .activePaymentMethodList![index]
                                               .getWay!,
@@ -378,7 +380,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
 
                                           Expanded(
                                             child: Text(
-                                              Get.find<SplashController>()
+                                              getIt<SplashBloc>().state
                                                   .configModel!
                                                   .activePaymentMethodList![index]
                                                   .getWayTitle!,
@@ -395,7 +397,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                                             height: 20,
                                             fit: BoxFit.contain,
                                             image:
-                                                '${Get.find<SplashController>().configModel!.baseUrls!.gatewayImageUrl}/${Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayImage!}',
+                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.gatewayImageUrl}/${getIt<SplashBloc>().state.configModel!.activePaymentMethodList![index].getWayImage!}',
                                           ),
                                           const SizedBox(
                                             width: Dimensions.paddingSizeSmall,

@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/domain/models/userinfo_model.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
@@ -94,7 +96,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         backButton: true,
                         circularImage: ImagePickerWidget(
                           image:
-                              '${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}/${profileController.userInfoModel!.image}',
+                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.customerImageUrl}/${profileController.userInfoModel!.image}',
                           onTap: () => context.read<ProfileBloc>().add(
                             const ProfileImagePicked(),
                           ),

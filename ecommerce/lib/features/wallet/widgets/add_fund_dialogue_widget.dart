@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/wallet/controllers/wallet_controller.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -142,12 +144,12 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
 
                           walletController.amountEmpty &&
                                   inputAmountController.text.isNotEmpty
-                              ? Get.find<SplashController>()
+                              ? getIt<SplashBloc>().state
                                         .configModel!
                                         .activePaymentMethodList!
                                         .isNotEmpty
                                     ? ListView.builder(
-                                        itemCount: Get.find<SplashController>()
+                                        itemCount: getIt<SplashBloc>().state
                                             .configModel!
                                             .activePaymentMethodList!
                                             .length,
@@ -156,7 +158,7 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                                             const NeverScrollableScrollPhysics(),
                                         itemBuilder: (context, index) {
                                           bool isSelected =
-                                              Get.find<SplashController>()
+                                              getIt<SplashBloc>().state
                                                   .configModel!
                                                   .activePaymentMethodList![index]
                                                   .getWay! ==
@@ -166,7 +168,7 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                                             onTap: () {
                                               walletController
                                                   .changeDigitalPaymentName(
-                                                    Get.find<SplashController>()
+                                                    getIt<SplashBloc>().state
                                                         .configModel!
                                                         .activePaymentMethodList![index]
                                                         .getWay!,
@@ -228,7 +230,7 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                                                     height: 20,
                                                     fit: BoxFit.contain,
                                                     image:
-                                                        '${Get.find<SplashController>().configModel!.baseUrls!.gatewayImageUrl}/${Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayImage!}',
+                                                        '${getIt<SplashBloc>().state.configModel!.baseUrls!.gatewayImageUrl}/${getIt<SplashBloc>().state.configModel!.activePaymentMethodList![index].getWayImage!}',
                                                   ),
                                                   const SizedBox(
                                                     width: Dimensions
@@ -237,9 +239,7 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
 
                                                   Expanded(
                                                     child: Text(
-                                                      Get.find<
-                                                            SplashController
-                                                          >()
+                                                      getIt<SplashBloc>().state
                                                           .configModel!
                                                           .activePaymentMethodList![index]
                                                           .getWayTitle!,
@@ -290,7 +290,7 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                       } else {
                         double amount = double.parse(
                           inputAmountController.text.replaceAll(
-                            Get.find<SplashController>()
+                            getIt<SplashBloc>().state
                                 .configModel!
                                 .currencySymbol!,
                             '',

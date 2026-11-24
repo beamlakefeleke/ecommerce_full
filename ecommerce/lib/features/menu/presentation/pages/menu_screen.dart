@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -60,7 +61,7 @@ class _MenuScreenState extends State<MenuScreen> {
                           child: CustomImage(
                             placeholder: Images.guestIconLight,
                             image:
-                                '${Get.find<SplashController>().configModel!.baseUrls!.customerImageUrl}'
+                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.customerImageUrl}'
                                 '/${(profileController.userInfoModel != null && isLoggedIn) ? profileController.userInfoModel!.image : ''}',
                             height: 70,
                             width: 70,
@@ -252,18 +253,18 @@ class _MenuScreenState extends State<MenuScreen> {
                                     title: 'coupon'.tr,
                                     route: RouteHelper.getCouponRoute(),
                                     hideDivider:
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                                     .configModel!
                                                     .loyaltyPointStatus ==
                                                 1 ||
-                                            Get.find<SplashController>()
+                                            getIt<SplashBloc>().state
                                                     .configModel!
                                                     .customerWalletStatus ==
                                                 1
                                         ? false
                                         : true,
                                   ),
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>().state
                                               .configModel!
                                               .loyaltyPointStatus ==
                                           1)
@@ -272,7 +273,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                           title: 'loyalty_points'.tr,
                                           route: RouteHelper.getLoyaltyRoute(),
                                           hideDivider:
-                                              Get.find<SplashController>()
+                                              getIt<SplashBloc>().state
                                                       .configModel!
                                                       .customerWalletStatus ==
                                                   1
@@ -283,7 +284,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                               : '${profileController.userInfoModel?.loyaltyPoint != null ? profileController.userInfoModel!.loyaltyPoint.toString() : '0'} ${'points'.tr}',
                                         )
                                       : const SizedBox(),
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>().state
                                               .configModel!
                                               .customerWalletStatus ==
                                           1)
@@ -310,15 +311,15 @@ class _MenuScreenState extends State<MenuScreen> {
                             ),
                           ],
                         ),
-                        (Get.find<SplashController>()
+                        (getIt<SplashBloc>().state
                                         .configModel!
                                         .refEarningStatus ==
                                     1) ||
-                                (Get.find<SplashController>()
+                                (getIt<SplashBloc>().state
                                         .configModel!
                                         .toggleDmRegistration! &&
                                     !ResponsiveHelper.isDesktop(context)) ||
-                                (Get.find<SplashController>()
+                                (getIt<SplashBloc>().state
                                         .configModel!
                                         .toggleStoreRegistration! &&
                                     !ResponsiveHelper.isDesktop(context))
@@ -366,7 +367,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                     ),
                                     child: Column(
                                       children: [
-                                        (Get.find<SplashController>()
+                                        (getIt<SplashBloc>().state
                                                     .configModel!
                                                     .refEarningStatus ==
                                                 1)
@@ -376,17 +377,13 @@ class _MenuScreenState extends State<MenuScreen> {
                                                 route:
                                                     RouteHelper.getReferAndEarnRoute(),
                                                 hideDivider:
-                                                    (Get.find<
-                                                                  SplashController
-                                                                >()
+                                                    (getIt<SplashBloc>().state
                                                                 .configModel!
                                                                 .toggleDmRegistration! &&
                                                             !ResponsiveHelper.isDesktop(
                                                               context,
                                                             )) ||
-                                                        (Get.find<
-                                                                  SplashController
-                                                                >()
+                                                        (getIt<SplashBloc>().state
                                                                 .configModel!
                                                                 .toggleStoreRegistration! &&
                                                             !ResponsiveHelper.isDesktop(
@@ -396,7 +393,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                                     : true,
                                               )
                                             : const SizedBox(),
-                                        (Get.find<SplashController>()
+                                        (getIt<SplashBloc>().state
                                                     .configModel!
                                                     .toggleDmRegistration! &&
                                                 !ResponsiveHelper.isDesktop(
@@ -409,9 +406,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                                 route:
                                                     RouteHelper.getDeliverymanRegistrationRoute(),
                                                 hideDivider:
-                                                    (Get.find<
-                                                              SplashController
-                                                            >()
+                                                    (getIt<SplashBloc>().state
                                                             .configModel!
                                                             .toggleStoreRegistration! &&
                                                         !ResponsiveHelper.isDesktop(
@@ -421,7 +416,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                                     : true,
                                               )
                                             : const SizedBox(),
-                                        (Get.find<SplashController>()
+                                        (getIt<SplashBloc>().state
                                                     .configModel!
                                                     .toggleStoreRegistration! &&
                                                 !ResponsiveHelper.isDesktop(
@@ -512,7 +507,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                       'privacy-policy',
                                     ),
                                   ),
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>().state
                                               .configModel!
                                               .refundPolicyStatus ==
                                           1)
@@ -523,11 +518,11 @@ class _MenuScreenState extends State<MenuScreen> {
                                             'refund-policy',
                                           ),
                                           hideDivider:
-                                              (Get.find<SplashController>()
+                                              (getIt<SplashBloc>().state
                                                           .configModel!
                                                           .cancellationPolicyStatus ==
                                                       1) ||
-                                                  (Get.find<SplashController>()
+                                                  (getIt<SplashBloc>().state
                                                           .configModel!
                                                           .shippingPolicyStatus ==
                                                       1)
@@ -535,7 +530,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                               : true,
                                         )
                                       : const SizedBox(),
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>().state
                                               .configModel!
                                               .cancellationPolicyStatus ==
                                           1)
@@ -546,7 +541,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                             'cancellation-policy',
                                           ),
                                           hideDivider:
-                                              (Get.find<SplashController>()
+                                              (getIt<SplashBloc>().state
                                                       .configModel!
                                                       .shippingPolicyStatus ==
                                                   1)
@@ -554,7 +549,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                               : true,
                                         )
                                       : const SizedBox(),
-                                  (Get.find<SplashController>()
+                                  (getIt<SplashBloc>().state
                                               .configModel!
                                               .shippingPolicyStatus ==
                                           1)

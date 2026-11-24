@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -29,9 +31,9 @@ class OrderBannerViewWidget extends StatelessWidget {
     return Column(
       children: [
         DateConverter.isBeforeTime(order.scheduleAt) &&
-                Get.find<SplashController>()
+                (getIt<SplashBloc>()
                     .getModuleConfig(order.moduleType)
-                    .newVariation!
+                    ?.newVariation ?? false)
             ? ongoing
                   ? Column(
                       children: [
@@ -103,7 +105,7 @@ class OrderBannerViewWidget extends StatelessWidget {
                     )
                   : CustomImage(
                       image:
-                          '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store!.coverPhoto}',
+                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store!.coverPhoto}',
                       height: 150,
                       width: double.infinity,
                     )
@@ -119,7 +121,7 @@ class OrderBannerViewWidget extends StatelessWidget {
                   : Center(
                       child: CustomImage(
                         image:
-                            '${Get.find<SplashController>().configModel!.baseUrls!.parcelCategoryImageUrl}/${order.parcelCategory?.image}',
+                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.parcelCategoryImageUrl}/${order.parcelCategory?.image}',
                         height: 160,
                       ),
                     )
@@ -140,7 +142,7 @@ class OrderBannerViewWidget extends StatelessWidget {
                     )
                   : CustomImage(
                       image:
-                          '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
+                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
                       height: 160,
                       width: double.infinity,
                     )
@@ -157,7 +159,7 @@ class OrderBannerViewWidget extends StatelessWidget {
                     )
                   : CustomImage(
                       image:
-                          '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
+                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
                       height: 160,
                       width: double.infinity,
                     )
@@ -174,7 +176,7 @@ class OrderBannerViewWidget extends StatelessWidget {
                     )
                   : CustomImage(
                       image:
-                          '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
+                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
                       height: 160,
                       width: double.infinity,
                     )
@@ -191,7 +193,7 @@ class OrderBannerViewWidget extends StatelessWidget {
                     )
                   : CustomImage(
                       image:
-                          '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
+                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}/${order.store?.coverPhoto}',
                       height: 160,
                       width: double.infinity,
                     )

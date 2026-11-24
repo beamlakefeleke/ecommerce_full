@@ -1,3 +1,4 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
@@ -9,7 +10,9 @@ import 'package:ecommerce/features/location/controllers/location_controller.dart
 import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/controllers/address_controller.dart';
 import 'package:ecommerce/features/home/screens/modules/food_home_screen.dart';
@@ -32,6 +35,7 @@ import 'package:ecommerce/common/widgets/web_menu_bar.dart';
 import 'package:ecommerce/features/home/screens/web_new_home_screen.dart';
 import 'package:ecommerce/features/home/widgets/filter_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/home/widgets/module_view.dart';
 import 'package:ecommerce/features/parcel/presentation/pages/parcel_category_screen.dart';
@@ -42,18 +46,18 @@ class HomeScreen extends StatefulWidget {
   static Future<void> loadData(bool reload, {bool fromModule = false}) async {
     Get.find<LocationController>().syncZoneData();
     Get.find<FlashSaleController>().setEmptyFlashSale(fromModule: fromModule);
-    if (Get.find<SplashController>().module != null &&
-        !Get.find<SplashController>()
+    if (getIt<SplashBloc>().state.module != null &&
+        !getIt<SplashBloc>().state
             .configModel!
             .moduleConfig!
             .module!
             .isParcel!) {
       Get.find<BannerController>().getBannerList(reload);
-      if (Get.find<SplashController>().module!.moduleType.toString() ==
+      if (getIt<SplashBloc>().state.module!.moduleType.toString() ==
           AppConstants.grocery) {
         Get.find<FlashSaleController>().getFlashSale(reload, false);
       }
-      if (Get.find<SplashController>().module!.moduleType.toString() ==
+      if (getIt<SplashBloc>().state.module!.moduleType.toString() ==
           AppConstants.ecommerce) {
         Get.find<ItemController>().getFeaturedCategoriesItemList(false, false);
         Get.find<FlashSaleController>().getFlashSale(reload, false);
@@ -79,25 +83,25 @@ class HomeScreen extends StatefulWidget {
       );
       Get.find<CouponController>().getCouponList();
     }
-    Get.find<SplashController>().getModules();
-    if (Get.find<SplashController>().module == null &&
-        Get.find<SplashController>().configModel!.module == null) {
+    getIt<SplashBloc>().add(const SplashModulesRequested());
+    if (getIt<SplashBloc>().state.module == null &&
+        getIt<SplashBloc>().state.configModel!.module == null) {
       Get.find<BannerController>().getFeaturedBanner();
       Get.find<StoreController>().getFeaturedStoreList();
       if (AuthHelper.isLoggedIn()) {
         Get.find<AddressController>().getAddressList();
       }
     }
-    if (Get.find<SplashController>().module != null &&
-        Get.find<SplashController>()
+    if (getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state
             .configModel!
             .moduleConfig!
             .module!
             .isParcel!) {
       Get.find<ParcelController>().getParcelCategoryList();
     }
-    if (Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+    if (getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy) {
       Get.find<ItemController>().getBasicMedicine(reload, false);
       Get.find<StoreController>().getFeaturedStoreList();
@@ -140,8 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SplashController>(
-      builder: (splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
         bool showMobileModule =
             !ResponsiveHelper.isDesktop(context) &&
             splashController.module == null &&
@@ -174,8 +177,8 @@ class _HomeScreenState extends State<HomeScreen> {
               : SafeArea(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      splashController.setRefreshing(true);
-                      if (Get.find<SplashController>().module != null) {
+                      getIt<SplashBloc>().add(SplashRefreshingSet(true);
+                      if (getIt<SplashBloc>().state.module != null) {
                         await Get.find<LocationController>().syncZoneData();
                         await Get.find<BannerController>().getBannerList(true);
                         if (isGrocery) {
@@ -243,14 +246,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                       } else {
                         await Get.find<BannerController>().getFeaturedBanner();
-                        await Get.find<SplashController>().getModules();
+                        await getIt<SplashBloc>().add(const SplashModulesRequested());
                         if (AuthHelper.isLoggedIn()) {
                           await Get.find<AddressController>().getAddressList();
                         }
                         await Get.find<StoreController>()
                             .getFeaturedStoreList();
                       }
-                      splashController.setRefreshing(false);
+                      getIt<SplashBloc>().add(SplashRefreshingSet(false);
                     },
                     child: ResponsiveHelper.isDesktop(context)
                         ? WebNewHomeScreen(scrollController: _scrollController)
@@ -288,8 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         .module ==
                                                     null)
                                             ? InkWell(
-                                                onTap: () => splashController
-                                                    .removeModule(),
+                                                onTap: () => getIt<SplashBloc>().add(const SplashModuleRemoved()),
                                                 child: Image.asset(
                                                   Images.moduleIcon,
                                                   height: 25,
@@ -509,9 +511,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ),
                                                     Expanded(
                                                       child: Text(
-                                                        Get.find<
-                                                                  SplashController
-                                                                >()
+                                                        getIt<SplashBloc>().state
                                                                 .configModel!
                                                                 .moduleConfig!
                                                                 .module!

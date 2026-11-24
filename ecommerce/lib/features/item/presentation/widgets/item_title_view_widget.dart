@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -100,22 +102,22 @@ class ItemTitleViewWidget extends StatelessWidget {
                               width: Dimensions.paddingSizeExtraSmall,
                             ),
 
-                            ((Get.find<SplashController>()
+                            ((getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!
                                             .unit! &&
                                         item!.unitType != null) ||
-                                    (Get.find<SplashController>()
+                                    (getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!
                                             .vegNonVeg! &&
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                             .configModel!
                                             .toggleVegNonVeg!))
                                 ? Text(
-                                    Get.find<SplashController>()
+                                    getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!
@@ -400,18 +402,18 @@ class ItemTitleViewWidget extends StatelessWidget {
 
                         Column(
                           children: [
-                            ((Get.find<SplashController>()
+                            ((getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!
                                             .unit! &&
                                         item!.unitType != null) ||
-                                    (Get.find<SplashController>()
+                                    (getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!
                                             .vegNonVeg! &&
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                             .configModel!
                                             .toggleVegNonVeg!))
                                 ? Container(
@@ -429,7 +431,7 @@ class ItemTitleViewWidget extends StatelessWidget {
                                       ).primaryColor.withOpacity(0.1),
                                     ),
                                     child: Text(
-                                      Get.find<SplashController>()
+                                      getIt<SplashBloc>().state
                                               .configModel!
                                               .moduleConfig!
                                               .module!

@@ -7,7 +7,9 @@ import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -47,8 +49,8 @@ class DetailsWebViewWidget extends StatelessWidget {
         imageList.addAll(itemController.item!.images!);
 
         String? baseUrl = itemController.item!.availableDateStarts == null
-            ? Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl
-            : Get.find<SplashController>()
+            ? getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl
+            : getIt<SplashBloc>().state
                   .configModel!
                   .baseUrls!
                   .campaignImageUrl;
@@ -162,7 +164,7 @@ class DetailsWebViewWidget extends StatelessWidget {
                                   ItemTitleViewWidget(
                                     item: itemController.item,
                                     inStock:
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!
@@ -523,7 +525,7 @@ class DetailsWebViewWidget extends StatelessWidget {
                                             width: 300,
                                             isLoading: cartController.isLoading,
                                             buttonText:
-                                                (Get.find<SplashController>()
+                                                (getIt<SplashBloc>().state
                                                         .configModel!
                                                         .moduleConfig!
                                                         .module!
@@ -539,7 +541,7 @@ class DetailsWebViewWidget extends StatelessWidget {
                                                 ? 'update_in_cart'.tr
                                                 : 'add_to_cart'.tr,
                                             onPressed:
-                                                (!Get.find<SplashController>()
+                                                (!getIt<SplashBloc>().state
                                                         .configModel!
                                                         .moduleConfig!
                                                         .module!
@@ -591,14 +593,14 @@ class DetailsWebViewWidget extends StatelessWidget {
       );
     } else if (ItemHelper.existAnotherStoreItem(
       cartModel!.item!.storeId,
-      Get.find<SplashController>().module!.id,
+      getIt<SplashBloc>().state.module!.id,
     )) {
       Get.dialog(
         ConfirmationDialog(
           icon: Images.warning,
           title: 'are_you_sure_to_reset'.tr,
           description:
-              Get.find<SplashController>()
+              getIt<SplashBloc>().state
                   .configModel!
                   .moduleConfig!
                   .module!

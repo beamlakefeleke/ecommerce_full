@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/coupon/data/models/coupon_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -138,7 +140,7 @@ class CouponBottomSheet extends StatelessWidget {
                                 ),
 
                                 Text(
-                                  '${'please_add_manually_or_collect_promo_from'.tr} ${Get.find<SplashController>().configModel!.businessName!}',
+                                  '${'please_add_manually_or_collect_promo_from'.tr} ${getIt<SplashBloc>().state.configModel!.businessName!}',
                                   style: robotoMedium.copyWith(
                                     fontSize: Dimensions.fontSizeSmall,
                                     color: Theme.of(context).disabledColor,

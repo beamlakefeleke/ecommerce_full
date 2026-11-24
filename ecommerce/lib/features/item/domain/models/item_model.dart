@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/basic_medicine_model.dart';
 
 class ItemModel {
@@ -28,9 +30,9 @@ class ItemModel {
       items = [];
       json['products'].forEach((v) {
         if (v['module_type'] == null ||
-            !Get.find<SplashController>()
+            !(getIt<SplashBloc>()
                 .getModuleConfig(v['module_type'])
-                .newVariation! ||
+                ?.newVariation ?? false) ||
             v['variations'] == null ||
             v['variations'].isEmpty ||
             (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {
@@ -42,9 +44,9 @@ class ItemModel {
       items = [];
       json['items'].forEach((v) {
         if (v['module_type'] == null ||
-            !Get.find<SplashController>()
+            !(getIt<SplashBloc>()
                 .getModuleConfig(v['module_type'])
-                .newVariation! ||
+                ?.newVariation ?? false) ||
             v['variations'] == null ||
             v['variations'].isEmpty ||
             (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {

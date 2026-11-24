@@ -1,6 +1,8 @@
 import 'package:ecommerce/features/category/controllers/category_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/arrow_icon_button.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -58,12 +60,12 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
   @override
   Widget build(BuildContext context) {
     bool isPharmacy =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
     bool isFood =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.food;
 
     if (widget.categoryController.categoryList != null &&
@@ -162,7 +164,7 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
                                                     ),
                                                 child: CustomImage(
                                                   image:
-                                                      '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
+                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
                                                   height: 80,
                                                   width: double.infinity,
                                                   fit: BoxFit.cover,
@@ -369,7 +371,7 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
                                         height: 80,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
@@ -555,7 +557,7 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
                                         height: 120,
                                         width: double.infinity,
                                         fit: BoxFit.cover,

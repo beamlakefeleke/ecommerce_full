@@ -3,7 +3,10 @@ import 'package:ecommerce/common/widgets/corner_banner/corner_discount_tag.dart'
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
@@ -59,7 +62,7 @@ class ItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool ltr = Get.find<LocalizationController>().isLtr;
-    BaseUrls? baseUrls = Get.find<SplashController>().configModel!.baseUrls;
+    BaseUrls? baseUrls = getIt<SplashBloc>().state.configModel!.baseUrls;
     bool desktop = ResponsiveHelper.isDesktop(context);
     double? discount;
     String? discountType;
@@ -107,11 +110,11 @@ class ItemWidget extends StatelessWidget {
               if (isStore) {
                 if (store != null) {
                   if (isFeatured &&
-                      Get.find<SplashController>().moduleList != null) {
+                      getIt<SplashBloc>().state.moduleList != null) {
                     for (ModuleModel module
-                        in Get.find<SplashController>().moduleList!) {
+                        in getIt<SplashBloc>().state.moduleList!) {
                       if (module.id == store!.moduleId) {
-                        Get.find<SplashController>().setModule(module);
+                        getIt<SplashBloc>().add(SplashModuleSet(module));
                         break;
                       }
                     }
@@ -129,11 +132,11 @@ class ItemWidget extends StatelessWidget {
                 }
               } else {
                 if (isFeatured &&
-                    Get.find<SplashController>().moduleList != null) {
+                    getIt<SplashBloc>().state.moduleList != null) {
                   for (ModuleModel module
-                      in Get.find<SplashController>().moduleList!) {
+                      in getIt<SplashBloc>().state.moduleList!) {
                     if (module.id == item!.moduleId) {
-                      Get.find<SplashController>().setModule(module);
+                      getIt<SplashBloc>().add(SplashModuleSet(module));
                       break;
                     }
                   }
@@ -239,12 +242,12 @@ class ItemWidget extends StatelessWidget {
                                   ),
 
                                   (!isStore &&
-                                          Get.find<SplashController>()
+                                          getIt<SplashBloc>().state
                                               .configModel!
                                               .moduleConfig!
                                               .module!
                                               .vegNonVeg! &&
-                                          Get.find<SplashController>()
+                                          getIt<SplashBloc>().state
                                               .configModel!
                                               .toggleVegNonVeg!)
                                       ? Image.asset(
@@ -306,7 +309,7 @@ class ItemWidget extends StatelessWidget {
                                     : 0,
                               ),
 
-                              (Get.find<SplashController>()
+                              (getIt<SplashBloc>().state
                                           .configModel!
                                           .moduleConfig!
                                           .module!

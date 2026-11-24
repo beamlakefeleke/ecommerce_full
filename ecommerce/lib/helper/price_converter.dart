@@ -1,6 +1,7 @@
-import 'package:animated_flip_counter/animated_flip_counter.dart';
+﻿import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/util/styles.dart';
 
@@ -20,11 +21,11 @@ class PriceConverter {
       }
     }
     bool isRightSide =
-        Get.find<SplashController>().configModel!.currencySymbolDirection ==
+        getIt<SplashBloc>().state.configModel!.currencySymbolDirection ==
         'right';
-    return '${isRightSide ? '' : '${Get.find<SplashController>().configModel!.currencySymbol!} '}'
-        '${toFixed(price!).toStringAsFixed(forDM ? 0 : Get.find<SplashController>().configModel!.digitAfterDecimalPoint!).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}'
-        '${isRightSide ? ' ${Get.find<SplashController>().configModel!.currencySymbol!}' : ''}';
+    return '${isRightSide ? '' : '${getIt<SplashBloc>().state.configModel!.currencySymbol!} '}'
+        '${toFixed(price!).toStringAsFixed(forDM ? 0 : getIt<SplashBloc>().state.configModel!.digitAfterDecimalPoint!).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}'
+        '${isRightSide ? ' ${getIt<SplashBloc>().state.configModel!.currencySymbol!}' : ''}';
   }
 
   static Widget convertAnimationPrice(
@@ -42,7 +43,7 @@ class PriceConverter {
       }
     }
     bool isRightSide =
-        Get.find<SplashController>().configModel!.currencySymbolDirection ==
+        getIt<SplashBloc>().state.configModel!.currencySymbolDirection ==
         'right';
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -52,12 +53,12 @@ class PriceConverter {
         textStyle: textStyle ?? robotoMedium,
         fractionDigits: forDM
             ? 0
-            : Get.find<SplashController>().configModel!.digitAfterDecimalPoint!,
+            : getIt<SplashBloc>().state.configModel!.digitAfterDecimalPoint!,
         prefix: isRightSide
             ? ''
-            : Get.find<SplashController>().configModel!.currencySymbol!,
+            : getIt<SplashBloc>().state.configModel!.currencySymbol!,
         suffix: isRightSide
-            ? Get.find<SplashController>().configModel!.currencySymbol!
+            ? getIt<SplashBloc>().state.configModel!.currencySymbol!
             : '',
       ),
     );
@@ -97,16 +98,16 @@ class PriceConverter {
     String discount,
     String discountType,
   ) {
-    return '$discount${discountType == 'percent' ? '%' : Get.find<SplashController>().configModel!.currencySymbol} OFF';
+    return '$discount${discountType == 'percent' ? '%' : getIt<SplashBloc>().state.configModel!.currencySymbol} OFF';
   }
 
   static double toFixed(double val) {
     num mod = power(
       10,
-      Get.find<SplashController>().configModel!.digitAfterDecimalPoint!,
+      getIt<SplashBloc>().state.configModel!.digitAfterDecimalPoint!,
     );
     return (((val * mod).toPrecision(
-          Get.find<SplashController>().configModel!.digitAfterDecimalPoint!,
+          getIt<SplashBloc>().state.configModel!.digitAfterDecimalPoint!,
         )).floor().toDouble() /
         mod);
   }

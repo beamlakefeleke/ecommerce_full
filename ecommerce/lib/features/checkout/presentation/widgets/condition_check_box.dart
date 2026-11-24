@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +14,7 @@ class CheckoutCondition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool activeRefund =
-        Get.find<SplashController>().configModel!.refundPolicyStatus == 1;
+        getIt<SplashBloc>().state.configModel!.refundPolicyStatus == 1;
     return Row(
       children: [
         // SizedBox(

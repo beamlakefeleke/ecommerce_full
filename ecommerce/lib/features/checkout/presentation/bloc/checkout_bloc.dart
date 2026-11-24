@@ -12,7 +12,9 @@ import 'package:ecommerce/features/checkout/domain/usecases/place_order_usecase.
 import 'package:ecommerce/features/checkout/domain/usecases/place_prescription_order_usecase.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/network_info.dart';
 import 'package:ecommerce/util/app_constants.dart';
 
@@ -102,7 +104,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     on<CheckoutPrescriptionOrderPlaced>(_onPrescriptionOrderPlaced);
   }
 
-  SplashController get _splash => getx.Get.find<SplashController>();
+  SplashState get _splash => getIt<SplashBloc>().state;
 
   void _onPrevDataCleared(
     CheckoutPrevDataCleared event,

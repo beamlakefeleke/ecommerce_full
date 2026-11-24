@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -16,8 +18,8 @@ class WebRecommendedStoreView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isFood =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.food;
 
     return GetBuilder<StoreController>(
@@ -113,7 +115,7 @@ class WebRecommendedStoreView extends StatelessWidget {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}'
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}'
                                             '/${storeController.recommendedStoreList![index].logo}',
                                         fit: BoxFit.cover,
                                         height: 60,

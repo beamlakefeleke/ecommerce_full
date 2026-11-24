@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -65,11 +67,11 @@ class _UpdateScreenState extends State<UpdateScreen> {
                       onPressed: () async {
                         String? appUrl = 'https://google.com';
                         if (GetPlatform.isAndroid) {
-                          appUrl = Get.find<SplashController>()
+                          appUrl = getIt<SplashBloc>().state
                               .configModel!
                               .appUrlAndroid;
                         } else if (GetPlatform.isIOS) {
-                          appUrl = Get.find<SplashController>()
+                          appUrl = getIt<SplashBloc>().state
                               .configModel!
                               .appUrlIos;
                         }

@@ -1,6 +1,8 @@
 import 'package:ecommerce/common/widgets/title_widget.dart';
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -60,7 +62,7 @@ class BasicCampaignView extends StatelessWidget {
                           ),
                           child: CustomImage(
                             image:
-                                '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}'
+                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
                                 '/${campaignController.basicCampaignList![index].image}',
                             width: 200,
                             height: 80,

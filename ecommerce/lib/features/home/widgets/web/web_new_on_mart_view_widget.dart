@@ -1,7 +1,9 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -132,16 +134,15 @@ class _WebNewOnMartViewWidgetState extends State<WebNewOnMartViewWidget> {
                                     child: InkWell(
                                       hoverColor: Colors.transparent,
                                       onTap: () {
-                                        if (Get.find<SplashController>()
+                                        if (getIt<SplashBloc>().state
                                                 .moduleList !=
                                             null) {
                                           for (ModuleModel module
-                                              in Get.find<SplashController>()
+                                              in getIt<SplashBloc>().state
                                                   .moduleList!) {
                                             if (module.id ==
                                                 storeList[index].moduleId) {
-                                              Get.find<SplashController>()
-                                                  .setModule(module);
+                                              getIt<SplashBloc>().add(SplashModuleSet(module);
                                               break;
                                             }
                                           }
@@ -193,7 +194,7 @@ class _WebNewOnMartViewWidgetState extends State<WebNewOnMartViewWidget> {
                                                               ),
                                                           child: CustomImage(
                                                             image:
-                                                                '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}'
+                                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}'
                                                                 '/${storeList[index].logo}',
                                                             height: 90,
                                                             width: 90,

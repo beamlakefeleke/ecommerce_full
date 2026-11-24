@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -28,14 +30,13 @@ class ParcelAppBarWidget extends StatelessWidget
       ),
       elevation: 0,
       leadingWidth: backButton! ? Dimensions.paddingSizeLarge : 0,
-      title: GetBuilder<SplashController>(
-        builder: (splashController) {
+      title: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
           return Row(
             children: [
               (splashController.module != null &&
                       splashController.configModel!.module == null)
                   ? InkWell(
-                      onTap: () => splashController.removeModule(),
+                      onTap: () => getIt<SplashBloc>().add(const SplashModuleRemoved()),
                       child: Image.asset(
                         Images.moduleIcon,
                         height: 25,

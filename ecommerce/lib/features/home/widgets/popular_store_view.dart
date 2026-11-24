@@ -1,7 +1,9 @@
 import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -78,16 +80,15 @@ class PopularStoreView extends StatelessWidget {
                                 child: CustomInkWell(
                                   onTap: () {
                                     if (isFeatured && // set as true
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                                 .moduleList !=
                                             null) {
                                       for (ModuleModel module
-                                          in Get.find<SplashController>()
+                                          in getIt<SplashBloc>().state
                                               .moduleList!) {
                                         if (module.id ==
                                             storeList[index].moduleId) {
-                                          Get.find<SplashController>()
-                                              .setModule(module);
+                                          getIt<SplashBloc>().add(SplashModuleSet(module);
                                           break;
                                         }
                                       }
@@ -112,7 +113,7 @@ class PopularStoreView extends StatelessWidget {
                                         ),
                                         child: CustomImage(
                                           image:
-                                              '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}'
+                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}'
                                               '/${storeList[index].coverPhoto}',
                                           height: 50,
                                           width: 50,

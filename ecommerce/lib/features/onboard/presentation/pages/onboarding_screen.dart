@@ -1,5 +1,6 @@
 import 'package:ecommerce/core/di/injection.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/onboard/presentation/bloc/onboard_bloc.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -124,8 +125,7 @@ class _OnBoardingViewState extends State<_OnBoardingView> {
                                         child: CustomButton(
                                           transparent: true,
                                           onPressed: () {
-                                            Get.find<SplashController>()
-                                                .disableIntro();
+                                            getIt<SplashBloc>().add(const SplashIntroDismissed());
                                             Get.offNamed(
                                               RouteHelper.getSignInRoute(
                                                 RouteHelper.onBoarding,
@@ -147,8 +147,7 @@ class _OnBoardingViewState extends State<_OnBoardingView> {
                                           curve: Curves.ease,
                                         );
                                       } else {
-                                        Get.find<SplashController>()
-                                            .disableIntro();
+                                        getIt<SplashBloc>().add(const SplashIntroDismissed());
                                         Get.offNamed(
                                           RouteHelper.getSignInRoute(
                                             RouteHelper.onBoarding,

@@ -1,5 +1,7 @@
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -46,12 +48,12 @@ class WebMostPopularItemBannerViewWidget extends StatelessWidget {
                               index2 <
                               campaignController.basicCampaignList!.length;
 
-                          String? baseUrl1 = Get.find<SplashController>()
+                          String? baseUrl1 = getIt<SplashBloc>().state
                               .configModel!
                               .baseUrls!
                               .campaignImageUrl;
                           String? baseUrl2 = hasSecond
-                              ? Get.find<SplashController>()
+                              ? getIt<SplashBloc>().state
                                     .configModel!
                                     .baseUrls!
                                     .campaignImageUrl

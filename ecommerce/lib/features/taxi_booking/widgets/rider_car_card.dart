@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
@@ -55,7 +57,7 @@ class RiderCarCard extends StatelessWidget {
                   ),
                   child: CustomImage(
                     image:
-                        '${Get.find<SplashController>().configModel!.baseUrls!.vehicleImageUrl}/${vehicle.carImages!.isNotEmpty ? vehicle.carImages![0] : ''}',
+                        '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleImageUrl}/${vehicle.carImages!.isNotEmpty ? vehicle.carImages![0] : ''}',
                     height: 130,
                     width: Get.width,
                   ),
@@ -135,7 +137,7 @@ class RiderCarCard extends StatelessWidget {
                               children: [
                                 TextSpan(
                                   text:
-                                      '${Get.find<SplashController>().configModel!.currencySymbol}',
+                                      '${getIt<SplashBloc>().state.configModel!.currencySymbol}',
                                   style: robotoRegular.copyWith(
                                     fontSize: Dimensions.fontSizeSmall,
                                   ),
@@ -143,7 +145,7 @@ class RiderCarCard extends StatelessWidget {
                                 TextSpan(
                                   text: double.parse(vehicle.minFare.toString())
                                       .toStringAsFixed(
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                             .configModel!
                                             .digitAfterDecimalPoint!,
                                       ),

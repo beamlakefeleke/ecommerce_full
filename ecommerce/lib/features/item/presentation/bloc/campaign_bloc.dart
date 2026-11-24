@@ -5,7 +5,9 @@ import 'package:ecommerce/core/usecase/usecase.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/item/domain/usecases/campaign_usecases.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 
 part 'campaign_event.dart';
 part 'campaign_state.dart';
@@ -62,9 +64,9 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
     result.fold((failure) {}, (list) {
       final List<Item> filtered = [];
       for (var c in list) {
-        if (!Get.find<SplashController>()
+        if (!(getIt<SplashBloc>()
                 .getModuleConfig(c.moduleType)
-                .newVariation! ||
+                ?.newVariation ?? false) ||
             c.variations!.isEmpty ||
             c.foodVariations!.isNotEmpty) {
           filtered.add(c);

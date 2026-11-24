@@ -1,8 +1,9 @@
-import 'package:ecommerce/core/di/injection.dart';
+﻿import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -130,7 +131,7 @@ class _SearchViewState extends State<_SearchView>
                                         return SearchFieldWidget(
                                           controller: _searchController,
                                           hint:
-                                              Get.find<SplashController>()
+                                              getIt<SplashBloc>().state
                                                   .configModel!
                                                   .moduleConfig!
                                                   .module!
@@ -227,9 +228,7 @@ class _SearchViewState extends State<_SearchView>
                                                       Tab(text: 'item'.tr),
                                                       Tab(
                                                         text:
-                                                            Get.find<
-                                                                  SplashController
-                                                                >()
+                                                            getIt<SplashBloc>().state
                                                                 .configModel!
                                                                 .moduleConfig!
                                                                 .module!
@@ -283,7 +282,7 @@ class _SearchViewState extends State<_SearchView>
                                           child: SearchFieldWidget(
                                             controller: _searchController,
                                             hint:
-                                                Get.find<SplashController>()
+                                                getIt<SplashBloc>().state
                                                     .configModel!
                                                     .moduleConfig!
                                                     .module!
@@ -660,7 +659,7 @@ class _SearchViewState extends State<_SearchView>
                                                                     ),
                                                                 child: CustomImage(
                                                                   image:
-                                                                      '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}'
+                                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}'
                                                                       '/${searchController.suggestedItemList![index].image}',
                                                                   width: 45,
                                                                   height: 45,
@@ -739,7 +738,7 @@ class _SearchViewState extends State<_SearchView>
   void searchData() {
     if (_searchController.text.trim().isEmpty) {
       showCustomSnackBar(
-        Get.find<SplashController>()
+        getIt<SplashBloc>().state
                 .configModel!
                 .moduleConfig!
                 .module!
@@ -760,7 +759,7 @@ class _SearchViewState extends State<_SearchView>
         );
       } else {
         showCustomSnackBar(
-          Get.find<SplashController>()
+          getIt<SplashBloc>().state
                   .configModel!
                   .moduleConfig!
                   .module!

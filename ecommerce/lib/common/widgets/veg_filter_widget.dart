@@ -1,6 +1,8 @@
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
@@ -52,12 +54,12 @@ class VegFilterWidget extends StatelessWidget {
       );
     }
 
-    return (Get.find<SplashController>()
+    return (getIt<SplashBloc>().state
                 .configModel!
                 .moduleConfig!
                 .module!
                 .vegNonVeg! &&
-            Get.find<SplashController>().configModel!.toggleVegNonVeg!)
+            getIt<SplashBloc>().state.configModel!.toggleVegNonVeg!)
         ? Padding(
             padding: fromAppBar
                 ? EdgeInsets.zero

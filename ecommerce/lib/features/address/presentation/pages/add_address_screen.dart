@@ -2,7 +2,9 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
@@ -77,7 +79,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       Get.find<AuthController>().getUserCountryCode().isNotEmpty
       ? Get.find<AuthController>().getUserCountryCode()
       : CountryCode.fromCountryCode(
-          Get.find<SplashController>().configModel!.country!,
+          getIt<SplashBloc>().state.configModel!.country!,
         ).dialCode;
 
   @override
@@ -95,10 +97,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     if (widget.address == null) {
       _initialPosition = LatLng(
         double.parse(
-          Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '0',
+          getIt<SplashBloc>().state.configModel!.defaultLocation!.lat ?? '0',
         ),
         double.parse(
-          Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '0',
+          getIt<SplashBloc>().state.configModel!.defaultLocation!.lng ?? '0',
         ),
       );
     } else {

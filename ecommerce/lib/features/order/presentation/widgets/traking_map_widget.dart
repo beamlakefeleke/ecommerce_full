@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
@@ -237,7 +239,7 @@ class _TrackingMapWidgetState extends State<TrackingMapWidget> {
                 infoWindow: InfoWindow(
                   title: parcel
                       ? 'Receiver'
-                      : Get.find<SplashController>()
+                      : getIt<SplashBloc>().state
                             .configModel!
                             .moduleConfig!
                             .module!

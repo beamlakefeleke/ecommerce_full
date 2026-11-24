@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/custom_circle_list_view_package.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -90,7 +92,7 @@ class _CircleListViewState extends State<CircleListView> {
                                         ),
                                         child: CustomImage(
                                           image:
-                                              '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}'
+                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
                                               '/${itemCampaignList[index].image}',
                                           fit: BoxFit.cover,
                                         ),

@@ -1,10 +1,11 @@
-import 'package:ecommerce/core/di/injection.dart';
+﻿import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
 import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
@@ -61,10 +62,10 @@ class _PickMapScreenState extends State<PickMapScreen> {
     }
     _initialPosition = LatLng(
       double.parse(
-        Get.find<SplashController>().configModel!.defaultLocation!.lat ?? '0',
+        getIt<SplashBloc>().state.configModel!.defaultLocation!.lat ?? '0',
       ),
       double.parse(
-        Get.find<SplashController>().configModel!.defaultLocation!.lng ?? '0',
+        getIt<SplashBloc>().state.configModel!.defaultLocation!.lng ?? '0',
       ),
     );
   }

@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';
@@ -372,7 +374,7 @@ class TopSection extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
-                            Get.find<SplashController>()
+                            getIt<SplashBloc>().state
                                             .configModel!
                                             .homeDeliveryStatus ==
                                         1 &&
@@ -391,7 +393,7 @@ class TopSection extends StatelessWidget {
                               width: Dimensions.paddingSizeDefault,
                             ),
 
-                            Get.find<SplashController>()
+                            getIt<SplashBloc>().state
                                             .configModel!
                                             .takeawayStatus ==
                                         1 &&

@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_bloc.dart';
 import 'package:ecommerce/features/loyalty/presentation/widgets/loyalty_bottom_sheet_widget.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -197,7 +199,7 @@ class LoyaltyStepper extends StatelessWidget {
                       style: robotoRegular,
                     ),
                     Text(
-                      '${'minimun'.tr} ${Get.find<SplashController>().configModel!.loyaltyPointExchangeRate} ${'points_required_to_convert_into_currency'.tr}',
+                      '${'minimun'.tr} ${getIt<SplashBloc>().state.configModel!.loyaltyPointExchangeRate} ${'points_required_to_convert_into_currency'.tr}',
                       style: robotoRegular,
                     ),
                   ],

@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+﻿import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/core/usecase/usecase.dart';
@@ -9,7 +9,8 @@ import 'package:ecommerce/features/item/domain/models/common_condition_model.dar
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/item/domain/usecases/item_usecases.dart';
 import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/module_helper.dart';
 import 'package:get/get.dart';
 
@@ -74,7 +75,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     on<ExistInCartChecked>((e, emit) => _setExistInCart(emit, e.item));
   }
 
-  // ── List loaders ───────────────────────────────────────────────────────────
+  // â”€â”€ List loaders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> _onPopular(
     PopularItemsRequested event,
@@ -205,7 +206,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     emit(state.copyWith(selectedCategory: event.index));
   }
 
-  // ── Item details / selection state ───────────────────────────────────────
+  // â”€â”€ Item details / selection state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> _onProductDetails(
     ProductDetailsRequested event,
@@ -243,7 +244,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
         cart.addOnIds,
         item.addOns,
       );
-      if (ModuleHelper.getModuleConfig(item.moduleType).newVariation!) {
+      if (ModuleHelper.getModuleConfig(item.moduleType)?.newVariation ?? false) {
         selectedVariations = List.of(cart.foodVariations!);
         collapseVariation = ItemHelper.collapseVariation(item.foodVariations!);
       } else {
@@ -263,7 +264,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
         ),
       );
     } else {
-      if (ModuleHelper.getModuleConfig(item!.moduleType).newVariation!) {
+      if (ModuleHelper.getModuleConfig(item!.moduleType)?.newVariation ?? false) {
         selectedVariations = ItemHelper.initializeSelectedVariation(
           item.foodVariations,
         );
@@ -302,7 +303,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
       ModuleHelper.getModule() != null
           ? ModuleHelper.getModule()!.moduleType
           : ModuleHelper.getCacheModule()!.moduleType,
-    ).newVariation!) {
+    )?.newVariation ?? false) {
       cartIndex = -1;
     } else {
       cartIndex = _isExistInCart(item.id, variationType);
@@ -355,7 +356,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
   void _onQuantity(ItemQuantityChanged event, Emitter<ItemState> emit) {
     final int newQty = ItemHelper.setQuantity(
       event.isIncrement,
-      Get.find<SplashController>().configModel!.moduleConfig!.module!.stock!,
+      getIt<SplashBloc>().state.configModel!.moduleConfig!.module!.stock!,
       event.stock,
       state.quantity!,
       event.quantityLimit,

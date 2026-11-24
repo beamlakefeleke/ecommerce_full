@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
@@ -177,7 +179,7 @@ class TrackDetailsViewWidget extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     takeAway
-                        ? Get.find<SplashController>()
+                        ? getIt<SplashBloc>().state
                                   .configModel!
                                   .moduleConfig!
                                   .module!
@@ -197,7 +199,7 @@ class TrackDetailsViewWidget extends StatelessWidget {
                     ClipOval(
                       child: CustomImage(
                         image:
-                            '${takeAway ? Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl : Get.find<SplashController>().configModel!.baseUrls!.deliveryManImageUrl}/${takeAway
+                            '${takeAway ? getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl : getIt<SplashBloc>().state.configModel!.baseUrls!.deliveryManImageUrl}/${takeAway
                                 ? track.store != null
                                       ? track.store!.logo
                                       : ''

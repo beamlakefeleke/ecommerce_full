@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
@@ -26,11 +28,11 @@ class PartialPayView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CheckoutBloc, CheckoutState>(
       builder: (context, state) {
-        return Get.find<SplashController>()
+        return getIt<SplashBloc>().state
                     .configModel!
                     .partialPaymentStatus! &&
                 !isPrescription &&
-                Get.find<SplashController>()
+                getIt<SplashBloc>().state
                         .configModel!
                         .customerWalletStatus ==
                     1 &&

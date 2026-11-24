@@ -1,7 +1,10 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_compression_flutter/image_compression_flutter.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,8 +19,8 @@ class NetworkInfo {
 
   static void checkConnectivity(BuildContext context) {
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      if (Get.find<SplashController>().firstTimeConnectionCheck) {
-        Get.find<SplashController>().setFirstTimeConnectionCheck(false);
+      if (getIt<SplashBloc>().state.firstTimeConnectionCheck) {
+        getIt<SplashBloc>().add(const SplashFirstConnectionCheckDone());
       } else {
         bool isNotConnected = result == ConnectivityResult.none;
         isNotConnected

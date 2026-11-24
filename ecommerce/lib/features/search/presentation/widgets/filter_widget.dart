@@ -1,5 +1,7 @@
 
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -158,8 +160,8 @@ class FilterWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                  (Get.find<SplashController>().configModel!.toggleVegNonVeg! &&
-                          Get.find<SplashController>()
+                  (getIt<SplashBloc>().state.configModel!.toggleVegNonVeg! &&
+                          getIt<SplashBloc>().state
                               .configModel!
                               .moduleConfig!
                               .module!
@@ -175,8 +177,8 @@ class FilterWidget extends StatelessWidget {
                         )
                       : const SizedBox(),
 
-                  (Get.find<SplashController>().configModel!.toggleVegNonVeg! &&
-                          Get.find<SplashController>()
+                  (getIt<SplashBloc>().state.configModel!.toggleVegNonVeg! &&
+                          getIt<SplashBloc>().state
                               .configModel!
                               .moduleConfig!
                               .module!
@@ -194,7 +196,7 @@ class FilterWidget extends StatelessWidget {
 
                   CustomCheckBoxWidget(
                     title: isStore
-                        ? Get.find<SplashController>()
+                        ? getIt<SplashBloc>().state
                                   .configModel!
                                   .moduleConfig!
                                   .module!
@@ -216,7 +218,7 @@ class FilterWidget extends StatelessWidget {
 
                   CustomCheckBoxWidget(
                     title: isStore
-                        ? Get.find<SplashController>()
+                        ? getIt<SplashBloc>().state
                                   .configModel!
                                   .moduleConfig!
                                   .module!

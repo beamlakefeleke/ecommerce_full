@@ -1,6 +1,9 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -40,7 +43,7 @@ class CookiesView extends StatelessWidget {
                 bottom: Dimensions.paddingSizeSmall,
               ),
               child: Text(
-                Get.find<SplashController>().configModel!.cookiesText ??
+                getIt<SplashBloc>().state.configModel!.cookiesText ??
                     'This is dummy cookies text',
                 style: robotoMedium.copyWith(
                   fontSize: Dimensions.fontSizeSmall,
@@ -62,7 +65,7 @@ class CookiesView extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   onPressed: () {
-                    Get.find<SplashController>().saveCookiesData(false);
+                    getIt<SplashBloc>().add(SplashCookiesSaved(false));
                   },
                   child: Text(
                     'no_thanks'.tr,
@@ -86,9 +89,9 @@ class CookiesView extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   onPressed: () {
-                    Get.find<SplashController>().saveCookiesData(true);
-                    Get.find<SplashController>().cookiesStatusChange(
-                      Get.find<SplashController>().configModel!.cookiesText ??
+                    getIt<SplashBloc>().add(SplashCookiesSaved(true));
+                    getIt<SplashBloc>().cookiesStatusChange(
+                      getIt<SplashBloc>().state.configModel!.cookiesText ??
                           "This is dummy cookies text",
                     );
                   },

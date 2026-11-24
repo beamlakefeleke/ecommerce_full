@@ -5,7 +5,9 @@ import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
@@ -249,9 +251,9 @@ class _WebChatViewWidgetState extends State<WebChatViewWidget>
                                                       deliverymanId: null,
                                                       conversationId: 0,
                                                       image:
-                                                          '${Get.find<SplashController>().configModel!.baseUrls!.businessLogoUrl}/${Get.find<SplashController>().configModel!.logo}',
+                                                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.businessLogoUrl}/${getIt<SplashBloc>().state.configModel!.logo}',
                                                       name:
-                                                          '${Get.find<SplashController>().configModel!.businessName}',
+                                                          '${getIt<SplashBloc>().state.configModel!.businessName}',
                                                       receiverType: 'admin',
                                                     ),
                                                   ),
@@ -297,7 +299,7 @@ class _WebChatViewWidgetState extends State<WebChatViewWidget>
                                                           height: 50,
                                                           width: 50,
                                                           image:
-                                                              '${Get.find<SplashController>().configModel!.baseUrls!.businessLogoUrl}/${Get.find<SplashController>().configModel!.logo}',
+                                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.businessLogoUrl}/${getIt<SplashBloc>().state.configModel!.logo}',
                                                         ),
                                                       ),
                                                       const SizedBox(
@@ -306,7 +308,7 @@ class _WebChatViewWidgetState extends State<WebChatViewWidget>
                                                       ),
                                                       Expanded(
                                                         child: Text(
-                                                          '${Get.find<SplashController>().configModel!.businessName}',
+                                                          '${getIt<SplashBloc>().state.configModel!.businessName}',
                                                           style: robotoMedium,
                                                         ),
                                                       ),

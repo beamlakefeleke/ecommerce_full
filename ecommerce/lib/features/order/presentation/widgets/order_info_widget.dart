@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
@@ -75,9 +77,10 @@ class OrderInfoWidget extends StatelessWidget {
                 ? SizedBox(
                     height:
                         DateConverter.isBeforeTime(order.scheduleAt) &&
-                            Get.find<SplashController>()
-                                .getModuleConfig(order.moduleType)
-                                .newVariation!
+                            (getIt<SplashBloc>()
+                                    .getModuleConfig(order.moduleType)
+                                    ?.newVariation ??
+                                false)
                         ? (order.orderStatus != 'delivered' &&
                                   order.orderStatus != 'failed' &&
                                   order.orderStatus != 'canceled' &&
@@ -200,12 +203,14 @@ class OrderInfoWidget extends StatelessWidget {
                         )
                       : const SizedBox(),
 
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>()
+                          .state
                           .configModel!
                           .orderDeliveryVerification!
                       ? const Divider(height: Dimensions.paddingSizeLarge)
                       : const SizedBox(),
-                  Get.find<SplashController>()
+                  getIt<SplashBloc>()
+                          .state
                           .configModel!
                           .orderDeliveryVerification!
                       ? Row(
@@ -316,9 +321,10 @@ class OrderInfoWidget extends StatelessWidget {
                     ),
                   ),
 
-                  Get.find<SplashController>()
-                          .getModuleConfig(order.moduleType)
-                          .newVariation!
+                  getIt<SplashBloc>()
+                              .getModuleConfig(order.moduleType)
+                              ?.newVariation ??
+                          false
                       ? Column(
                           children: [
                             Divider(
@@ -533,7 +539,7 @@ class OrderInfoWidget extends StatelessWidget {
                                                 builder: (context) {
                                                   return ImageDialogWidget(
                                                     imageUrl:
-                                                        '${Get.find<SplashController>().configModel!.baseUrls!.refundImageUrl}/${order.refund!.image!.isNotEmpty ? order.refund!.image![0] : ''}',
+                                                        '${getIt<SplashBloc>().state.configModel!.baseUrls!.refundImageUrl}/${order.refund!.image!.isNotEmpty ? order.refund!.image![0] : ''}',
                                                   );
                                                 },
                                               ),
@@ -542,7 +548,7 @@ class OrderInfoWidget extends StatelessWidget {
                                                 width: 40,
                                                 fit: BoxFit.cover,
                                                 image: order.refund != null
-                                                    ? '${Get.find<SplashController>().configModel!.baseUrls!.refundImageUrl}/${order.refund!.image!.isNotEmpty ? order.refund!.image![0] : ''}'
+                                                    ? '${getIt<SplashBloc>().state.configModel!.baseUrls!.refundImageUrl}/${order.refund!.image!.isNotEmpty ? order.refund!.image![0] : ''}'
                                                     : '',
                                               ),
                                             )
@@ -659,35 +665,39 @@ class OrderInfoWidget extends StatelessWidget {
                 : const SizedBox(),
 
             (isDesktop &&
-                    Get.find<SplashController>()
-                        .getModuleConfig(order.moduleType)
-                        .orderAttachment! &&
+                    (getIt<SplashBloc>()
+                            .getModuleConfig(order.moduleType)
+                            ?.orderAttachment ??
+                        false) &&
                     order.orderAttachment != null &&
                     order.orderAttachment!.isNotEmpty)
                 ? const SizedBox(height: Dimensions.paddingSizeSmall)
                 : const SizedBox(),
 
             (isDesktop &&
-                    Get.find<SplashController>()
-                        .getModuleConfig(order.moduleType)
-                        .orderAttachment! &&
+                    (getIt<SplashBloc>()
+                            .getModuleConfig(order.moduleType)
+                            ?.orderAttachment ??
+                        false) &&
                     order.orderAttachment != null &&
                     order.orderAttachment!.isNotEmpty)
                 ? Text('prescription'.tr, style: robotoMedium)
                 : const SizedBox(),
 
             (isDesktop &&
-                    Get.find<SplashController>()
-                        .getModuleConfig(order.moduleType)
-                        .orderAttachment! &&
+                    (getIt<SplashBloc>()
+                            .getModuleConfig(order.moduleType)
+                            ?.orderAttachment ??
+                        false) &&
                     order.orderAttachment != null &&
                     order.orderAttachment!.isNotEmpty)
                 ? const SizedBox(height: Dimensions.paddingSizeLarge)
                 : const SizedBox(),
 
-            (Get.find<SplashController>()
-                        .getModuleConfig(order.moduleType)
-                        .orderAttachment! &&
+            ((getIt<SplashBloc>()
+                            .getModuleConfig(order.moduleType)
+                            ?.orderAttachment ??
+                        false) &&
                     order.orderAttachment != null &&
                     order.orderAttachment!.isNotEmpty)
                 ? Container(
@@ -739,7 +749,7 @@ class OrderInfoWidget extends StatelessWidget {
                                 child: InkWell(
                                   onTap: () => openDialog(
                                     context,
-                                    '${Get.find<SplashController>().configModel!.baseUrls!.orderAttachmentUrl}/${order.orderAttachment![index]}',
+                                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.orderAttachmentUrl}/${order.orderAttachment![index]}',
                                   ),
                                   child: Center(
                                     child: ClipRRect(
@@ -748,7 +758,7 @@ class OrderInfoWidget extends StatelessWidget {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${Get.find<SplashController>().configModel!.baseUrls!.orderAttachmentUrl}/${order.orderAttachment![index]}',
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.orderAttachmentUrl}/${order.orderAttachment![index]}',
                                         width: 100,
                                         height: 100,
                                       ),
@@ -764,9 +774,10 @@ class OrderInfoWidget extends StatelessWidget {
 
                         SizedBox(
                           width:
-                              (Get.find<SplashController>()
-                                      .getModuleConfig(order.moduleType)
-                                      .orderAttachment! &&
+                              ((getIt<SplashBloc>()
+                                          .getModuleConfig(order.moduleType)
+                                          ?.orderAttachment ??
+                                      false) &&
                                   order.orderAttachment != null &&
                                   order.orderAttachment!.isNotEmpty)
                               ? Dimensions.paddingSizeSmall
@@ -816,9 +827,10 @@ class OrderInfoWidget extends StatelessWidget {
                 : const SizedBox(),
             SizedBox(
               height:
-                  Get.find<SplashController>()
-                          .getModuleConfig(order.moduleType)
-                          .orderAttachment! &&
+                  (getIt<SplashBloc>()
+                              .getModuleConfig(order.moduleType)
+                              ?.orderAttachment ??
+                          false) &&
                       order.orderAttachment != null &&
                       order.orderAttachment!.isNotEmpty
                   ? Dimensions.paddingSizeSmall
@@ -872,7 +884,7 @@ class OrderInfoWidget extends StatelessWidget {
                               child: InkWell(
                                 onTap: () => openDialog(
                                   context,
-                                  '${Get.find<SplashController>().configModel!.baseUrls!.orderAttachmentUrl}/${order.orderProof![index]}',
+                                  '${getIt<SplashBloc>().state.configModel!.baseUrls!.orderAttachmentUrl}/${order.orderProof![index]}',
                                 ),
                                 child: Center(
                                   child: ClipRRect(
@@ -881,7 +893,7 @@ class OrderInfoWidget extends StatelessWidget {
                                     ),
                                     child: CustomImage(
                                       image:
-                                          '${Get.find<SplashController>().configModel!.baseUrls!.orderAttachmentUrl}/${order.orderProof![index]}',
+                                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.orderAttachmentUrl}/${order.orderProof![index]}',
                                       width: 100,
                                       height: 100,
                                     ),
@@ -941,7 +953,7 @@ class OrderInfoWidget extends StatelessWidget {
                             ClipOval(
                               child: CustomImage(
                                 image:
-                                    '${Get.find<SplashController>().configModel!.baseUrls!.deliveryManImageUrl}/${order.deliveryMan!.image}',
+                                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.deliveryManImageUrl}/${order.deliveryMan!.image}',
                                 height: 35,
                                 width: 35,
                                 fit: BoxFit.cover,
@@ -1152,7 +1164,7 @@ class OrderInfoWidget extends StatelessWidget {
                 ? Text(
                     parcel
                         ? 'parcel_category'.tr
-                        : Get.find<SplashController>()
+                        : getIt<SplashBloc>()
                               .getModuleConfig(order.moduleType)
                               .showRestaurantText!
                         ? 'restaurant_details'.tr
@@ -1190,7 +1202,7 @@ class OrderInfoWidget extends StatelessWidget {
                       ? Text(
                           parcel
                               ? 'parcel_category'.tr
-                              : Get.find<SplashController>()
+                              : getIt<SplashBloc>()
                                     .getModuleConfig(order.moduleType)
                                     .showRestaurantText!
                               ? 'restaurant_details'.tr
@@ -1228,8 +1240,8 @@ class OrderInfoWidget extends StatelessWidget {
                             ClipOval(
                               child: CustomImage(
                                 image: parcel
-                                    ? '${Get.find<SplashController>().configModel!.baseUrls!.parcelCategoryImageUrl}/${order.parcelCategory!.image}'
-                                    : '${Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl}/${order.store!.logo}',
+                                    ? '${getIt<SplashBloc>().state.configModel!.baseUrls!.parcelCategoryImageUrl}/${order.parcelCategory!.image}'
+                                    : '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}/${order.store!.logo}',
                                 height: 35,
                                 width: 35,
                                 fit: BoxFit.cover,
@@ -1327,7 +1339,8 @@ class OrderInfoWidget extends StatelessWidget {
                                 : const SizedBox(),
 
                             !isGuestLoggedIn &&
-                                    (Get.find<SplashController>()
+                                    (getIt<SplashBloc>()
+                                            .state
                                             .configModel!
                                             .refundActiveStatus! &&
                                         order.orderStatus == 'delivered' &&

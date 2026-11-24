@@ -1,5 +1,7 @@
 import 'package:ecommerce/features/category/controllers/category_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -82,7 +84,7 @@ class CategoryPopUp extends StatelessWidget {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${Get.find<SplashController>().configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
                                         height: 50,
                                         width: 50,
                                         fit: BoxFit.cover,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -24,8 +26,8 @@ class ItemImageViewWidget extends StatelessWidget {
     return BlocBuilder<ItemBloc, ItemState>(
       builder: (context, itemController) {
         String? baseUrl = item!.availableDateStarts == null
-            ? Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl
-            : Get.find<SplashController>()
+            ? getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl
+            : getIt<SplashBloc>().state
                   .configModel!
                   .baseUrls!
                   .campaignImageUrl;

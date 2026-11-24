@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
 import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
@@ -81,7 +83,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                       width: 48,
                       height: 46,
                       image:
-                          '${Get.find<SplashController>().configModel!.baseUrls!.vehicleImageUrl}/${widget.vehicle.carImages!.isNotEmpty ? widget.vehicle.carImages![0] : ''}',
+                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleImageUrl}/${widget.vehicle.carImages!.isNotEmpty ? widget.vehicle.carImages![0] : ''}',
                     ),
                     const SizedBox(width: Dimensions.paddingSizeDefault),
 
@@ -100,7 +102,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                               width: 20,
                               height: 20,
                               image:
-                                  '${Get.find<SplashController>().configModel!.baseUrls!.vehicleBrandImageUrl}/${''}',
+                                  '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleBrandImageUrl}/${''}',
                             ),
                             Text(
                               widget.vehicle.categoryName!,

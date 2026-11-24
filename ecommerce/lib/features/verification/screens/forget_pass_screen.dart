@@ -1,7 +1,9 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:ecommerce/features/auth/domain/models/social_log_in_body.dart';
 import 'package:ecommerce/features/verification/controllers/verification_controller.dart';
@@ -36,7 +38,7 @@ class ForgetPassScreen extends StatefulWidget {
 class _ForgetPassScreenState extends State<ForgetPassScreen> {
   final TextEditingController _numberController = TextEditingController();
   String? _countryDialCode = CountryCode.fromCountryCode(
-    Get.find<SplashController>().configModel!.country!,
+    getIt<SplashBloc>().state.configModel!.country!,
   ).dialCode;
 
   @override
@@ -98,7 +100,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                       },
                       countryDialCode: _countryDialCode != null
                           ? CountryCode.fromCountryCode(
-                              Get.find<SplashController>()
+                              getIt<SplashBloc>().state
                                   .configModel!
                                   .country!,
                             ).code

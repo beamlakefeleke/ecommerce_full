@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
@@ -83,7 +85,7 @@ class OrderItemWidget extends StatelessWidget {
                   width: 50,
                   fit: BoxFit.cover,
                   image:
-                      '${orderDetails.itemCampaignId != null ? Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl : Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}/'
+                      '${orderDetails.itemCampaignId != null ? getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl : getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}/'
                       '${orderDetails.itemDetails!.image}',
                 ),
               ),
@@ -129,19 +131,22 @@ class OrderItemWidget extends StatelessWidget {
                             textDirection: TextDirection.ltr,
                           ),
                         ),
-                        ((Get.find<SplashController>()
+                        ((getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .moduleConfig!
                                         .module!
                                         .unit! &&
                                     orderDetails.itemDetails!.unitType !=
                                         null) ||
-                                (Get.find<SplashController>()
+                                (getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .moduleConfig!
                                         .module!
                                         .vegNonVeg! &&
-                                    Get.find<SplashController>()
+                                    getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .toggleVegNonVeg!))
                             ? Container(
@@ -158,9 +163,10 @@ class OrderItemWidget extends StatelessWidget {
                                   ).primaryColor.withOpacity(0.1),
                                 ),
                                 child: Text(
-                                  !Get.find<SplashController>()
-                                          .getModuleConfig(order.moduleType)
-                                          .newVariation!
+                                  !(getIt<SplashBloc>()
+                                              .getModuleConfig(order.moduleType)
+                                              ?.newVariation ??
+                                          false)
                                       ? orderDetails.itemDetails!.unitType ?? ''
                                       : orderDetails.itemDetails!.veg == 0
                                       ? 'non_veg'.tr
@@ -180,9 +186,7 @@ class OrderItemWidget extends StatelessWidget {
             ],
           ),
 
-          (Get.find<SplashController>()
-                      .getModuleConfig(order.moduleType)
-                      .addOn! &&
+          (getIt<SplashBloc>().getModuleConfig(order.moduleType)?.addOn ?? false &&
                   addOnText.isNotEmpty)
               ? Padding(
                   padding: const EdgeInsets.only(

@@ -5,7 +5,9 @@ import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
@@ -69,19 +71,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _baseUrl(NotificationBodyModel? notif) {
     if (notif?.adminId != null) {
-      return Get.find<SplashController>()
+      return getIt<SplashBloc>().state
               .configModel!
               .baseUrls!
               .businessLogoUrl ??
           '';
     } else if (notif?.deliverymanId != null) {
-      return Get.find<SplashController>()
+      return getIt<SplashBloc>().state
               .configModel!
               .baseUrls!
               .deliveryManImageUrl ??
           '';
     }
-    return Get.find<SplashController>().configModel!.baseUrls!.storeImageUrl ??
+    return getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl ??
         '';
   }
 

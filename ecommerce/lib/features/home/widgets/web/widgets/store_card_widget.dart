@@ -1,9 +1,12 @@
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
@@ -56,11 +59,11 @@ class StoreCardWidget extends StatelessWidget {
             child: CustomInkWell(
               onTap: () {
                 if (store != null) {
-                  if (Get.find<SplashController>().moduleList != null) {
+                  if (getIt<SplashBloc>().state.moduleList != null) {
                     for (ModuleModel module
-                        in Get.find<SplashController>().moduleList!) {
+                        in getIt<SplashBloc>().state.moduleList!) {
                       if (module.id == store!.moduleId) {
-                        Get.find<SplashController>().setModule(module);
+                        getIt<SplashBloc>().add(SplashModuleSet(module));
                         break;
                       }
                     }
@@ -86,7 +89,7 @@ class StoreCardWidget extends StatelessWidget {
                         ),
                         child: CustomImage(
                           image:
-                              '${Get.find<SplashController>().configModel!.baseUrls!.storeCoverPhotoUrl}'
+                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeCoverPhotoUrl}'
                               '/${store!.coverPhoto}',
                           height: 120,
                           width: double.infinity,

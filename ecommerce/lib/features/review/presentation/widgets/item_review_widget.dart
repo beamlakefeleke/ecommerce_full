@@ -1,7 +1,9 @@
 import 'package:ecommerce/features/review/presentation/bloc/review_bloc.dart';
 import 'package:ecommerce/features/review/presentation/bloc/review_event.dart';
 import 'package:ecommerce/features/review/presentation/bloc/review_state.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/review/domain/models/review_body_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -83,7 +85,7 @@ class _ItemReviewWidgetState extends State<ItemReviewWidget> {
                                 width: 85,
                                 fit: BoxFit.cover,
                                 image:
-                                    '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}'
+                                    '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}'
                                     '/${widget.orderDetailsList[index].itemDetails!.image}',
                               ),
                             ),

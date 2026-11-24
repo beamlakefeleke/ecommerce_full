@@ -6,7 +6,9 @@ import 'package:ecommerce/features/home/widgets/components/review_item_card_widg
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/features/item/domain/models/basic_medicine_model.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/category/data/models/category_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
@@ -197,14 +199,14 @@ class _StoreScreenState extends State<StoreScreen> {
           return Visibility(
             visible:
                 storeController.showFavButton &&
-                Get.find<SplashController>()
+                getIt<SplashBloc>().state
                     .configModel!
                     .moduleConfig!
                     .module!
                     .orderAttachment! &&
                 (storeController.store != null &&
                     storeController.store!.prescriptionOrder!) &&
-                Get.find<SplashController>().configModel!.prescriptionStatus! &&
+                getIt<SplashBloc>().state.configModel!.prescriptionStatus! &&
                 AuthHelper.isLoggedIn(),
             child: Container(
               decoration: BoxDecoration(

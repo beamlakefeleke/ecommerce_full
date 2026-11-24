@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -102,7 +104,7 @@ class DateConverter {
     if (time != null) {
       currentTime = time;
     } else {
-      currentTime = Get.find<SplashController>().currentTime;
+      currentTime = DateTime.now();
     }
     DateTime start0 = start != null
         ? DateFormat('HH:mm').parse(start)
@@ -144,7 +146,7 @@ class DateConverter {
   }
 
   static String _timeFormatter() {
-    return Get.find<SplashController>().configModel!.timeformat == '24'
+    return getIt<SplashBloc>().state.configModel!.timeformat == '24'
         ? 'HH:mm'
         : 'hh:mm a';
   }

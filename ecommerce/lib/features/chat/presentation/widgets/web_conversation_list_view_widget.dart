@@ -7,7 +7,9 @@ import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -48,7 +50,7 @@ class _WebConversationListViewWidgetState
   }
 
   String? _baseUrlFor(String? type) {
-    final urls = Get.find<SplashController>().configModel!.baseUrls!;
+    final urls = getIt<SplashBloc>().state.configModel!.baseUrls!;
     if (type == UserType.vendor.name) return urls.storeImageUrl;
     if (type == UserType.delivery_man.name) return urls.deliveryManImageUrl;
     if (type == UserType.admin.name) return urls.businessLogoUrl;

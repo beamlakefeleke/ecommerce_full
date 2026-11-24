@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
 import 'package:ecommerce/features/auth/domain/models/delivery_man_body.dart';
 import 'package:ecommerce/features/auth/controllers/deliveryman_registration_controller.dart';
@@ -57,7 +59,7 @@ class _DeliveryManRegistrationScreenState
     super.initState();
 
     _countryDialCode = CountryCode.fromCountryCode(
-      Get.find<SplashController>().configModel!.country!,
+      getIt<SplashBloc>().state.configModel!.country!,
     ).dialCode;
     if (Get.find<DeliverymanRegistrationController>().showPassView) {
       Get.find<DeliverymanRegistrationController>().showHidePass();
@@ -524,10 +526,7 @@ class _DeliveryManRegistrationScreenState
                                                 countryDialCode:
                                                     _countryDialCode != null
                                                     ? CountryCode.fromCountryCode(
-                                                        Get.find<
-                                                              SplashController
-                                                            >()
-                                                            .configModel!
+                                                        getIt<SplashBloc>().state.configModel!
                                                             .country!,
                                                       ).code
                                                     : Get.find<
@@ -1377,7 +1376,7 @@ class _DeliveryManRegistrationScreenState
                                   },
                                   countryDialCode: _countryDialCode != null
                                       ? CountryCode.fromCountryCode(
-                                          Get.find<SplashController>()
+                                          getIt<SplashBloc>().state
                                               .configModel!
                                               .country!,
                                         ).code

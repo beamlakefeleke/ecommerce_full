@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -23,8 +25,8 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
   @override
   Widget build(BuildContext context) {
     bool isPharmacy =
-        Get.find<SplashController>().module != null &&
-        Get.find<SplashController>().module!.moduleType.toString() ==
+        getIt<SplashBloc>().state.module != null &&
+        getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
 
     return GetBuilder<CampaignController>(
@@ -80,7 +82,7 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
                                         ),
                                         child: CustomImage(
                                           image:
-                                              '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}'
+                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
                                               '/${campaignController.basicCampaignList![itemIndex].image}',
                                           fit: BoxFit.cover,
                                           height: 80,

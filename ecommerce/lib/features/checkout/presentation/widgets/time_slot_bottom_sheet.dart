@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/common/models/config_model.dart';
@@ -163,7 +165,7 @@ class TimeSlotBottomSheet extends StatelessWidget {
                                                             .store!
                                                             .schedules,
                                                       ) &&
-                                                  (Get.find<SplashController>()
+                                                  (getIt<SplashBloc>().state
                                                           .configModel!
                                                           .moduleConfig!
                                                           .module!

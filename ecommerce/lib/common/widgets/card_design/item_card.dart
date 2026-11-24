@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -91,7 +93,7 @@ class ItemCard extends StatelessWidget {
                             child: CustomImage(
                               placeholder: Images.placeholder,
                               image:
-                                  '${Get.find<SplashController>().configModel!.baseUrls!.itemImageUrl}'
+                                  '${getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl}'
                                   '/${item.image}',
                               fit: BoxFit.cover,
                               width: double.infinity,
@@ -278,7 +280,7 @@ class ItemCard extends StatelessWidget {
                                         ),
                                       ],
                                     )
-                                  : (Get.find<SplashController>()
+                                  : (getIt<SplashBloc>().state
                                             .configModel!
                                             .moduleConfig!
                                             .module!

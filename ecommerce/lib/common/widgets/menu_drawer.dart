@@ -4,7 +4,9 @@ import 'package:ecommerce/common/widgets/hover/on_hover.dart';
 import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
 import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
@@ -99,7 +101,7 @@ class MenuDrawerState extends State<MenuDrawer>
   void initState() {
     super.initState();
 
-    if (Get.find<SplashController>().configModel!.refundPolicyStatus == 1) {
+    if (getIt<SplashBloc>().state.configModel!.refundPolicyStatus == 1) {
       _menuList.add(
         Menu(
           icon: Images.refund,
@@ -111,7 +113,7 @@ class MenuDrawerState extends State<MenuDrawer>
         ),
       );
     }
-    if (Get.find<SplashController>().configModel!.cancellationPolicyStatus ==
+    if (getIt<SplashBloc>().state.configModel!.cancellationPolicyStatus ==
         1) {
       _menuList.add(
         Menu(
@@ -124,7 +126,7 @@ class MenuDrawerState extends State<MenuDrawer>
         ),
       );
     }
-    if (Get.find<SplashController>().configModel!.shippingPolicyStatus == 1) {
+    if (getIt<SplashBloc>().state.configModel!.shippingPolicyStatus == 1) {
       _menuList.add(
         Menu(
           icon: Images.shippingPolicy,
@@ -137,7 +139,7 @@ class MenuDrawerState extends State<MenuDrawer>
       );
     }
 
-    if (Get.find<SplashController>().configModel!.customerWalletStatus == 1) {
+    if (getIt<SplashBloc>().state.configModel!.customerWalletStatus == 1) {
       _menuList.add(
         Menu(
           icon: Images.wallet,
@@ -153,7 +155,7 @@ class MenuDrawerState extends State<MenuDrawer>
       );
     }
 
-    if (Get.find<SplashController>().configModel!.loyaltyPointStatus == 1) {
+    if (getIt<SplashBloc>().state.configModel!.loyaltyPointStatus == 1) {
       _menuList.add(
         Menu(
           icon: Images.loyal,
@@ -165,7 +167,7 @@ class MenuDrawerState extends State<MenuDrawer>
         ),
       );
     }
-    if (Get.find<SplashController>().configModel!.refEarningStatus == 1) {
+    if (getIt<SplashBloc>().state.configModel!.refEarningStatus == 1) {
       _menuList.add(
         Menu(
           icon: Images.referCode,
@@ -177,7 +179,7 @@ class MenuDrawerState extends State<MenuDrawer>
         ),
       );
     }
-    if (Get.find<SplashController>().configModel!.toggleDmRegistration!) {
+    if (getIt<SplashBloc>().state.configModel!.toggleDmRegistration!) {
       _menuList.add(
         Menu(
           icon: Images.deliveryManJoin,
@@ -189,12 +191,12 @@ class MenuDrawerState extends State<MenuDrawer>
         ),
       );
     }
-    if (Get.find<SplashController>().configModel!.toggleStoreRegistration!) {
+    if (getIt<SplashBloc>().state.configModel!.toggleStoreRegistration!) {
       _menuList.add(
         Menu(
           icon: Images.restaurantJoin,
           title:
-              Get.find<SplashController>()
+              getIt<SplashBloc>().state
                   .configModel!
                   .moduleConfig!
                   .module!

@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/notification/domain/entities/app_notification.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -52,7 +54,7 @@ class NotificationDialogWidget extends StatelessWidget {
                         child: CustomImage(
                           isNotification: true,
                           image:
-                              '${Get.find<SplashController>().configModel!.baseUrls!.notificationImageUrl}/${notification.data!.image}',
+                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.notificationImageUrl}/${notification.data!.image}',
                           width: MediaQuery.of(context).size.width,
                           fit: BoxFit.contain,
                         ),

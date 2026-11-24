@@ -1,7 +1,9 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -228,7 +230,7 @@ class OrderCalculationWidget extends StatelessWidget {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                             .configModel!
                                             .additionalChargeName!,
                                         style: robotoRegular.copyWith(
@@ -270,9 +272,9 @@ class OrderCalculationWidget extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
 
-                            Get.find<SplashController>()
+                            (getIt<SplashBloc>()
                                     .getModuleConfig(order.moduleType)
-                                    .addOn!
+                                    ?.addOn ?? false)
                                 ? Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -294,9 +296,9 @@ class OrderCalculationWidget extends StatelessWidget {
                                   )
                                 : const SizedBox(),
 
-                            Get.find<SplashController>()
+                            (getIt<SplashBloc>()
                                     .getModuleConfig(order.moduleType)
-                                    .addOn!
+                                    ?.addOn ?? false)
                                 ? Divider(
                                     thickness: 1,
                                     color: Theme.of(
@@ -305,9 +307,9 @@ class OrderCalculationWidget extends StatelessWidget {
                                   )
                                 : const SizedBox(),
 
-                            Get.find<SplashController>()
+                            (getIt<SplashBloc>()
                                     .getModuleConfig(order.moduleType)
-                                    .addOn!
+                                    ?.addOn ?? false)
                                 ? Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -330,9 +332,9 @@ class OrderCalculationWidget extends StatelessWidget {
                                 : const SizedBox(),
                             SizedBox(
                               height:
-                                  Get.find<SplashController>()
+                                  (getIt<SplashBloc>()
                                       .getModuleConfig(order.moduleType)
-                                      .addOn!
+                                      ?.addOn ?? false)
                                   ? 10
                                   : 0,
                             ),
@@ -364,7 +366,7 @@ class OrderCalculationWidget extends StatelessWidget {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        Get.find<SplashController>()
+                                        getIt<SplashBloc>().state
                                             .configModel!
                                             .additionalChargeName!,
                                         style: robotoRegular.copyWith(

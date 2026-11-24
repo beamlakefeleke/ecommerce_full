@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -55,7 +57,7 @@ class MiddleSectionMultipleBannerViewWidget extends StatelessWidget {
                                 ),
                                 child: CustomImage(
                                   image:
-                                      '${Get.find<SplashController>().configModel!.baseUrls!.campaignImageUrl}'
+                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
                                       '/${campaignController.basicCampaignList![index].image}',
                                   fit: BoxFit.cover,
                                   height: 230,

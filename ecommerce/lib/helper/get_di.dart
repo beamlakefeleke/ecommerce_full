@@ -19,11 +19,6 @@ import 'package:ecommerce/features/auth/domain/services/deliveryman_registration
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:ecommerce/features/splash/domain/repositories/splash_repository.dart';
-import 'package:ecommerce/features/splash/domain/repositories/splash_repository_interface.dart';
-import 'package:ecommerce/features/splash/domain/services/splash_service.dart';
-import 'package:ecommerce/features/splash/domain/services/splash_service_interface.dart';
 import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/features/store/domain/repositories/store_repository.dart';
 import 'package:ecommerce/features/store/domain/repositories/store_repository_interface.dart';
@@ -78,12 +73,6 @@ Future<Map<String, Map<String, String>>> init() async {
       StoreRegistrationRepository(apiClient: Get.find());
   Get.lazyPut(() => storeRegistrationRepositoryInterface);
 
-  SplashRepositoryInterface splashRepositoryInterface = SplashRepository(
-    sharedPreferences: Get.find(),
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => splashRepositoryInterface);
-
   StoreRepositoryInterface storeRepositoryInterface = StoreRepository(
     apiClient: Get.find(),
     sharedPreferences: Get.find(),
@@ -118,11 +107,6 @@ Future<Map<String, Map<String, String>>> init() async {
       );
   Get.lazyPut(() => storeRegistrationServiceInterface);
 
-  SplashServiceInterface splashServiceInterface = SplashService(
-    splashRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => splashServiceInterface);
-
   StoreServiceInterface storeServiceInterface = StoreService(
     storeRepositoryInterface: Get.find(),
   );
@@ -142,7 +126,6 @@ Future<Map<String, Map<String, String>>> init() async {
 
   /// Controller
   Get.lazyPut(() => ThemeController(sharedPreferences: Get.find()));
-  Get.lazyPut(() => SplashController(splashServiceInterface: Get.find()));
   Get.lazyPut(
     () => DeliverymanRegistrationController(
       deliverymanRegistrationServiceInterface: Get.find(),

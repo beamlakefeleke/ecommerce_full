@@ -1,7 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/wallet/controllers/wallet_controller.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -19,7 +21,7 @@ class BonusBannerWidget extends StatelessWidget {
       builder: (walletController) {
         return walletController.fundBonusList != null &&
                 walletController.fundBonusList!.isNotEmpty &&
-                Get.find<SplashController>().configModel!.addFundStatus!
+                getIt<SplashBloc>().state.configModel!.addFundStatus!
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -87,7 +89,7 @@ class BonusBannerWidget extends StatelessWidget {
 
                                     Text(
                                       '${'add_fund_to_wallet_minimum'.tr} ${PriceConverter.convertPrice(walletController.fundBonusList![index].minimumAddAmount)} ${'and_enjoy'.tr} ${walletController.fundBonusList![index].bonusAmount} '
-                                      '${walletController.fundBonusList![index].bonusType == 'amount' ? Get.find<SplashController>().configModel!.currencySymbol : '%'} ${'bonus'.tr}',
+                                      '${walletController.fundBonusList![index].bonusType == 'amount' ? getIt<SplashBloc>().state.configModel!.currencySymbol : '%'} ${'bonus'.tr}',
                                       style: robotoRegular.copyWith(
                                         fontSize: Dimensions.fontSizeSmall,
                                         color: Theme.of(context).primaryColor,

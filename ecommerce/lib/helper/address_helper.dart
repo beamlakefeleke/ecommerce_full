@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -16,7 +18,7 @@ class AddressHelper {
       address.zoneIds,
       [],
       sharedPreferences.getString(AppConstants.languageCode),
-      Get.find<SplashController>().module?.id,
+      getIt<SplashBloc>().state.module?.id,
       address.latitude,
       address.longitude,
     );
