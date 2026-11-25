@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_dropdown.dart';
 
@@ -9,8 +10,8 @@ class ModuleViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<StoreRegistrationController>(
-      builder: (storeRegController) {
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
+      builder: (context, storeRegController) {
         List<int> moduleIndexList = [];
         List<DropdownItem<int>> moduleList = [];
         if (storeRegController.moduleList != null &&
@@ -50,7 +51,9 @@ class ModuleViewWidget extends StatelessWidget {
                 ),
                 child: CustomDropdown<int>(
                   onChange: (int? value, int index) {
-                    storeRegController.selectModuleIndex(value);
+                    context.read<RegistrationBloc>().add(
+                      RegistrationModuleIndexSelected(value),
+                    );
                   },
                   dropdownButtonStyle: DropdownButtonStyle(
                     height: 45,

@@ -11,7 +11,7 @@ import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/address/presentation/pages/address_screen.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/dashboard/widgets/bottom_nav_item_widget.dart';
 import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -68,7 +68,7 @@ class DashboardScreenState extends State<DashboardScreen> {
 
     if (_isLogin) {
       if (getIt<SplashBloc>().state.configModel!.loyaltyPointStatus == 1 &&
-          Get.find<AuthController>().getEarningPint().isNotEmpty &&
+          getIt<AuthRepository>().getEarningPoint().isNotEmpty &&
           !ResponsiveHelper.isDesktop(Get.context)) {
         Future.delayed(
           const Duration(seconds: 1),
@@ -119,7 +119,8 @@ class DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
-    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(
+      builder: (context, splashController) {
         return PopScope(
           canPop: Navigator.canPop(context),
           onPopInvoked: (value) async {
@@ -192,7 +193,8 @@ class DashboardScreenState extends State<DashboardScreen> {
                           ? const SizedBox()
                           : Align(
                               alignment: Alignment.bottomCenter,
-                              child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
+                              child: BlocBuilder<SplashBloc, SplashState>(
+                                builder: (context, splashController) {
                                   bool isParcel =
                                       splashController.module != null &&
                                       splashController

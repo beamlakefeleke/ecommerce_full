@@ -7,8 +7,6 @@ import 'package:ecommerce/features/taxi_booking/repo/car_selection_repo.dart';
 import 'package:ecommerce/features/taxi_booking/repo/rider_repo.dart';
 import 'package:ecommerce/api/api_client.dart';
 
-import 'package:ecommerce/features/auth/controllers/deliveryman_registration_controller.dart';
-import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
 import 'package:ecommerce/features/auth/domain/reposotories/auth_repository.dart';
 import 'package:ecommerce/features/auth/domain/reposotories/auth_repository_interface.dart';
 import 'package:ecommerce/features/auth/domain/reposotories/deliveryman_registration_repository.dart';
@@ -91,16 +89,9 @@ Future<Map<String, Map<String, String>>> init() async {
 
   /// Controller
   Get.lazyPut(() => ThemeController(sharedPreferences: Get.find()));
-  Get.lazyPut(
-    () => DeliverymanRegistrationController(
-      deliverymanRegistrationServiceInterface: Get.find(),
-    ),
-  );
-  Get.lazyPut(
-    () => StoreRegistrationController(
-      storeRegistrationServiceInterface: Get.find(),
-    ),
-  );
+  // DeliverymanRegistrationController + StoreRegistrationController moved to
+  // RegistrationBloc in injection.dart (_registerRegistration). The two
+  // service interfaces above stay GetX-registered and are bridged into get_it.
   // StoreController moved to StoreBloc in injection.dart
   // WalletController moved to WalletBloc in injection.dart
   Get.lazyPut(() => RiderController(riderRepo: Get.find()));

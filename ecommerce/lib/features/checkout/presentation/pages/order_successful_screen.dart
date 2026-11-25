@@ -4,7 +4,7 @@ import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -80,7 +80,8 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
             if (orderController.trackModel != null) {
               total =
                   ((orderController.trackModel!.orderAmount! / 100) *
-                  getIt<SplashBloc>().state
+                  getIt<SplashBloc>()
+                      .state
                       .configModel!
                       .loyaltyPointItemPurchasePoint!);
               success =
@@ -191,7 +192,8 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
 
                               ResponsiveHelper.isDesktop(context) &&
                                       (success &&
-                                          getIt<SplashBloc>().state
+                                          getIt<SplashBloc>()
+                                                  .state
                                                   .configModel!
                                                   .loyaltyPointStatus ==
                                               1 &&
@@ -249,7 +251,7 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
                                       : double.infinity,
                                   buttonText: 'back_to_home'.tr,
                                   onPressed: () {
-                                    Get.find<AuthController>().saveEarningPoint(
+                                    getIt<AuthRepository>().saveEarningPoint(
                                       total.toStringAsFixed(0),
                                     );
                                     Get.offAllNamed(

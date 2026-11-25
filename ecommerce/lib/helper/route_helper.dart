@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:meta_seo/meta_seo.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/loyalty/presentation/pages/loyalty_screen.dart';
 import 'package:ecommerce/features/refer_and_earn/presentation/pages/refer_and_earn_screen.dart';
 import 'package:ecommerce/core/di/injection.dart';
@@ -21,10 +21,10 @@ import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/features/address/presentation/pages/add_address_screen.dart';
 import 'package:ecommerce/features/address/presentation/pages/address_screen.dart';
-import 'package:ecommerce/features/auth/screens/delivery_man_registration_screen.dart';
-import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
-import 'package:ecommerce/features/auth/screens/sign_up_screen.dart';
-import 'package:ecommerce/features/auth/screens/store_registration_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/delivery_man_registration_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_up_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/store_registration_screen.dart';
 import 'package:ecommerce/features/category/presentation/pages/category_screen.dart';
 import 'package:ecommerce/features/location/presentation/pages/map_screen.dart';
 import 'package:ecommerce/features/store/presentation/pages/campaign_screen.dart';
@@ -654,7 +654,7 @@ class RouteHelper {
                   Get.parameters['contact_number'] != 'null'
               ? Get.parameters['contact_number']
               : AuthHelper.isGuestLoggedIn()
-              ? Get.find<AuthController>().getGuestNumber()
+              ? getIt<AuthRepository>().getGuestContactNumber()
               : null,
         ),
       ),

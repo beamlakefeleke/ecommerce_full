@@ -11,7 +11,7 @@ import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/location/presentation/widgets/permission_dialog_widget.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/custom_validator.dart';
@@ -76,8 +76,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   late LatLng _initialPosition;
   bool _otherSelect = false;
   String? _countryDialCode =
-      Get.find<AuthController>().getUserCountryCode().isNotEmpty
-      ? Get.find<AuthController>().getUserCountryCode()
+      getIt<AuthRepository>().getUserCountryCode().isNotEmpty
+      ? getIt<AuthRepository>().getUserCountryCode()
       : CountryCode.fromCountryCode(
           getIt<SplashBloc>().state.configModel!.country!,
         ).dialCode;

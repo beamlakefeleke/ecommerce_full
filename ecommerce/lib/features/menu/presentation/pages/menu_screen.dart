@@ -7,7 +7,7 @@ import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.da
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/price_converter.dart';

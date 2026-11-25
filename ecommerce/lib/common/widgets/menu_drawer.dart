@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/hover/on_hover.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
-import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -113,8 +115,7 @@ class MenuDrawerState extends State<MenuDrawer>
         ),
       );
     }
-    if (getIt<SplashBloc>().state.configModel!.cancellationPolicyStatus ==
-        1) {
+    if (getIt<SplashBloc>().state.configModel!.cancellationPolicyStatus == 1) {
       _menuList.add(
         Menu(
           icon: Images.cancellation,
@@ -196,7 +197,8 @@ class MenuDrawerState extends State<MenuDrawer>
         Menu(
           icon: Images.restaurantJoin,
           title:
-              getIt<SplashBloc>().state
+              getIt<SplashBloc>()
+                  .state
                   .configModel!
                   .moduleConfig!
                   .module!
@@ -223,11 +225,10 @@ class MenuDrawerState extends State<MenuDrawer>
                 description: 'are_you_sure_to_logout'.tr,
                 isLogOut: true,
                 onYesPressed: () {
-                  Get.find<ProfileController>().clearUserInfo();
-                  Get.find<AuthController>().clearSharedData();
-                  Get.find<CartController>().clearCartList();
-                  Get.find<AuthController>().socialLogout();
-                  Get.find<FavouriteController>().removeFavourite();
+                  getIt<ProfileBloc>().add(const ProfileCleared());
+                  getIt<AuthRepository>().clearSharedData();
+                  getIt<CartBloc>().add(const CartCleared());
+                  getIt<FavouriteBloc>().add(const FavouriteCleared());
                   if (ResponsiveHelper.isDesktop(Get.context)) {
                     Get.offAllNamed(RouteHelper.getInitialRoute());
                   } else {
@@ -240,7 +241,7 @@ class MenuDrawerState extends State<MenuDrawer>
               useSafeArea: false,
             );
           } else {
-            Get.find<FavouriteController>().removeFavourite();
+            getIt<FavouriteBloc>().add(const FavouriteCleared());
             if (ResponsiveHelper.isDesktop(context)) {
               Get.dialog(
                 const SignInScreen(exitFromApp: false, backFromThis: false),

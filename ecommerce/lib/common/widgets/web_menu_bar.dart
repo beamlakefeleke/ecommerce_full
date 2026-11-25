@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ecommerce/common/widgets/hover/text_hover.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
-import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -406,11 +406,11 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   const SizedBox(width: 20),
 
-                  GetBuilder<AuthController>(
-                    builder: (authController) {
+                  Builder(
+                    builder: (context) {
                       return InkWell(
                         onTap: () {
-                          if (authController.isLoggedIn()) {
+                          if (AuthHelper.isLoggedIn()) {
                             Get.toNamed(RouteHelper.getProfileRoute());
                           } else {
                             Get.dialog(
@@ -434,7 +434,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                           child: Row(
                             children: [
                               Icon(
-                                authController.isLoggedIn()
+                                AuthHelper.isLoggedIn()
                                     ? Icons.person_pin_rounded
                                     : Icons.lock_outline,
                                 size: 18,
@@ -446,7 +446,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                                 width: Dimensions.paddingSizeSmall,
                               ),
                               Text(
-                                authController.isLoggedIn()
+                                AuthHelper.isLoggedIn()
                                     ? 'profile'.tr
                                     : 'sign_in'.tr,
                                 style: robotoRegular.copyWith(

@@ -175,6 +175,9 @@ import 'package:ecommerce/features/auth/domain/usecases/register_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_login_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_register_usecase.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
+import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
 import 'package:ecommerce/features/store/data/datasources/store_remote_data_source.dart';
 import 'package:ecommerce/features/store/data/repositories/store_repository_impl.dart';
 import 'package:ecommerce/features/store/domain/repositories/store_repository.dart';
@@ -788,6 +791,16 @@ void _registerAuth() {
           getIt<SplashBloc>().state.configModel?.customerVerification ?? false,
     ),
   );
+
+  // Store + deliveryman registration bloc. The two registration *services*
+  // are still GetX-registered (in lib/helper/get_di.dart) because they wrap
+  // the legacy registration repositories; bridge them into get_it here.
+  getIt.registerFactory(
+    () => RegistrationBloc(
+      storeService: getx.Get.find<StoreRegistrationServiceInterface>(),
+      dmService: getx.Get.find<DeliverymanRegistrationServiceInterface>(),
+    ),
+  );
 }
 
 void _registerAddress() {
@@ -935,7 +948,10 @@ void _registerVerification() {
 
 void _registerWallet() {
   getIt.registerLazySingleton<WalletRemoteDataSource>(
-    () => WalletRemoteDataSourceImpl(apiClient: getIt(), sharedPreferences: getIt()),
+    () => WalletRemoteDataSourceImpl(
+      apiClient: getIt(),
+      sharedPreferences: getIt(),
+    ),
   );
   getIt.registerLazySingleton<WalletRepository>(
     () => WalletRepositoryImpl(remoteDataSource: getIt()),

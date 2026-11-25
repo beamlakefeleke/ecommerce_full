@@ -9,10 +9,10 @@ import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_state.dart';
-import 'package:ecommerce/features/auth/screens/sign_up_screen.dart';
-import 'package:ecommerce/features/auth/widgets/condition_check_box_widget.dart';
-import 'package:ecommerce/features/auth/widgets/guest_button_widget.dart';
-import 'package:ecommerce/features/auth/widgets/social_login_widget.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_up_screen.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/condition_check_box_widget.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/guest_button_widget.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/social_login_widget.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';

@@ -6,8 +6,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
-import 'package:ecommerce/features/auth/widgets/module_view_widget.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/module_view_widget.dart';
 import 'package:ecommerce/features/location/presentation/widgets/location_search_dialog_widget.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -44,8 +45,8 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<StoreRegistrationController>(
-      builder: (storeRegController) {
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
+      builder: (context, storeRegController) {
         List<int> zoneIndexList = [];
         List<DropdownItem<int>> zoneList = [];
         if (storeRegController.zoneList != null &&
@@ -78,7 +79,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
             ),
             child: SingleChildScrollView(
               child: ResponsiveHelper.isDesktop(context)
-                  ? webView(storeRegController, zoneList)
+                  ? webView(context, storeRegController, zoneList)
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -104,7 +105,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                           height: Dimensions.paddingSizeExtraLarge,
                         ),
 
-                        mapView(storeRegController),
+                        mapView(context, storeRegController),
                         SizedBox(
                           height: !widget.fromView
                               ? Dimensions.paddingSizeSmall
@@ -138,7 +139,8 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
   }
 
   Widget webView(
-    StoreRegistrationController storeRegController,
+    BuildContext context,
+    RegistrationState storeRegController,
     List<DropdownItem<int>> zoneList,
   ) {
     return Row(
@@ -205,7 +207,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: Dimensions.paddingSizeLarge),
-                    mapView(storeRegController),
+                    mapView(context, storeRegController),
                   ],
                 ),
               )
@@ -215,7 +217,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
   }
 
   Widget zoneSection(
-    StoreRegistrationController storeRegController,
+    RegistrationState storeRegController,
     List<DropdownItem<int>> zoneList,
   ) {
     return storeRegController.zoneIds != null
@@ -230,7 +232,9 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
             ),
             child: CustomDropdown<int>(
               onChange: (int? value, int index) {
-                storeRegController.setZoneIndex(value);
+                context.read<RegistrationBloc>().add(
+                  RegistrationZoneIndexSet(value),
+                );
               },
               dropdownButtonStyle: DropdownButtonStyle(
                 height: 45,
@@ -262,7 +266,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
         : Center(child: Text('service_not_available_in_this_area'.tr));
   }
 
-  Widget mapView(StoreRegistrationController storeRegController) {
+  Widget mapView(BuildContext context, RegistrationState storeRegController) {
     return storeRegController.zoneList!.isNotEmpty
         ? Center(
             child: Container(
@@ -290,14 +294,16 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                       initialCameraPosition: CameraPosition(
                         target: LatLng(
                           double.parse(
-                            getIt<SplashBloc>().state
+                            getIt<SplashBloc>()
+                                    .state
                                     .configModel!
                                     .defaultLocation!
                                     .lat ??
                                 '0',
                           ),
                           double.parse(
-                            getIt<SplashBloc>().state
+                            getIt<SplashBloc>()
+                                    .state
                                     .configModel!
                                     .defaultLocation!
                                     .lng ??
@@ -315,7 +321,9 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                       zoomGesturesEnabled: true,
                       polygons: _polygons,
                       onCameraIdle: () {
-                        storeRegController.setLocation(_cameraPosition.target);
+                        context.read<RegistrationBloc>().add(
+                          RegistrationLocationSet(_cameraPosition.target),
+                        );
                         if (!widget.fromView) {
                           widget.mapController!.moveCamera(
                             CameraUpdate.newCameraPosition(_cameraPosition),
@@ -364,8 +372,8 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                               widget.mapController!.moveCamera(
                                 CameraUpdate.newCameraPosition(_cameraPosition),
                               );
-                              storeRegController.setLocation(
-                                _cameraPosition.target,
+                              context.read<RegistrationBloc>().add(
+                                RegistrationLocationSet(_cameraPosition.target),
                               );
                             }
                           }

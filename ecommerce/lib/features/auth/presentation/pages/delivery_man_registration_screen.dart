@@ -4,15 +4,15 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
 import 'package:ecommerce/features/auth/domain/models/delivery_man_body.dart';
-import 'package:ecommerce/features/auth/controllers/deliveryman_registration_controller.dart';
-import 'package:ecommerce/features/auth/widgets/condition_check_box_widget.dart';
-import 'package:ecommerce/features/auth/widgets/pass_view_widget.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/condition_check_box_widget.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/pass_view_widget.dart';
 import 'package:ecommerce/helper/custom_validator.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -61,32 +61,26 @@ class _DeliveryManRegistrationScreenState
     _countryDialCode = CountryCode.fromCountryCode(
       getIt<SplashBloc>().state.configModel!.country!,
     ).dialCode;
-    if (Get.find<DeliverymanRegistrationController>().showPassView) {
-      Get.find<DeliverymanRegistrationController>().showHidePass();
-    }
-    Get.find<DeliverymanRegistrationController>().pickDmImage(false, true);
-    Get.find<DeliverymanRegistrationController>().dmStatusChange(
-      0.4,
-      isUpdate: false,
-    );
-    Get.find<StoreRegistrationController>().validPassCheck('', isUpdate: false);
-    Get.find<DeliverymanRegistrationController>().setIdentityTypeIndex(
-      Get.find<DeliverymanRegistrationController>().identityTypeList[0],
-      false,
-    );
-    Get.find<DeliverymanRegistrationController>().setDMTypeIndex(0, false);
-    Get.find<DeliverymanRegistrationController>().getZoneList();
-    Get.find<DeliverymanRegistrationController>().getVehicleList();
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          getIt<RegistrationBloc>()
+            ..add(const RegistrationInitialized('deliveryman')),
+      child: Builder(builder: (context) => _buildScreen(context)),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        if (Get.find<DeliverymanRegistrationController>().dmStatus != 0.4 &&
-            !didPop) {
-          Get.find<DeliverymanRegistrationController>().dmStatusChange(0.4);
+        if (context.read<RegistrationBloc>().state.status_ != 0.4 && !didPop) {
+          context.read<RegistrationBloc>().add(
+            const RegistrationStatusChanged(0.4),
+          );
         } else {
           Future.delayed(const Duration(milliseconds: 0), () => Get.back());
         }
@@ -96,8 +90,10 @@ class _DeliveryManRegistrationScreenState
         appBar: CustomAppBar(
           title: 'delivery_man_registration'.tr,
           onBackPressed: () {
-            if (Get.find<DeliverymanRegistrationController>().dmStatus != 0.4) {
-              Get.find<DeliverymanRegistrationController>().dmStatusChange(0.4);
+            if (context.read<RegistrationBloc>().state.status_ != 0.4) {
+              context.read<RegistrationBloc>().add(
+                const RegistrationStatusChanged(0.4),
+              );
             } else {
               Future.delayed(const Duration(milliseconds: 0), () => Get.back());
             }
@@ -105,8 +101,8 @@ class _DeliveryManRegistrationScreenState
         ),
         endDrawer: const MenuDrawer(),
         endDrawerEnableOpenDragGesture: false,
-        body: GetBuilder<DeliverymanRegistrationController>(
-          builder: (deliverymanRegistrationController) {
+        body: BlocBuilder<RegistrationBloc, RegistrationState>(
+          builder: (context, deliverymanRegistrationController) {
             List<int> zoneIndexList = [];
             List<DropdownItem<int>> zoneList = [];
             List<DropdownItem<int>> vehicleList = [];
@@ -115,7 +111,7 @@ class _DeliveryManRegistrationScreenState
 
             for (
               int index = 0;
-              index < deliverymanRegistrationController.dmTypeList.length;
+              index < RegistrationState.dmTypeList.length;
               index++
             ) {
               dmTypeList.add(
@@ -124,9 +120,7 @@ class _DeliveryManRegistrationScreenState
                   child: SizedBox(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        '${deliverymanRegistrationController.dmTypeList[index]?.tr}',
-                      ),
+                      child: Text('${RegistrationState.dmTypeList[index]?.tr}'),
                     ),
                   ),
                 ),
@@ -134,7 +128,7 @@ class _DeliveryManRegistrationScreenState
             }
             for (
               int index = 0;
-              index < deliverymanRegistrationController.identityTypeList.length;
+              index < RegistrationState.identityTypeList.length;
               index++
             ) {
               identityTypeList.add(
@@ -143,11 +137,7 @@ class _DeliveryManRegistrationScreenState
                   child: SizedBox(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        deliverymanRegistrationController
-                            .identityTypeList[index]
-                            .tr,
-                      ),
+                      child: Text(RegistrationState.identityTypeList[index].tr),
                     ),
                   ),
                 ),
@@ -234,7 +224,7 @@ class _DeliveryManRegistrationScreenState
                                 ).disabledColor,
                                 minHeight: 2,
                                 value:
-                                    deliverymanRegistrationController.dmStatus,
+                                    deliverymanRegistrationController.status_,
                               ),
                               // const SizedBox(height: Dimensions.paddingSizeExtraLarge),
                             ],
@@ -260,7 +250,7 @@ class _DeliveryManRegistrationScreenState
                                         Visibility(
                                           visible:
                                               deliverymanRegistrationController
-                                                  .dmStatus ==
+                                                  .status_ ==
                                               0.4,
                                           child: Column(
                                             children: [
@@ -277,12 +267,12 @@ class _DeliveryManRegistrationScreenState
                                                           ),
                                                       child:
                                                           deliverymanRegistrationController
-                                                                  .pickedImage !=
+                                                                  .pickedDmImage !=
                                                               null
                                                           ? GetPlatform.isWeb
                                                                 ? Image.network(
                                                                     deliverymanRegistrationController
-                                                                        .pickedImage!
+                                                                        .pickedDmImage!
                                                                         .path,
                                                                     width: 150,
                                                                     height: 120,
@@ -292,7 +282,7 @@ class _DeliveryManRegistrationScreenState
                                                                 : Image.file(
                                                                     File(
                                                                       deliverymanRegistrationController
-                                                                          .pickedImage!
+                                                                          .pickedDmImage!
                                                                           .path,
                                                                     ),
                                                                     width: 150,
@@ -347,12 +337,16 @@ class _DeliveryManRegistrationScreenState
                                                       top: 0,
                                                       left: 0,
                                                       child: InkWell(
-                                                        onTap: () =>
-                                                            deliverymanRegistrationController
-                                                                .pickDmImage(
-                                                                  true,
-                                                                  false,
-                                                                ),
+                                                        onTap: () => context
+                                                            .read<
+                                                              RegistrationBloc
+                                                            >()
+                                                            .add(
+                                                              const DmImagePicked(
+                                                                isPhoto: true,
+                                                                isRemove: false,
+                                                              ),
+                                                            ),
                                                         child: DottedBorder(
                                                           color: Theme.of(
                                                             context,
@@ -378,7 +372,7 @@ class _DeliveryManRegistrationScreenState
                                                           child: Visibility(
                                                             visible:
                                                                 deliverymanRegistrationController
-                                                                    .pickedImage !=
+                                                                    .pickedDmImage !=
                                                                 null,
                                                             child: Center(
                                                               child: Container(
@@ -414,15 +408,19 @@ class _DeliveryManRegistrationScreenState
                                                     ),
 
                                                     deliverymanRegistrationController
-                                                                .pickedImage !=
+                                                                .pickedDmImage !=
                                                             null
                                                         ? Positioned(
                                                             bottom: -10,
                                                             right: -10,
                                                             child: InkWell(
-                                                              onTap: () =>
-                                                                  deliverymanRegistrationController
-                                                                      .removeDmImage(),
+                                                              onTap: () => context
+                                                                  .read<
+                                                                    RegistrationBloc
+                                                                  >()
+                                                                  .add(
+                                                                    const DmImageRemoved(),
+                                                                  ),
                                                               child: Container(
                                                                 decoration: BoxDecoration(
                                                                   border: Border.all(
@@ -526,12 +524,13 @@ class _DeliveryManRegistrationScreenState
                                                 countryDialCode:
                                                     _countryDialCode != null
                                                     ? CountryCode.fromCountryCode(
-                                                        getIt<SplashBloc>().state.configModel!
+                                                        getIt<SplashBloc>()
+                                                            .state
+                                                            .configModel!
                                                             .country!,
                                                       ).code
-                                                    : Get.find<
-                                                            LocalizationController
-                                                          >()
+                                                    : getIt<LanguageBloc>()
+                                                          .state
                                                           .locale
                                                           .countryCode,
                                               ),
@@ -570,16 +569,33 @@ class _DeliveryManRegistrationScreenState
                                                       value.isNotEmpty) {
                                                     if (!deliverymanRegistrationController
                                                         .showPassView) {
-                                                      deliverymanRegistrationController
-                                                          .showHidePass();
+                                                      context
+                                                          .read<
+                                                            RegistrationBloc
+                                                          >()
+                                                          .add(
+                                                            const RegistrationPassToggled(),
+                                                          );
                                                     }
-                                                    deliverymanRegistrationController
-                                                        .validPassCheck(value);
+                                                    context
+                                                        .read<
+                                                          RegistrationBloc
+                                                        >()
+                                                        .add(
+                                                          RegistrationPassValidated(
+                                                            value,
+                                                          ),
+                                                        );
                                                   } else {
                                                     if (deliverymanRegistrationController
                                                         .showPassView) {
-                                                      deliverymanRegistrationController
-                                                          .showHidePass();
+                                                      context
+                                                          .read<
+                                                            RegistrationBloc
+                                                          >()
+                                                          .add(
+                                                            const RegistrationPassToggled(),
+                                                          );
                                                     }
                                                   }
                                                 },
@@ -618,7 +634,7 @@ class _DeliveryManRegistrationScreenState
                                         Visibility(
                                           visible:
                                               deliverymanRegistrationController
-                                                  .dmStatus !=
+                                                  .status_ !=
                                               0.4,
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -651,10 +667,14 @@ class _DeliveryManRegistrationScreenState
                                                               int? value,
                                                               int index,
                                                             ) {
-                                                              deliverymanRegistrationController
-                                                                  .setDMTypeIndex(
-                                                                    index,
-                                                                    true,
+                                                              context
+                                                                  .read<
+                                                                    RegistrationBloc
+                                                                  >()
+                                                                  .add(
+                                                                    DmTypeIndexSet(
+                                                                      index,
+                                                                    ),
                                                                   );
                                                             },
                                                         dropdownButtonStyle: DropdownButtonStyle(
@@ -725,9 +745,14 @@ class _DeliveryManRegistrationScreenState
                                                                     int? value,
                                                                     int index,
                                                                   ) {
-                                                                    deliverymanRegistrationController
-                                                                        .setZoneIndex(
-                                                                          value,
+                                                                    context
+                                                                        .read<
+                                                                          RegistrationBloc
+                                                                        >()
+                                                                        .add(
+                                                                          RegistrationZoneIndexSet(
+                                                                            value,
+                                                                          ),
                                                                         );
                                                                   },
                                                               dropdownButtonStyle: DropdownButtonStyle(
@@ -806,10 +831,14 @@ class _DeliveryManRegistrationScreenState
                                                               int? value,
                                                               int index,
                                                             ) {
-                                                              deliverymanRegistrationController
-                                                                  .setVehicleIndex(
-                                                                    value,
-                                                                    true,
+                                                              context
+                                                                  .read<
+                                                                    RegistrationBloc
+                                                                  >()
+                                                                  .add(
+                                                                    DmVehicleIndexSet(
+                                                                      value,
+                                                                    ),
                                                                   );
                                                             },
                                                         dropdownButtonStyle: DropdownButtonStyle(
@@ -870,11 +899,15 @@ class _DeliveryManRegistrationScreenState
                                                 ),
                                                 child: CustomDropdown<int>(
                                                   onChange: (int? value, int index) {
-                                                    deliverymanRegistrationController
-                                                        .setIdentityTypeIndex(
-                                                          deliverymanRegistrationController
-                                                              .identityTypeList[index],
-                                                          true,
+                                                    context
+                                                        .read<
+                                                          RegistrationBloc
+                                                        >()
+                                                        .add(
+                                                          DmIdentityTypeIndexSet(
+                                                            RegistrationState
+                                                                .identityTypeList[index],
+                                                          ),
                                                         );
                                                   },
                                                   dropdownButtonStyle: DropdownButtonStyle(
@@ -905,7 +938,7 @@ class _DeliveryManRegistrationScreenState
                                                   ),
                                                   items: identityTypeList,
                                                   child: Text(
-                                                    deliverymanRegistrationController
+                                                    RegistrationState
                                                         .identityTypeList[0]
                                                         .tr,
                                                   ),
@@ -962,12 +995,16 @@ class _DeliveryManRegistrationScreenState
                                                           .pickedIdentities
                                                           .length) {
                                                     return InkWell(
-                                                      onTap: () =>
-                                                          deliverymanRegistrationController
-                                                              .pickDmImage(
-                                                                false,
-                                                                false,
-                                                              ),
+                                                      onTap: () => context
+                                                          .read<
+                                                            RegistrationBloc
+                                                          >()
+                                                          .add(
+                                                            const DmImagePicked(
+                                                              isPhoto: false,
+                                                              isRemove: false,
+                                                            ),
+                                                          ),
                                                       child: DottedBorder(
                                                         color: Theme.of(
                                                           context,
@@ -1082,11 +1119,15 @@ class _DeliveryManRegistrationScreenState
                                                             right: 0,
                                                             top: 0,
                                                             child: InkWell(
-                                                              onTap: () =>
-                                                                  deliverymanRegistrationController
-                                                                      .removeIdentityImage(
-                                                                        index,
-                                                                      ),
+                                                              onTap: () => context
+                                                                  .read<
+                                                                    RegistrationBloc
+                                                                  >()
+                                                                  .add(
+                                                                    DmIdentityImageRemoved(
+                                                                      index,
+                                                                    ),
+                                                                  ),
                                                               child: const Padding(
                                                                 padding:
                                                                     EdgeInsets.all(
@@ -1154,7 +1195,7 @@ class _DeliveryManRegistrationScreenState
   //
 
   Widget webView(
-    DeliverymanRegistrationController deliverymanRegistrationController,
+    RegistrationState deliverymanRegistrationController,
     List<DropdownItem<int>> zoneList,
     List<DropdownItem<int>> typeList,
     List<DropdownItem<int>> vehicleList,
@@ -1218,12 +1259,12 @@ class _DeliveryManRegistrationScreenState
                                   ),
                                   child:
                                       deliverymanRegistrationController
-                                              .pickedImage !=
+                                              .pickedDmImage !=
                                           null
                                       ? GetPlatform.isWeb
                                             ? Image.network(
                                                 deliverymanRegistrationController
-                                                    .pickedImage!
+                                                    .pickedDmImage!
                                                     .path,
                                                 width: 180,
                                                 height: 180,
@@ -1232,7 +1273,7 @@ class _DeliveryManRegistrationScreenState
                                             : Image.file(
                                                 File(
                                                   deliverymanRegistrationController
-                                                      .pickedImage!
+                                                      .pickedDmImage!
                                                       .path,
                                                 ),
                                                 width: 180,
@@ -1279,8 +1320,12 @@ class _DeliveryManRegistrationScreenState
                                   left: 0,
                                   child: InkWell(
                                     onTap: () =>
-                                        deliverymanRegistrationController
-                                            .pickDmImage(true, false),
+                                        context.read<RegistrationBloc>().add(
+                                          const DmImagePicked(
+                                            isPhoto: true,
+                                            isRemove: false,
+                                          ),
+                                        ),
                                     child: DottedBorder(
                                       color: Theme.of(context).primaryColor,
                                       strokeWidth: 1,
@@ -1294,7 +1339,7 @@ class _DeliveryManRegistrationScreenState
                                       child: Visibility(
                                         visible:
                                             deliverymanRegistrationController
-                                                .pickedImage !=
+                                                .pickedDmImage !=
                                             null,
                                         child: Center(
                                           child: Container(
@@ -1376,11 +1421,13 @@ class _DeliveryManRegistrationScreenState
                                   },
                                   countryDialCode: _countryDialCode != null
                                       ? CountryCode.fromCountryCode(
-                                          getIt<SplashBloc>().state
+                                          getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .country!,
                                         ).code
-                                      : Get.find<LocalizationController>()
+                                      : getIt<LanguageBloc>()
+                                            .state
                                             .locale
                                             .countryCode,
                                 ),
@@ -1427,16 +1474,19 @@ class _DeliveryManRegistrationScreenState
                                         if (value != null && value.isNotEmpty) {
                                           if (!deliverymanRegistrationController
                                               .showPassView) {
-                                            deliverymanRegistrationController
-                                                .showHidePass();
+                                            context.read<RegistrationBloc>().add(
+                                              const RegistrationPassToggled(),
+                                            );
                                           }
-                                          deliverymanRegistrationController
-                                              .validPassCheck(value);
+                                          context.read<RegistrationBloc>().add(
+                                            RegistrationPassValidated(value),
+                                          );
                                         } else {
                                           if (deliverymanRegistrationController
                                               .showPassView) {
-                                            deliverymanRegistrationController
-                                                .showHidePass();
+                                            context.read<RegistrationBloc>().add(
+                                              const RegistrationPassToggled(),
+                                            );
                                           }
                                         }
                                       },
@@ -1539,8 +1589,9 @@ class _DeliveryManRegistrationScreenState
                                       ),
                                       child: CustomDropdown<int>(
                                         onChange: (int? value, int index) {
-                                          deliverymanRegistrationController
-                                              .setDMTypeIndex(index, true);
+                                          context.read<RegistrationBloc>().add(
+                                            DmTypeIndexSet(index),
+                                          );
                                         },
                                         dropdownButtonStyle:
                                             DropdownButtonStyle(
@@ -1567,7 +1618,7 @@ class _DeliveryManRegistrationScreenState
                                         ),
                                         items: typeList,
                                         child: Text(
-                                          '${deliverymanRegistrationController.dmTypeList[0]}',
+                                          '${RegistrationState.dmTypeList[0]}',
                                         ),
                                       ),
                                     ),
@@ -1612,8 +1663,13 @@ class _DeliveryManRegistrationScreenState
                                             ),
                                             child: CustomDropdown<int>(
                                               onChange: (int? value, int index) {
-                                                deliverymanRegistrationController
-                                                    .setZoneIndex(value);
+                                                context
+                                                    .read<RegistrationBloc>()
+                                                    .add(
+                                                      RegistrationZoneIndexSet(
+                                                        value,
+                                                      ),
+                                                    );
                                               },
                                               dropdownButtonStyle: DropdownButtonStyle(
                                                 height: 45,
@@ -1705,13 +1761,18 @@ class _DeliveryManRegistrationScreenState
                                               ),
                                             ),
                                             child: CustomDropdown<int>(
-                                              onChange: (int? value, int index) {
-                                                deliverymanRegistrationController
-                                                    .setVehicleIndex(
-                                                      value,
-                                                      true,
-                                                    );
-                                              },
+                                              onChange:
+                                                  (int? value, int index) {
+                                                    context
+                                                        .read<
+                                                          RegistrationBloc
+                                                        >()
+                                                        .add(
+                                                          DmVehicleIndexSet(
+                                                            value,
+                                                          ),
+                                                        );
+                                                  },
                                               dropdownButtonStyle: DropdownButtonStyle(
                                                 height: 45,
                                                 padding:
@@ -1789,12 +1850,12 @@ class _DeliveryManRegistrationScreenState
                                       ),
                                       child: CustomDropdown<int>(
                                         onChange: (int? value, int index) {
-                                          deliverymanRegistrationController
-                                              .setIdentityTypeIndex(
-                                                deliverymanRegistrationController
-                                                    .identityTypeList[index],
-                                                true,
-                                              );
+                                          context.read<RegistrationBloc>().add(
+                                            DmIdentityTypeIndexSet(
+                                              RegistrationState
+                                                  .identityTypeList[index],
+                                            ),
+                                          );
                                         },
                                         dropdownButtonStyle:
                                             DropdownButtonStyle(
@@ -1821,7 +1882,7 @@ class _DeliveryManRegistrationScreenState
                                         ),
                                         items: identityTypeList,
                                         child: Text(
-                                          deliverymanRegistrationController
+                                          RegistrationState
                                               .identityTypeList[0]
                                               .tr,
                                         ),
@@ -1883,8 +1944,12 @@ class _DeliveryManRegistrationScreenState
                                         .length) {
                                   return InkWell(
                                     onTap: () =>
-                                        deliverymanRegistrationController
-                                            .pickDmImage(false, false),
+                                        context.read<RegistrationBloc>().add(
+                                          const DmImagePicked(
+                                            isPhoto: false,
+                                            isRemove: false,
+                                          ),
+                                        ),
                                     child: DottedBorder(
                                       color: Theme.of(context).primaryColor,
                                       strokeWidth: 1,
@@ -1962,9 +2027,11 @@ class _DeliveryManRegistrationScreenState
                                         right: 0,
                                         top: 0,
                                         child: InkWell(
-                                          onTap: () =>
-                                              deliverymanRegistrationController
-                                                  .removeIdentityImage(index),
+                                          onTap: () => context
+                                              .read<RegistrationBloc>()
+                                              .add(
+                                                DmIdentityImageRemoved(index),
+                                              ),
                                           child: const Padding(
                                             padding: EdgeInsets.all(
                                               Dimensions.paddingSizeSmall,
@@ -2039,15 +2106,17 @@ class _DeliveryManRegistrationScreenState
   }
 
   Widget buttonView() {
-    return GetBuilder<DeliverymanRegistrationController>(
-      builder: (deliverymanRegistrationController) {
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
+      builder: (context, deliverymanRegistrationController) {
         return CustomButton(
           isBold: ResponsiveHelper.isDesktop(context) ? false : true,
           radius: ResponsiveHelper.isDesktop(context)
               ? Dimensions.radiusSmall
               : Dimensions.radiusDefault,
-          isLoading: deliverymanRegistrationController.isLoading,
-          buttonText: deliverymanRegistrationController.dmStatus == 0.4
+          isLoading:
+              (deliverymanRegistrationController.status ==
+              RegistrationStatus.loading),
+          buttonText: deliverymanRegistrationController.status_ == 0.4
               ? 'next'.tr
               : 'submit'.tr,
           margin: EdgeInsets.all(
@@ -2059,7 +2128,7 @@ class _DeliveryManRegistrationScreenState
           onPressed: !deliverymanRegistrationController.acceptTerms
               ? null
               : () async {
-                  if (deliverymanRegistrationController.dmStatus == 0.4 &&
+                  if (deliverymanRegistrationController.status_ == 0.4 &&
                       !ResponsiveHelper.isDesktop(context)) {
                     String fName = _fNameController.text.trim();
                     String lName = _lNameController.text.trim();
@@ -2077,7 +2146,8 @@ class _DeliveryManRegistrationScreenState
                       showCustomSnackBar('enter_delivery_man_first_name'.tr);
                     } else if (lName.isEmpty) {
                       showCustomSnackBar('enter_delivery_man_last_name'.tr);
-                    } else if (deliverymanRegistrationController.pickedImage ==
+                    } else if (deliverymanRegistrationController
+                            .pickedDmImage ==
                         null) {
                       showCustomSnackBar('pick_delivery_man_profile_image'.tr);
                     } else if (email.isEmpty) {
@@ -2102,10 +2172,12 @@ class _DeliveryManRegistrationScreenState
                         !deliverymanRegistrationController.lengthCheck) {
                       showCustomSnackBar('provide_valid_password'.tr);
                     } else {
-                      deliverymanRegistrationController.dmStatusChange(0.8);
+                      context.read<RegistrationBloc>().add(
+                        const RegistrationStatusChanged(0.8),
+                      );
                     }
                   } else {
-                    _addDeliveryMan(deliverymanRegistrationController);
+                    _addDeliveryMan(context, deliverymanRegistrationController);
                   }
                 },
         );
@@ -2114,7 +2186,8 @@ class _DeliveryManRegistrationScreenState
   }
 
   void _addDeliveryMan(
-    DeliverymanRegistrationController deliverymanRegiController,
+    BuildContext context,
+    RegistrationState deliverymanRegiController,
   ) async {
     String fName = _fNameController.text.trim();
     String lName = _lNameController.text.trim();
@@ -2136,7 +2209,7 @@ class _DeliveryManRegistrationScreenState
       } else if (lName.isEmpty) {
         showCustomSnackBar('enter_delivery_man_last_name'.tr);
         return;
-      } else if (deliverymanRegiController.pickedImage == null) {
+      } else if (deliverymanRegiController.pickedDmImage == null) {
         showCustomSnackBar('pick_delivery_man_profile_image'.tr);
         return;
       } else if (email.isEmpty) {
@@ -2166,7 +2239,7 @@ class _DeliveryManRegistrationScreenState
 
     if (identityNumber.isEmpty) {
       showCustomSnackBar('enter_delivery_man_identity_number'.tr);
-    } else if (deliverymanRegiController.pickedImage == null) {
+    } else if (deliverymanRegiController.pickedDmImage == null) {
       showCustomSnackBar('upload_delivery_man_image'.tr);
     } else if (deliverymanRegiController.vehicleIndex! == -1) {
       showCustomSnackBar('please_select_vehicle_for_the_deliveryman'.tr);
@@ -2175,25 +2248,27 @@ class _DeliveryManRegistrationScreenState
     } else if (deliverymanRegiController.dmTypeIndex == 0) {
       showCustomSnackBar('please_select_deliveryman_type'.tr);
     } else {
-      deliverymanRegiController.registerDeliveryMan(
-        DeliveryManBody(
-          fName: fName,
-          lName: lName,
-          password: password,
-          phone: numberWithCountryCode,
-          email: email,
-          identityNumber: identityNumber,
-          identityType: deliverymanRegiController
-              .identityTypeList[deliverymanRegiController.identityTypeIndex],
-          earning: deliverymanRegiController.dmTypeIndex == 1 ? '1' : '0',
-          zoneId: deliverymanRegiController
-              .zoneList![deliverymanRegiController.selectedZoneIndex!]
-              .id
-              .toString(),
-          vehicleId: deliverymanRegiController
-              .vehicles![deliverymanRegiController.vehicleIndex!]
-              .id
-              .toString(),
+      context.read<RegistrationBloc>().add(
+        DeliveryManRegistrationSubmitted(
+          DeliveryManBody(
+            fName: fName,
+            lName: lName,
+            password: password,
+            phone: numberWithCountryCode,
+            email: email,
+            identityNumber: identityNumber,
+            identityType: RegistrationState
+                .identityTypeList[deliverymanRegiController.identityTypeIndex],
+            earning: deliverymanRegiController.dmTypeIndex == 1 ? '1' : '0',
+            zoneId: deliverymanRegiController
+                .zoneList![deliverymanRegiController.selectedZoneIndex!]
+                .id
+                .toString(),
+            vehicleId: deliverymanRegiController
+                .vehicles![deliverymanRegiController.vehicleIndex!]
+                .id
+                .toString(),
+          ),
         ),
       );
     }

@@ -1,4 +1,4 @@
-import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';

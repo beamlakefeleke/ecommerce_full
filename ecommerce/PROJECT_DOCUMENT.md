@@ -134,17 +134,32 @@ verification, wallet.
 Order: alphabetical, one feature at a time. All features migrated. Remaining work: `taxi_booking` (skipped per user instruction), `support` (not yet started), and the home feature's GetX-controller references that resolve as each owning feature migrates.
 
 ### auth — transitional notes (resolve on the relevant feature's turn)
-- The legacy `auth/domain/reposotories/auth_repository(_interface).dart` and the old
-  `auth/domain/models/{signup_body_model,social_log_in_body}.dart` are KEPT for now
-  because the still-GetX `deliveryman/store registration` features
-  (and `route_helper`) consume them via `get_di`. Delete them when those migrate.
-  (`verification` has been migrated and no longer depends on these.)
-- `deliveryman_registration` and `store_registration` are separate GetX controllers under
-  `auth/` — NOT migrated yet. Treat them as their own units later.
-- Expected cross-feature breakage from deleting `AuthController` (fix on each turn):
-  splash, profile, parcel, order, menu, location, dashboard, route_helper,
-  web_landing_page, pick_map_screen still reference `Get.find<AuthController>()`.
-  (verification, sign_in, sign_up, social_login, guest_button have been retargeted.)
+- The legacy `auth/domain/reposotories/auth_repository(_interface).dart` is KEPT because
+  the `DeliverymanRegistrationService` still declares an `AuthRepositoryInterface`
+  constructor dependency (dead field, never used); drop it when that service is cleaned
+  up. The `auth/domain/models/{delivery_man_body,delivery_man_vehicles_model,store_body_model}`
+  are KEPT — consumed by the registration services/bloc. (`signup_body_model`/
+  `social_log_in_body` canonical copies now live in `data/models/`; the `domain/models/`
+  duplicates are only read by the legacy GetX auth repo.)
+- **`deliveryman_registration` + `store_registration` DONE** — single screen-scoped
+  `RegistrationBloc` (factory; provided per-screen via `BlocProvider` seeded with
+  `RegistrationInitialized('store'|'deliveryman')`) handles BOTH flows. One `RegistrationState`
+  holds zone/module/location working state + stepper status + password-check flags +
+  store images/time + deliveryman image/identities/vehicles/terms. The bloc wraps the two
+  still-GetX registration *services* (bridged from GetX into get_it in `injection.dart`
+  `_registerRegistration`), which in turn wrap the registration repositories. All
+  `GetBuilder<Deliveryman/StoreRegistrationController>` → `BlocBuilder<RegistrationBloc>`;
+  method calls → events; `Get.find<LocalizationController>()` → `getIt<LanguageBloc>()`.
+  Screens moved to `presentation/pages`; the 5 shared widgets (`condition_check_box`,
+  `custom_time_picker`, `module_view`, `pass_view`, `select_location_view`) retargeted.
+  Legacy `DeliverymanRegistrationController`/`StoreRegistrationController` deleted +
+  removed from get_di; `route_helper` repointed.
+- Cross-feature `AuthController` consumers retargeted to `getIt<AuthRepository>()`:
+  `api_checker`, `menu_drawer`, `web_menu_bar` (via `AuthHelper.isLoggedIn`),
+  `add_address_screen`, `congratulation_dialogue`, `order_successful_screen`,
+  `payment_failed_dialog`, `dashboard_screen`, `route_helper`, plus `FavouriteController`/
+  `CartController`/`ProfileController` logout calls → the respective blocs.
+  (verification, sign_in, sign_up, social_login, guest_button already retargeted.)
 - Pre-existing (NOT migration-caused) errors remain in `social_login_widget.dart` from
   google_sign_in 7.x / flutter_facebook_auth 7.x API changes (`GoogleSignIn()` ctor,
   `signIn()`, `AccessToken.token/userId`). These belong to a dependency-upgrade task.

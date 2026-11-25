@@ -5,17 +5,19 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/domain/models/store_body_model.dart';
 import 'package:ecommerce/common/models/translation.dart';
 import 'package:ecommerce/common/models/config_model.dart';
-import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
-import 'package:ecommerce/features/auth/widgets/custom_time_picker_widget.dart';
-import 'package:ecommerce/features/auth/widgets/pass_view_widget.dart';
-import 'package:ecommerce/features/auth/widgets/select_location_view_widget.dart';
+
+import 'package:ecommerce/features/auth/presentation/widgets/custom_time_picker_widget.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/pass_view_widget.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/select_location_view_widget.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -84,33 +86,29 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
       _nameFocus.add(FocusNode());
       _addressFocus.add(FocusNode());
     }
-    Get.find<StoreRegistrationController>().storeStatusChange(
-      0.4,
-      isUpdate: false,
-    );
-    Get.find<StoreRegistrationController>().getZoneList();
-    Get.find<StoreRegistrationController>().selectModuleIndex(
-      -1,
-      canUpdate: false,
-    );
-
     for (var language in _languageList) {
       _tabs.add(Tab(text: language.value));
-    }
-
-    if (Get.find<StoreRegistrationController>().showPassView) {
-      Get.find<StoreRegistrationController>().showHidePass(isUpdate: false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          getIt<RegistrationBloc>()
+            ..add(const RegistrationInitialized('store')),
+      child: Builder(builder: (context) => _buildScreen(context)),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        if (Get.find<StoreRegistrationController>().storeStatus != 0.4 &&
-            !didPop) {
-          Get.find<StoreRegistrationController>().storeStatusChange(0.4);
+        if (context.read<RegistrationBloc>().state.status_ != 0.4 && !didPop) {
+          context.read<RegistrationBloc>().add(
+            const RegistrationStatusChanged(0.4),
+          );
         } else {
           Future.delayed(const Duration(milliseconds: 0), () => Get.back());
         }
@@ -119,8 +117,10 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
         appBar: CustomAppBar(
           title: 'store_registration'.tr,
           onBackPressed: () {
-            if (Get.find<StoreRegistrationController>().storeStatus != 0.4) {
-              Get.find<StoreRegistrationController>().storeStatusChange(0.4);
+            if (context.read<RegistrationBloc>().state.status_ != 0.4) {
+              context.read<RegistrationBloc>().add(
+                const RegistrationStatusChanged(0.4),
+              );
             } else {
               Future.delayed(const Duration(milliseconds: 0), () => Get.back());
             }
@@ -129,11 +129,11 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
         endDrawer: const MenuDrawer(),
         endDrawerEnableOpenDragGesture: false,
         body: SafeArea(
-          child: GetBuilder<StoreRegistrationController>(
-            builder: (storeRegController) {
-              if (storeRegController.storeAddress != null &&
+          child: BlocBuilder<RegistrationBloc, RegistrationState>(
+            builder: (context, storeRegController) {
+              if (storeRegController.address != null &&
                   _languageList!.isNotEmpty) {
-                _addressController[0].text = storeRegController.storeAddress
+                _addressController[0].text = storeRegController.address
                     .toString();
               }
 
@@ -152,7 +152,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                storeRegController.storeStatus == 0.4
+                                storeRegController.status_ == 0.4
                                     ? 'provide_store_information_to_proceed_next'
                                           .tr
                                     : 'provide_owner_information_to_confirm'.tr,
@@ -171,7 +171,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                   context,
                                 ).disabledColor,
                                 minHeight: 2,
-                                value: storeRegController.storeStatus,
+                                value: storeRegController.status_,
                               ),
                             ],
                           ),
@@ -189,14 +189,14 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                         child: SizedBox(
                           width: Dimensions.webMaxWidth,
                           child: ResponsiveHelper.isDesktop(context)
-                              ? webView(storeRegController)
+                              ? webView(context, storeRegController)
                               : Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Visibility(
                                       visible:
-                                          storeRegController.storeStatus == 0.4,
+                                          storeRegController.status_ == 0.4,
                                       child: Column(
                                         children: [
                                           Row(
@@ -292,12 +292,17 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                         top: 0,
                                                         left: 0,
                                                         child: InkWell(
-                                                          onTap: () =>
-                                                              storeRegController
-                                                                  .pickImage(
-                                                                    true,
-                                                                    false,
-                                                                  ),
+                                                          onTap: () => context
+                                                              .read<
+                                                                RegistrationBloc
+                                                              >()
+                                                              .add(
+                                                                const RegistrationImagePicked(
+                                                                  isLogo: true,
+                                                                  isRemove:
+                                                                      false,
+                                                                ),
+                                                              ),
                                                           child: DottedBorder(
                                                             color: Theme.of(
                                                               context,
@@ -450,12 +455,16 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                       top: 0,
                                                       left: 0,
                                                       child: InkWell(
-                                                        onTap: () =>
-                                                            storeRegController
-                                                                .pickImage(
-                                                                  false,
-                                                                  false,
-                                                                ),
+                                                        onTap: () => context
+                                                            .read<
+                                                              RegistrationBloc
+                                                            >()
+                                                            .add(
+                                                              const RegistrationImagePicked(
+                                                                isLogo: false,
+                                                                isRemove: false,
+                                                              ),
+                                                            ),
                                                         child: DottedBorder(
                                                           color: Theme.of(
                                                             context,
@@ -663,7 +672,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
 
                                     Visibility(
                                       visible:
-                                          storeRegController.storeStatus != 0.4,
+                                          storeRegController.status_ != 0.4,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
@@ -729,13 +738,13 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                             countryDialCode:
                                                 _countryDialCode != null
                                                 ? CountryCode.fromCountryCode(
-                                                    getIt<SplashBloc>().state
+                                                    getIt<SplashBloc>()
+                                                        .state
                                                         .configModel!
                                                         .country!,
                                                   ).code
-                                                : Get.find<
-                                                        LocalizationController
-                                                      >()
+                                                : getIt<LanguageBloc>()
+                                                      .state
                                                       .locale
                                                       .countryCode,
                                           ),
@@ -770,16 +779,27 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                   value.isNotEmpty) {
                                                 if (!storeRegController
                                                     .showPassView) {
-                                                  storeRegController
-                                                      .showHidePass();
+                                                  context
+                                                      .read<RegistrationBloc>()
+                                                      .add(
+                                                        const RegistrationPassToggled(),
+                                                      );
                                                 }
-                                                storeRegController
-                                                    .validPassCheck(value);
+                                                context
+                                                    .read<RegistrationBloc>()
+                                                    .add(
+                                                      RegistrationPassValidated(
+                                                        value,
+                                                      ),
+                                                    );
                                               } else {
                                                 if (storeRegController
                                                     .showPassView) {
-                                                  storeRegController
-                                                      .showHidePass();
+                                                  context
+                                                      .read<RegistrationBloc>()
+                                                      .add(
+                                                        const RegistrationPassToggled(),
+                                                      );
                                                 }
                                               }
                                             },
@@ -829,7 +849,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
     );
   }
 
-  Widget webView(StoreRegistrationController storeRegController) {
+  Widget webView(BuildContext context, RegistrationState storeRegController) {
     return Column(
       children: [
         Container(
@@ -1164,8 +1184,14 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                       top: 0,
                                       left: 0,
                                       child: InkWell(
-                                        onTap: () => storeRegController
-                                            .pickImage(true, false),
+                                        onTap: () => context
+                                            .read<RegistrationBloc>()
+                                            .add(
+                                              const RegistrationImagePicked(
+                                                isLogo: true,
+                                                isRemove: false,
+                                              ),
+                                            ),
                                         child: DottedBorder(
                                           color: Theme.of(context).primaryColor,
                                           strokeWidth: 1,
@@ -1306,10 +1332,13 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                     top: 0,
                                     left: 0,
                                     child: InkWell(
-                                      onTap: () => storeRegController.pickImage(
-                                        false,
-                                        false,
-                                      ),
+                                      onTap: () =>
+                                          context.read<RegistrationBloc>().add(
+                                            const RegistrationImagePicked(
+                                              isLogo: false,
+                                              isRemove: false,
+                                            ),
+                                          ),
                                       child: DottedBorder(
                                         color: Theme.of(context).primaryColor,
                                         strokeWidth: 1,
@@ -1430,13 +1459,9 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                       },
                       countryDialCode: _countryDialCode != null
                           ? CountryCode.fromCountryCode(
-                              getIt<SplashBloc>().state
-                                  .configModel!
-                                  .country!,
+                              getIt<SplashBloc>().state.configModel!.country!,
                             ).code
-                          : Get.find<LocalizationController>()
-                                .locale
-                                .countryCode,
+                          : getIt<LanguageBloc>().state.locale.countryCode,
                     ),
                   ),
                 ],
@@ -1502,12 +1527,18 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                           onChanged: (value) {
                             if (value != null && value.isNotEmpty) {
                               if (!storeRegController.showPassView) {
-                                storeRegController.showHidePass();
+                                context.read<RegistrationBloc>().add(
+                                  const RegistrationPassToggled(),
+                                );
                               }
-                              storeRegController.validPassCheck(value);
+                              context.read<RegistrationBloc>().add(
+                                RegistrationPassValidated(value),
+                              );
                             } else {
                               if (storeRegController.showPassView) {
-                                storeRegController.showHidePass();
+                                context.read<RegistrationBloc>().add(
+                                  const RegistrationPassToggled(),
+                                );
                               }
                             }
                           },
@@ -1587,21 +1618,21 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
   }
 
   Widget buttonView() {
-    return GetBuilder<StoreRegistrationController>(
-      builder: (storeRegController) {
+    return BlocBuilder<RegistrationBloc, RegistrationState>(
+      builder: (context, storeRegController) {
         return CustomButton(
           isBold: ResponsiveHelper.isDesktop(context) ? false : true,
           radius: ResponsiveHelper.isDesktop(context)
               ? Dimensions.radiusSmall
               : Dimensions.radiusDefault,
-          isLoading: storeRegController.isLoading,
+          isLoading: (storeRegController.status == RegistrationStatus.loading),
           margin: EdgeInsets.all(
             ResponsiveHelper.isDesktop(context)
                 ? 0
                 : Dimensions.paddingSizeSmall,
           ),
           buttonText:
-              storeRegController.storeStatus == 0.4 &&
+              storeRegController.status_ == 0.4 &&
                   !ResponsiveHelper.isDesktop(context)
               ? 'next'.tr
               : 'submit'.tr,
@@ -1634,7 +1665,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
               valid = false;
             }
 
-            if (storeRegController.storeStatus == 0.4 &&
+            if (storeRegController.status_ == 0.4 &&
                 !ResponsiveHelper.isDesktop(context)) {
               if (storeRegController.pickedLogo == null) {
                 showCustomSnackBar('select_store_logo'.tr);
@@ -1662,10 +1693,12 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                   'maximum_delivery_time_can_not_be_smaller_then_minimum_delivery_time'
                       .tr,
                 );
-              } else if (storeRegController.restaurantLocation == null) {
+              } else if (storeRegController.location == null) {
                 showCustomSnackBar('set_store_location'.tr);
               } else {
-                storeRegController.storeStatusChange(0.8);
+                context.read<RegistrationBloc>().add(
+                  RegistrationStatusChanged(0.8),
+                );
                 firstTime = true;
               }
             } else {
@@ -1694,7 +1727,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                   showCustomSnackBar('select_store_logo'.tr);
                 } else if (storeRegController.pickedCover == null) {
                   showCustomSnackBar('select_store_cover_photo'.tr);
-                } else if (storeRegController.restaurantLocation == null) {
+                } else if (storeRegController.location == null) {
                   showCustomSnackBar('set_store_location'.tr);
                 }
               }
@@ -1743,30 +1776,30 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                   );
                 }
 
-                storeRegController.registerStore(
-                  StoreBodyModel(
-                    translation: jsonEncode(translation),
-                    tax: vat,
-                    minDeliveryTime: minTime,
-                    maxDeliveryTime: maxTime,
-                    lat: storeRegController.restaurantLocation!.latitude
-                        .toString(),
-                    email: email,
-                    lng: storeRegController.restaurantLocation!.longitude
-                        .toString(),
-                    fName: fName,
-                    lName: lName,
-                    phone: _countryDialCode! + phone,
-                    password: password,
-                    zoneId: storeRegController
-                        .zoneList![storeRegController.selectedZoneIndex!]
-                        .id
-                        .toString(),
-                    moduleId: storeRegController
-                        .moduleList![storeRegController.selectedModuleIndex!]
-                        .id
-                        .toString(),
-                    deliveryTimeType: storeRegController.storeTimeUnit,
+                context.read<RegistrationBloc>().add(
+                  StoreRegistrationSubmitted(
+                    StoreBodyModel(
+                      translation: jsonEncode(translation),
+                      tax: vat,
+                      minDeliveryTime: minTime,
+                      maxDeliveryTime: maxTime,
+                      lat: storeRegController.location!.latitude.toString(),
+                      email: email,
+                      lng: storeRegController.location!.longitude.toString(),
+                      fName: fName,
+                      lName: lName,
+                      phone: _countryDialCode! + phone,
+                      password: password,
+                      zoneId: storeRegController
+                          .zoneList![storeRegController.selectedZoneIndex!]
+                          .id
+                          .toString(),
+                      moduleId: storeRegController
+                          .moduleList![storeRegController.selectedModuleIndex!]
+                          .id
+                          .toString(),
+                      deliveryTimeType: storeRegController.storeTimeUnit,
+                    ),
                   ),
                 );
               }

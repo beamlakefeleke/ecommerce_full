@@ -1,7 +1,8 @@
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -96,10 +97,11 @@ class PaymentFailedDialog extends StatelessWidget {
                                           if (success) {
                                             double total =
                                                 ((orderAmount! / 100) *
-                                                getIt<SplashBloc>().state
+                                                getIt<SplashBloc>()
+                                                    .state
                                                     .configModel!
                                                     .loyaltyPointItemPurchasePoint!);
-                                            Get.find<AuthController>()
+                                            getIt<AuthRepository>()
                                                 .saveEarningPoint(
                                                   total.toStringAsFixed(0),
                                                 );
@@ -120,7 +122,8 @@ class PaymentFailedDialog extends StatelessWidget {
                                 : const SizedBox(),
                             SizedBox(
                               height:
-                                  getIt<SplashBloc>().state
+                                  getIt<SplashBloc>()
+                                      .state
                                       .configModel!
                                       .cashOnDelivery!
                                   ? Dimensions.paddingSizeLarge

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
-import 'package:ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
@@ -50,7 +51,7 @@ class CongratulationDialogue extends StatelessWidget {
                       horizontal: Dimensions.paddingSizeSmall,
                     ),
                     child: Text(
-                      '${'you_will_earn'.tr} ${Get.find<AuthController>().getEarningPint()} ${'points_after_completing_this_order'.tr}',
+                      '${'you_will_earn'.tr} ${getIt<AuthRepository>().getEarningPoint()} ${'points_after_completing_this_order'.tr}',
                       style: robotoRegular.copyWith(
                         fontSize: Dimensions.fontSizeLarge,
                         color: Theme.of(context).disabledColor,
@@ -63,7 +64,7 @@ class CongratulationDialogue extends StatelessWidget {
                   CustomButton(
                     buttonText: 'visit_loyalty_points'.tr,
                     onPressed: () {
-                      Get.find<AuthController>().saveEarningPoint('');
+                      getIt<AuthRepository>().saveEarningPoint('');
                       Get.back();
                       Get.toNamed(RouteHelper.getLoyaltyRoute());
                     },
@@ -77,7 +78,7 @@ class CongratulationDialogue extends StatelessWidget {
               right: 5,
               child: InkWell(
                 onTap: () {
-                  Get.find<AuthController>().saveEarningPoint('');
+                  getIt<AuthRepository>().saveEarningPoint('');
                   Get.back();
                 },
                 child: const Icon(Icons.clear, size: 18),

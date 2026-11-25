@@ -1,9 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/auth/controllers/store_registration_controller.dart';
-import 'package:ecommerce/features/auth/widgets/min_max_time_picker_widget.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
+import 'package:ecommerce/features/auth/presentation/widgets/min_max_time_picker_widget.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
@@ -29,8 +30,8 @@ class CustomTimePickerWidget extends StatelessWidget {
       child: Container(
         width: 500,
         padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-        child: GetBuilder<StoreRegistrationController>(
-          builder: (storeRegController) {
+        child: BlocBuilder<RegistrationBloc, RegistrationState>(
+          builder: (context, storeRegController) {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -104,8 +105,9 @@ class CustomTimePickerWidget extends StatelessWidget {
                   children: [
                     MinMaxTimePickerWidget(
                       times: time,
-                      onChanged: (int index) =>
-                          storeRegController.minTimeChange(time[index]),
+                      onChanged: (int index) => context
+                          .read<RegistrationBloc>()
+                          .add(RegistrationMinTimeChanged(time[index])),
                       initialPosition: 10,
                     ),
 
@@ -113,15 +115,17 @@ class CustomTimePickerWidget extends StatelessWidget {
 
                     MinMaxTimePickerWidget(
                       times: time,
-                      onChanged: (int index) =>
-                          storeRegController.maxTimeChange(time[index]),
+                      onChanged: (int index) => context
+                          .read<RegistrationBloc>()
+                          .add(RegistrationMaxTimeChanged(time[index])),
                       initialPosition: 10,
                     ),
 
                     MinMaxTimePickerWidget(
                       times: unit,
-                      onChanged: (int index) =>
-                          storeRegController.timeUnitChange(unit[index]),
+                      onChanged: (int index) => context
+                          .read<RegistrationBloc>()
+                          .add(RegistrationTimeUnitChanged(unit[index])),
                       initialPosition: 1,
                     ),
                   ],

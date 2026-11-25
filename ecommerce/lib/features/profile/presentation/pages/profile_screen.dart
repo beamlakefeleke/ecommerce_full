@@ -5,7 +5,7 @@ import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_state.dart';
-import 'package:ecommerce/features/auth/screens/sign_in_screen.dart';
+import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';

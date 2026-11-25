@@ -1,7 +1,7 @@
-import 'package:ecommerce/features/auth/controllers/deliveryman_registration_controller.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_state.dart';
+import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -26,8 +26,8 @@ class ConditionCheckBoxWidget extends StatelessWidget {
           : MainAxisAlignment.center,
       children: [
         forDeliveryMan
-            ? GetBuilder<DeliverymanRegistrationController>(
-                builder: (dmRegController) {
+            ? BlocBuilder<RegistrationBloc, RegistrationState>(
+                builder: (context, regState) {
                   return BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, authState) {
                       return Checkbox(
@@ -38,10 +38,12 @@ class ConditionCheckBoxWidget extends StatelessWidget {
                         ),
                         value: forSignUp
                             ? authState.acceptTerms
-                            : dmRegController.acceptTerms,
+                            : regState.acceptTerms,
                         onChanged: (bool? isChecked) => forSignUp
                             ? context.read<AuthBloc>().add(const TermsToggled())
-                            : dmRegController.toggleTerms(),
+                            : context.read<RegistrationBloc>().add(
+                                const DmTermsToggled(),
+                              ),
                       );
                     },
                   );
