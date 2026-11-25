@@ -1,11 +1,14 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
@@ -73,8 +76,11 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   final FocusNode _floorNode = FocusNode();
   final FocusNode _emailFocus = FocusNode();
   CameraPosition? _cameraPosition;
+  GoogleMapController? _mapController;
   late LatLng _initialPosition;
   bool _otherSelect = false;
+
+  LocationBloc get _locationBloc => getIt<LocationBloc>();
   String? _countryDialCode =
       getIt<AuthRepository>().getUserCountryCode().isNotEmpty
       ? getIt<AuthRepository>().getUserCountryCode()
@@ -89,10 +95,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   void initCall() {
-    Get.find<LocationController>().setAddressTypeIndex(0, isUpdate: false);
+    _locationBloc.add(const AddressTypeIndexChanged(0));
     if (AuthHelper.isLoggedIn() &&
-        Get.find<ProfileController>().userInfoModel == null) {
-      Get.find<ProfileController>().getUserInfo();
+        context.read<ProfileBloc>().state.userInfoModel == null) {
+      context.read<ProfileBloc>().add(const ProfileInfoRequested());
     }
     if (widget.address == null) {
       _initialPosition = LatLng(
@@ -104,18 +110,18 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         ),
       );
     } else {
-      Get.find<LocationController>().setUpdateAddress(widget.address!);
+      _locationBloc.add(UpdateAddressSeeded(widget.address!));
       _initialPosition = LatLng(
         double.parse(widget.address!.latitude ?? '0'),
         double.parse(widget.address!.longitude ?? '0'),
       );
 
       if (widget.address!.addressType == 'home') {
-        Get.find<LocationController>().setAddressTypeIndex(0, isUpdate: false);
+        _locationBloc.add(const AddressTypeIndexChanged(0));
       } else if (widget.address!.addressType == 'office') {
-        Get.find<LocationController>().setAddressTypeIndex(1, isUpdate: false);
+        _locationBloc.add(const AddressTypeIndexChanged(1));
       } else {
-        Get.find<LocationController>().setAddressTypeIndex(2, isUpdate: false);
+        _locationBloc.add(const AddressTypeIndexChanged(2));
         _levelController.text = widget.address!.addressType!;
         _otherSelect = true;
       }
@@ -174,8 +180,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
               : 'update_address'.tr,
         ),
         body: SafeArea(
-          child: GetBuilder<ProfileController>(
-            builder: (profileController) {
+          child: BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, profileController) {
               if (widget.address != null) {
                 splitPhoneNumber(widget.address!.contactPersonNumber!);
                 _contactPersonNameController.text =
@@ -192,9 +198,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 splitPhoneNumber(profileController.userInfoModel!.phone!);
               }
 
-              return GetBuilder<LocationController>(
-                builder: (locationController) {
-                  _addressController.text = locationController.address!;
+              return BlocBuilder<LocationBloc, LocationState>(
+                builder: (context, locationController) {
+                  _addressController.text = locationController.address ?? '';
 
                   return ResponsiveHelper.isDesktop(context)
                       ? SingleChildScrollView(
@@ -296,8 +302,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                                 fromSignUp:
                                                                     false,
                                                                 googleMapController:
-                                                                    locationController
-                                                                        .mapController,
+                                                                    _mapController,
                                                                 route: null,
                                                                 canRoute: false,
                                                               ),
@@ -311,12 +316,17 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                         mapToolbarEnabled:
                                                             false,
                                                         onCameraIdle: () {
-                                                          locationController
-                                                              .updatePosition(
-                                                                _cameraPosition,
-                                                                true,
-                                                              );
+                                                          _locationBloc.add(
+                                                            CameraPositionUpdated(
+                                                              _cameraPosition,
+                                                              true,
+                                                            ),
+                                                          );
                                                         },
+                                                        onCameraMoveStarted: () =>
+                                                            _locationBloc.add(
+                                                              const ButtonDisabled(),
+                                                            ),
                                                         onCameraMove:
                                                             ((position) =>
                                                                 _cameraPosition =
@@ -326,19 +336,21 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                               GoogleMapController
                                                               controller,
                                                             ) {
-                                                              locationController
+                                                              _mapController =
+                                                                  controller;
+                                                              _locationBloc
                                                                   .setMapController(
                                                                     controller,
                                                                   );
                                                               if (widget
                                                                       .address ==
                                                                   null) {
-                                                                locationController
-                                                                    .getCurrentLocation(
-                                                                      true,
-                                                                      mapController:
-                                                                          controller,
-                                                                    );
+                                                                _locationBloc.add(
+                                                                  const CurrentLocationRequested(
+                                                                    fromAddress:
+                                                                        true,
+                                                                  ),
+                                                                );
                                                               }
                                                             },
                                                       ),
@@ -364,15 +376,15 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                         bottom: 10,
                                                         right: 0,
                                                         child: InkWell(
-                                                          onTap: () => _checkPermission(() {
-                                                            locationController
-                                                                .getCurrentLocation(
-                                                                  true,
-                                                                  mapController:
-                                                                      locationController
-                                                                          .mapController,
+                                                          onTap: () =>
+                                                              _checkPermission(() {
+                                                                _locationBloc.add(
+                                                                  const CurrentLocationRequested(
+                                                                    fromAddress:
+                                                                        true,
+                                                                  ),
                                                                 );
-                                                          }),
+                                                              }),
                                                           child: Container(
                                                             width: 30,
                                                             height: 30,
@@ -424,8 +436,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                                       route:
                                                                           null,
                                                                       googleMapController:
-                                                                          locationController
-                                                                              .mapController,
+                                                                          _mapController,
                                                                     ),
                                                                   );
                                                                 },
@@ -442,8 +453,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                                   fromSignUp:
                                                                       false,
                                                                   googleMapController:
-                                                                      locationController
-                                                                          .mapController,
+                                                                      _mapController,
                                                                   route: null,
                                                                   canRoute:
                                                                       false,
@@ -507,7 +517,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                   shrinkWrap: true,
                                                   scrollDirection:
                                                       Axis.horizontal,
-                                                  itemCount: locationController
+                                                  itemCount: LocationState
                                                       .addressTypeList
                                                       .length,
                                                   itemBuilder: (context, index) => Padding(
@@ -520,10 +530,11 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                       onTap: () {
                                                         _otherSelect =
                                                             index == 2;
-                                                        locationController
-                                                            .setAddressTypeIndex(
-                                                              index,
-                                                            );
+                                                        _locationBloc.add(
+                                                          AddressTypeIndexChanged(
+                                                            index,
+                                                          ),
+                                                        );
                                                       },
                                                       child: Container(
                                                         padding: const EdgeInsets.symmetric(
@@ -661,8 +672,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                   focusNode: _addressNode,
                                                   nextFocus: _nameNode,
                                                   onChanged: (text) =>
-                                                      locationController
-                                                          .setPlaceMark(text),
+                                                      _locationBloc.add(
+                                                        PlaceMarkSet(text),
+                                                      ),
                                                 ),
                                               ),
                                               const SizedBox(
@@ -742,9 +754,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                       },
                                                   countryDialCode:
                                                       _countryDialCode ??
-                                                      Get.find<
-                                                            LocalizationController
-                                                          >()
+                                                      getIt<LanguageBloc>()
+                                                          .state
                                                           .locale
                                                           .countryCode,
                                                 ),
@@ -914,13 +925,12 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                                   true,
                                                               route: null,
                                                               googleMapController:
-                                                                  locationController
-                                                                      .mapController,
+                                                                  _mapController,
                                                             ),
                                                           );
                                                         },
                                                       );
-                                                      // Get.dialog(PickMapScreen(fromSignUp: false, canRoute: false, fromAddAddress: true, route: null, googleMapController: locationController.mapController));
+                                                      // Get.dialog(PickMapScreen(fromSignUp: false, canRoute: false, fromAddAddress: true, route: null, googleMapController: _mapController));
                                                     } else {
                                                       Get.toNamed(
                                                         RouteHelper.getPickMapRoute(
@@ -931,8 +941,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                           fromAddAddress: true,
                                                           fromSignUp: false,
                                                           googleMapController:
-                                                              locationController
-                                                                  .mapController,
+                                                              _mapController,
                                                           route: null,
                                                           canRoute: false,
                                                         ),
@@ -944,12 +953,17 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                   indoorViewEnabled: true,
                                                   mapToolbarEnabled: false,
                                                   onCameraIdle: () {
-                                                    locationController
-                                                        .updatePosition(
-                                                          _cameraPosition,
-                                                          true,
-                                                        );
+                                                    _locationBloc.add(
+                                                      CameraPositionUpdated(
+                                                        _cameraPosition,
+                                                        true,
+                                                      ),
+                                                    );
                                                   },
+                                                  onCameraMoveStarted: () =>
+                                                      _locationBloc.add(
+                                                        const ButtonDisabled(),
+                                                      ),
                                                   onCameraMove: ((position) {
                                                     _cameraPosition = position;
                                                   }),
@@ -958,18 +972,19 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                         GoogleMapController
                                                         controller,
                                                       ) {
-                                                        locationController
+                                                        _mapController =
+                                                            controller;
+                                                        _locationBloc
                                                             .setMapController(
                                                               controller,
                                                             );
                                                         if (widget.address ==
                                                             null) {
-                                                          locationController
-                                                              .getCurrentLocation(
-                                                                true,
-                                                                mapController:
-                                                                    controller,
-                                                              );
+                                                          _locationBloc.add(
+                                                            const CurrentLocationRequested(
+                                                              fromAddress: true,
+                                                            ),
+                                                          );
                                                         }
                                                       },
                                                 ),
@@ -994,15 +1009,14 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                   bottom: 10,
                                                   right: 0,
                                                   child: InkWell(
-                                                    onTap: () => _checkPermission(() {
-                                                      locationController
-                                                          .getCurrentLocation(
-                                                            true,
-                                                            mapController:
-                                                                locationController
-                                                                    .mapController,
+                                                    onTap: () =>
+                                                        _checkPermission(() {
+                                                          _locationBloc.add(
+                                                            const CurrentLocationRequested(
+                                                              fromAddress: true,
+                                                            ),
                                                           );
-                                                    }),
+                                                        }),
                                                     child: Container(
                                                       width: 30,
                                                       height: 30,
@@ -1051,8 +1065,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                                     true,
                                                                 route: null,
                                                                 googleMapController:
-                                                                    locationController
-                                                                        .mapController,
+                                                                    _mapController,
                                                               ),
                                                             );
                                                           },
@@ -1068,8 +1081,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                                                 true,
                                                             fromSignUp: false,
                                                             googleMapController:
-                                                                locationController
-                                                                    .mapController,
+                                                                _mapController,
                                                             route: null,
                                                             canRoute: false,
                                                           ),
@@ -1144,7 +1156,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                           child: ListView.builder(
                                             shrinkWrap: true,
                                             scrollDirection: Axis.horizontal,
-                                            itemCount: locationController
+                                            itemCount: LocationState
                                                 .addressTypeList
                                                 .length,
                                             itemBuilder: (context, index) => Padding(
@@ -1155,10 +1167,11 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                               child: InkWell(
                                                 onTap: () {
                                                   _otherSelect = index == 2;
-                                                  locationController
-                                                      .setAddressTypeIndex(
-                                                        index,
-                                                      );
+                                                  _locationBloc.add(
+                                                    AddressTypeIndexChanged(
+                                                      index,
+                                                    ),
+                                                  );
                                                 },
                                                 child: Container(
                                                   padding:
@@ -1265,10 +1278,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                           controller: _addressController,
                                           focusNode: _addressNode,
                                           nextFocus: _nameNode,
-                                          onChanged: (text) =>
-                                              locationController.setPlaceMark(
-                                                text,
-                                              ),
+                                          onChanged: (text) => _locationBloc
+                                              .add(PlaceMarkSet(text)),
                                         ),
                                         const SizedBox(
                                           height: Dimensions.paddingSizeLarge,
@@ -1305,7 +1316,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                               },
                                           countryDialCode:
                                               _countryDialCode ??
-                                              Get.find<LocalizationController>()
+                                              getIt<LanguageBloc>()
+                                                  .state
                                                   .locale
                                                   .countryCode,
                                         ),
@@ -1411,7 +1423,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     }
   }
 
-  Widget button(LocationController locationController) {
+  Widget button(LocationState locationController) {
     return Container(
       width: Dimensions.webMaxWidth,
       padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
@@ -1429,9 +1441,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     );
   }
 
-  void _onSaveOrUpdateButtonPressed(
-    LocationController locationController,
-  ) async {
+  void _onSaveOrUpdateButtonPressed(LocationState locationController) async {
     String numberWithCountryCode =
         _countryDialCode! + _contactPersonNumberController.text;
     PhoneValid phoneValid = await CustomValidator.isPhoneValid(
@@ -1461,17 +1471,16 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   AddressModel? _prepareAddressModel(
-    LocationController locationController,
+    LocationState locationController,
     bool isValid,
     String numberWithCountryCode,
   ) {
     String? addressType =
-        locationController.addressTypeList[locationController.addressTypeIndex];
+        LocationState.addressTypeList[locationController.addressTypeIndex];
     if (locationController.addressTypeIndex == 2) {
       addressType = _levelController.text.isNotEmpty
           ? _levelController.text.trim()
-          : locationController.addressTypeList[locationController
-                .addressTypeIndex];
+          : LocationState.addressTypeList[locationController.addressTypeIndex];
     }
     if (_addressController.text.isEmpty) {
       showCustomSnackBar('please_enter_the_delivery_address'.tr);
@@ -1493,7 +1502,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         address: _addressController.text,
         latitude: locationController.position.latitude.toString(),
         longitude: locationController.position.longitude.toString(),
-        zoneId: locationController.zoneID,
+        zoneId: locationController.zoneId,
         streetNumber: _streetNumberController.text,
         house: _houseController.text,
         floor: _floorController.text,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -96,8 +98,8 @@ class AddressConfirmDialogue extends StatelessWidget {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                GetBuilder<LocationController>(
-                  builder: (locationController) {
+                BlocBuilder<LocationBloc, LocationState>(
+                  builder: (context, locationController) {
                     return !locationController.isLoading
                         ? Row(
                             children: [

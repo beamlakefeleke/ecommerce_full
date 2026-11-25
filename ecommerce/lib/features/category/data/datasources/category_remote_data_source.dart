@@ -4,9 +4,7 @@ import 'package:ecommerce/core/error/exceptions.dart';
 import 'package:ecommerce/features/category/data/models/category_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/util/app_constants.dart';
-import 'package:get/get.dart' as getx;
 
 abstract class CategoryRemoteDataSource {
   Future<List<CategoryModel>> getCategoryList({bool allCategory = false});
@@ -43,7 +41,10 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
         ? {
             'Content-Type': 'application/json; charset=UTF-8',
             AppConstants.localizationKey:
-                getx.Get.find<LocalizationController>().locale.languageCode,
+                apiClient.sharedPreferences.getString(
+                  AppConstants.languageCode,
+                ) ??
+                AppConstants.languages[0].languageCode!,
           }
         : null;
     final Response response = await apiClient.getData(

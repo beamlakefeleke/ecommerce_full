@@ -1,12 +1,11 @@
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -66,12 +65,12 @@ class CartItemWidget extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.error,
               borderRadius: BorderRadius.horizontal(
                 right: Radius.circular(
-                  Get.find<LocalizationController>().isLtr
+                  getIt<LanguageBloc>().state.isLtr
                       ? Dimensions.radiusDefault
                       : 0,
                 ),
                 left: Radius.circular(
-                  Get.find<LocalizationController>().isLtr
+                  getIt<LanguageBloc>().state.isLtr
                       ? 0
                       : Dimensions.radiusDefault,
                 ),
