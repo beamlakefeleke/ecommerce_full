@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_state.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
@@ -14,7 +18,7 @@ import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 
 class VisitAgainCard extends StatelessWidget {
   final Store store;
@@ -236,25 +240,21 @@ class VisitAgainCard extends StatelessWidget {
 
         Positioned(
           top: 30,
-          left: Get.find<LocalizationController>().isLtr ? null : 10,
-          right: Get.find<LocalizationController>().isLtr ? 10 : null,
-          child: GetBuilder<FavouriteController>(
-            builder: (favouriteController) {
-              bool isWished = favouriteController.wishStoreIdList.contains(
-                store.id,
-              );
+          left: getIt<LanguageBloc>().state.isLtr ? null : 10,
+          right: getIt<LanguageBloc>().state.isLtr ? 10 : null,
+          child: BlocBuilder<FavouriteBloc, FavouriteState>(
+            bloc: getIt<FavouriteBloc>(),
+            builder: (context, favouriteState) {
+              bool isWished = favouriteState.wishStoreIdList.contains(store.id);
               return InkWell(
                 onTap: () {
                   if (AuthHelper.isLoggedIn()) {
                     isWished
-                        ? favouriteController.removeFromFavouriteList(
-                            store.id,
-                            true,
+                        ? getIt<FavouriteBloc>().add(
+                            FavouriteRemoved(id: store.id, isStore: true),
                           )
-                        : favouriteController.addToFavouriteList(
-                            null,
-                            store,
-                            true,
+                        : getIt<FavouriteBloc>().add(
+                            FavouriteAdded(store: store, isStore: true),
                           );
                   } else {
                     showCustomSnackBar('you_are_not_logged_in'.tr);

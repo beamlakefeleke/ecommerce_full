@@ -1,3 +1,4 @@
+import 'package:ecommerce/features/home/screens/home_screen.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,8 +30,10 @@ import 'package:ecommerce/common/widgets/web_page_title_widget.dart';
 import 'package:ecommerce/features/cart/presentation/widgets/cart_item_widget.dart';
 import 'package:ecommerce/features/cart/presentation/widgets/web_cart_items_widget.dart';
 import 'package:ecommerce/features/cart/presentation/widgets/web_suggested_item_view_widget.dart';
-import 'package:ecommerce/features/home/screens/home_screen.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_event.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -60,13 +63,16 @@ class _CartScreenState extends State<CartScreen> {
         cartBloc.add(const CartCutleryToggled());
       }
       cartBloc.add(const CartNotAvailableIndexSet(-1));
-      Get.find<StoreController>().getCartStoreSuggestedItemList(
-        cartBloc.state.cartList[0].item!.storeId,
+      getIt<StoreBloc>().add(
+        CartStoreSuggestedItemListRequested(
+          storeId: cartBloc.state.cartList[0].item!.storeId,
+        ),
       );
-      Get.find<StoreController>().getStoreDetails(
-        Store(id: cartBloc.state.cartList[0].item!.storeId, name: null),
-        false,
-        fromCart: true,
+      getIt<StoreBloc>().add(
+        StoreDetailsRequested(
+          storeID: cartBloc.state.cartList[0].item!.storeId.toString(),
+          fromCart: true,
+        ),
       );
     }
   }
@@ -78,13 +84,16 @@ class _CartScreenState extends State<CartScreen> {
           p.status != c.status && c.status == CartStatus.loaded,
       listener: (context, state) {
         if (state.cartList.isNotEmpty) {
-          Get.find<StoreController>().getCartStoreSuggestedItemList(
-            state.cartList[0].item!.storeId,
+          getIt<StoreBloc>().add(
+            CartStoreSuggestedItemListRequested(
+              storeId: state.cartList[0].item!.storeId,
+            ),
           );
-          Get.find<StoreController>().getStoreDetails(
-            Store(id: state.cartList[0].item!.storeId, name: null),
-            false,
-            fromCart: true,
+          getIt<StoreBloc>().add(
+            StoreDetailsRequested(
+              storeID: state.cartList[0].item!.storeId.toString(),
+              fromCart: true,
+            ),
           );
         }
       },
@@ -290,8 +299,9 @@ class _CartScreenState extends State<CartScreen> {
           BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1),
         ],
       ),
-      child: GetBuilder<StoreController>(
-        builder: (storeController) {
+      child: BlocBuilder<StoreBloc, StoreState>(
+        bloc: getIt<StoreBloc>(),
+        builder: (context, storeState) {
           return Column(
             children: [
               Align(
@@ -313,9 +323,10 @@ class _CartScreenState extends State<CartScreen> {
               // Cutlery toggle (mobile only)
               if (!ResponsiveHelper.isDesktop(context) &&
                   (getIt<SplashBloc>()
-                    .getModuleConfig(item.moduleType)
-                    ?.newVariation ?? false) &&
-                (storeController.store?.cutlery ?? false))
+                          .getModuleConfig(item.moduleType)
+                          ?.newVariation ??
+                      false) &&
+                  (storeState.store?.cutlery ?? false))
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: Dimensions.paddingSizeDefault,
@@ -445,9 +456,10 @@ class _CartScreenState extends State<CartScreen> {
                       ],
                     ),
                     if ((getIt<SplashBloc>()
-                          .getModuleConfig(item.moduleType)
-                          ?.newVariation ?? false) &&
-                      cartState.variationPrice > 0) ...[
+                                .getModuleConfig(item.moduleType)
+                                ?.newVariation ??
+                            false) &&
+                        cartState.variationPrice > 0) ...[
                       const SizedBox(height: Dimensions.paddingSizeSmall),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -466,7 +478,7 @@ class _CartScreenState extends State<CartScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('discount'.tr, style: robotoRegular),
-                        storeController.store != null
+                        storeState.store != null
                             ? Row(
                                 children: [
                                   Text('(-)', style: robotoRegular),
@@ -479,7 +491,8 @@ class _CartScreenState extends State<CartScreen> {
                             : Text('calculating'.tr, style: robotoRegular),
                       ],
                     ),
-                    if (getIt<SplashBloc>().state
+                    if (getIt<SplashBloc>()
+                        .state
                         .configModel!
                         .moduleConfig!
                         .module!
@@ -517,14 +530,14 @@ class _CartScreenState extends State<CartScreen> {
     return Container(
       color: Theme.of(context).cardColor,
       width: double.infinity,
-      child: GetBuilder<StoreController>(
-        builder: (storeController) {
+      child: BlocBuilder<StoreBloc, StoreState>(
+        bloc: getIt<StoreBloc>(),
+        builder: (context, storeState) {
           List<Item>? suggestedItems;
-          if (storeController.cartSuggestItemModel != null) {
+          if (storeState.cartSuggestItemModel != null) {
             suggestedItems = [];
             final List<int> cartIds = cartList.map((c) => c.item!.id!).toList();
-            for (final Item item
-                in storeController.cartSuggestItemModel!.items!) {
+            for (final Item item in storeState.cartSuggestItemModel!.items!) {
               if (!cartIds.contains(item.id)) {
                 suggestedItems.add(item);
               }
@@ -622,12 +635,12 @@ class _CheckoutButton extends StatelessWidget {
                 ),
               ],
       ),
-      child: GetBuilder<StoreController>(
-        builder: (storeController) {
-          if (storeController.store != null &&
-              !storeController.store!.freeDelivery! &&
-              getIt<SplashBloc>().state.configModel!.freeDeliveryOver !=
-                  null) {
+      child: BlocBuilder<StoreBloc, StoreState>(
+        bloc: getIt<StoreBloc>(),
+        builder: (context, storeState) {
+          if (storeState.store != null &&
+              !storeState.store!.freeDelivery! &&
+              getIt<SplashBloc>().state.configModel!.freeDeliveryOver != null) {
             percentage =
                 cartState.subTotal /
                 getIt<SplashBloc>().state.configModel!.freeDeliveryOver!;
@@ -635,8 +648,8 @@ class _CheckoutButton extends StatelessWidget {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (storeController.store != null &&
-                  !storeController.store!.freeDelivery! &&
+              if (storeState.store != null &&
+                  !storeState.store!.freeDelivery! &&
                   getIt<SplashBloc>().state.configModel!.freeDeliveryOver !=
                       null &&
                   percentage < 1) ...[
@@ -646,7 +659,8 @@ class _CheckoutButton extends StatelessWidget {
                     const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                     Text(
                       PriceConverter.convertPrice(
-                        getIt<SplashBloc>().state
+                        getIt<SplashBloc>()
+                                .state
                                 .configModel!
                                 .freeDeliveryOver! -
                             cartState.subTotal,
@@ -706,10 +720,12 @@ class _CheckoutButton extends StatelessWidget {
               if (ResponsiveHelper.isDesktop(context) &&
                   cartState.cartList.isNotEmpty &&
                   (getIt<SplashBloc>()
-                          .getModuleConfig(cartState.cartList[0].item!.moduleType)
+                          .getModuleConfig(
+                            cartState.cartList[0].item!.moduleType,
+                          )
                           ?.newVariation ??
                       false) &&
-                  (storeController.store?.cutlery ?? false))
+                  (storeState.store?.cutlery ?? false))
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0),
                   child: Row(

@@ -183,6 +183,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> updateZone() => remote.updateZone();
 
+  @override
+  Future<void> saveUserToken(String token) => local.saveUserToken(token);
+
+  @override
+  Future<void> clearGuestId() async => local.clearGuestId();
+
   // --- local passthrough ---
   @override
   bool isLoggedIn() => local.isLoggedIn();

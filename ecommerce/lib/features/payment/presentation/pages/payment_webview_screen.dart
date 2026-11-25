@@ -13,7 +13,7 @@ import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/payment_failed_dialog.dart';
-import 'package:ecommerce/features/wallet/widgets/fund_payment_dialog_widget.dart';
+import 'package:ecommerce/features/wallet/presentation/widgets/fund_payment_dialog_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PaymentWebViewScreen extends StatefulWidget {

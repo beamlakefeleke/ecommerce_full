@@ -1,4 +1,6 @@
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_state.dart';
@@ -19,7 +21,7 @@ class GuestButtonWidget extends StatelessWidget {
           curr.actionType == AuthActionType.guestLogin &&
           curr.actionStatus == AuthActionStatus.success,
       listener: (context, state) {
-        Get.find<ProfileController>().setForceFullyUserEmpty();
+        getIt<ProfileBloc>().add(const ProfileCleared());
         Navigator.pushReplacementNamed(context, RouteHelper.getInitialRoute());
       },
       builder: (context, state) {

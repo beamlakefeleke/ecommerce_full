@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/core/di/injection.dart';
@@ -13,7 +13,7 @@ import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/no_data_screen.dart';
-import 'package:ecommerce/features/store/widgets/review_widget.dart';
+import 'package:ecommerce/features/store/presentation/widgets/review_widget.dart';
 
 class ReviewScreen extends StatelessWidget {
   final String? storeID;

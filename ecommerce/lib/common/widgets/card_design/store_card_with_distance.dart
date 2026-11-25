@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_state.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -22,7 +26,7 @@ import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/discount_tag.dart';
 import 'package:ecommerce/common/widgets/new_tag.dart';
 import 'package:ecommerce/common/widgets/not_available_widget.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 
 class StoreCardWithDistance extends StatelessWidget {
   final Store store;
@@ -41,7 +45,7 @@ class StoreCardWithDistance extends StatelessWidget {
         getIt<SplashBloc>().state.module != null &&
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
-    double distance = Get.find<StoreController>().getRestaurantDistance(
+    double distance = StoreHelper.getRestaurantDistance(
       LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
     );
     return Stack(
@@ -99,15 +103,13 @@ class StoreCardWithDistance extends StatelessWidget {
                         ),
 
                         DiscountTag(
-                          discount: Get.find<StoreController>().getDiscount(
-                            store,
-                          ),
+                          discount: StoreHelper.getDiscount(store),
                           discountType: Get.find<StoreController>()
                               .getDiscountType(store),
                           freeDelivery: store.freeDelivery,
                         ),
 
-                        Get.find<StoreController>().isOpenNow(store)
+                        StoreHelper.isOpenNow(store)
                             ? const SizedBox()
                             : const NotAvailableWidget(isStore: true),
 
@@ -116,32 +118,29 @@ class StoreCardWithDistance extends StatelessWidget {
                     ),*/
                         Positioned(
                           top: 15,
-                          left: Get.find<LocalizationController>().isLtr
-                              ? null
-                              : 15,
-                          right: Get.find<LocalizationController>().isLtr
-                              ? 15
-                              : null,
-                          child: GetBuilder<FavouriteController>(
-                            builder: (favouriteController) {
-                              bool isWished = favouriteController
-                                  .wishStoreIdList
+                          left: getIt<LanguageBloc>().state.isLtr ? null : 15,
+                          right: getIt<LanguageBloc>().state.isLtr ? 15 : null,
+                          child: BlocBuilder<FavouriteBloc, FavouriteState>(
+                            bloc: getIt<FavouriteBloc>(),
+                            builder: (context, favouriteState) {
+                              bool isWished = favouriteState.wishStoreIdList
                                   .contains(store.id);
                               return InkWell(
                                 onTap: () {
                                   if (AuthHelper.isLoggedIn()) {
                                     isWished
-                                        ? favouriteController
-                                              .removeFromFavouriteList(
-                                                store.id,
-                                                true,
-                                              )
-                                        : favouriteController
-                                              .addToFavouriteList(
-                                                null,
-                                                store,
-                                                true,
-                                              );
+                                        ? getIt<FavouriteBloc>().add(
+                                            FavouriteRemoved(
+                                              id: store.id,
+                                              isStore: true,
+                                            ),
+                                          )
+                                        : getIt<FavouriteBloc>().add(
+                                            FavouriteAdded(
+                                              store: store,
+                                              isStore: true,
+                                            ),
+                                          );
                                   } else {
                                     showCustomSnackBar(
                                       'you_are_not_logged_in'.tr,
@@ -295,12 +294,13 @@ class StoreCardWithDistance extends StatelessWidget {
                                   if (getIt<SplashBloc>().state.moduleList !=
                                       null) {
                                     for (ModuleModel module
-                                        in getIt<SplashBloc>().state
+                                        in getIt<SplashBloc>()
+                                            .state
                                             .moduleList!) {
                                       if (module.id == store.moduleId) {
-                                        getIt<SplashBloc>().add(SplashModuleSet(
-                                          module,
-                                        ));
+                                        getIt<SplashBloc>().add(
+                                          SplashModuleSet(module),
+                                        );
                                         break;
                                       }
                                     }

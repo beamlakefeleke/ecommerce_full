@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
@@ -229,11 +229,13 @@ class SignUpScreenState extends State<SignUpScreen> {
                                         },
                                     countryDialCode: _countryDialCode != null
                                         ? CountryCode.fromCountryCode(
-                                            getIt<SplashBloc>().state
+                                            getIt<SplashBloc>()
+                                                .state
                                                 .configModel!
                                                 .country!,
                                           ).code
-                                        : Get.find<LocalizationController>()
+                                        : getIt<LanguageBloc>()
+                                              .state
                                               .locale
                                               .countryCode,
                                   ),
@@ -295,14 +297,16 @@ class SignUpScreenState extends State<SignUpScreen> {
                                               _confirmPasswordController,
                                           focusNode: _confirmPasswordFocus,
                                           nextFocus:
-                                              getIt<SplashBloc>().state
+                                              getIt<SplashBloc>()
+                                                      .state
                                                       .configModel!
                                                       .refEarningStatus ==
                                                   1
                                               ? _referCodeFocus
                                               : null,
                                           inputAction:
-                                              getIt<SplashBloc>().state
+                                              getIt<SplashBloc>()
+                                                      .state
                                                       .configModel!
                                                       .refEarningStatus ==
                                                   1
@@ -335,14 +339,16 @@ class SignUpScreenState extends State<SignUpScreen> {
                                     controller: _confirmPasswordController,
                                     focusNode: _confirmPasswordFocus,
                                     nextFocus:
-                                        getIt<SplashBloc>().state
+                                        getIt<SplashBloc>()
+                                                .state
                                                 .configModel!
                                                 .refEarningStatus ==
                                             1
                                         ? _referCodeFocus
                                         : null,
                                     inputAction:
-                                        getIt<SplashBloc>().state
+                                        getIt<SplashBloc>()
+                                                .state
                                                 .configModel!
                                                 .refEarningStatus ==
                                             1
@@ -361,7 +367,8 @@ class SignUpScreenState extends State<SignUpScreen> {
                                   ? Dimensions.paddingSizeLarge
                                   : 0,
                             ),
-                            (getIt<SplashBloc>().state
+                            (getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .refEarningStatus ==
                                     1)

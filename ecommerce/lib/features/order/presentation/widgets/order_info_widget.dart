@@ -25,7 +25,7 @@ import 'package:ecommerce/features/payment/presentation/widgets/offline_info_edi
 import 'package:ecommerce/features/order/presentation/widgets/order_banner_view_widget.dart';
 import 'package:ecommerce/features/order/presentation/widgets/order_item_widget.dart';
 import 'package:ecommerce/features/parcel/presentation/widgets/details_widget.dart';
-import 'package:ecommerce/features/store/widgets/review_dialog_widget.dart';
+import 'package:ecommerce/features/store/presentation/widgets/review_dialog_widget.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class OrderInfoWidget extends StatelessWidget {

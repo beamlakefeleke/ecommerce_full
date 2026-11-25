@@ -24,7 +24,7 @@ import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/discount_tag.dart';
 import 'package:ecommerce/common/widgets/hover/on_hover.dart';
 import 'package:ecommerce/common/widgets/title_widget.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 
 class WebBestStoreNearbyViewWidget extends StatefulWidget {
   const WebBestStoreNearbyViewWidget({super.key});

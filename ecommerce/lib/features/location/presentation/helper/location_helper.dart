@@ -29,7 +29,8 @@ import 'package:ecommerce/features/location/presentation/widgets/module_dialog_w
 import 'package:ecommerce/features/location/presentation/widgets/permission_dialog_widget.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_state.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -284,7 +285,7 @@ class LocationHelper {
     final splash = getIt<SplashBloc>().state;
     await getIt<SplashBloc>().add(SplashModulesRequested(headers: ));
     for (final ModuleModel m in splash.moduleList ?? const []) {
-      if (m.id == Get.find<StoreController>().store!.moduleId) {
+      if (m.id == getIt<StoreBloc>().state.store?.moduleId) {
         getIt<SplashBloc>().add(SplashModuleSet(m));
       }
     }

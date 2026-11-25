@@ -1,4 +1,4 @@
-﻿import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
@@ -24,7 +24,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ecommerce/features/search/presentation/bloc/search_event.dart';
 import 'package:ecommerce/features/search/presentation/bloc/search_state.dart';
-import 'package:ecommerce/features/store/widgets/bottom_cart_widget.dart';
+import 'package:ecommerce/features/store/presentation/widgets/bottom_cart_widget.dart';
 
 class SearchScreen extends StatelessWidget {
   final String? queryText;

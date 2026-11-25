@@ -25,7 +25,7 @@ import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/discount_tag.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:ecommerce/common/widgets/title_widget.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 
 class BestStoreNearbyView extends StatelessWidget {
   const BestStoreNearbyView({super.key});

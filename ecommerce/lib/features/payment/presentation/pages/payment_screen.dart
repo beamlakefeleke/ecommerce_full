@@ -14,7 +14,7 @@ import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/payment_failed_dialog.dart';
-import 'package:ecommerce/features/wallet/widgets/fund_payment_dialog_widget.dart';
+import 'package:ecommerce/features/wallet/presentation/widgets/fund_payment_dialog_widget.dart';
 
 class PaymentScreen extends StatefulWidget {
   final OrderModel orderModel;

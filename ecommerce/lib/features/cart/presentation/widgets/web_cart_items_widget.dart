@@ -10,7 +10,7 @@ import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/web_constrained_box.dart';
 import 'package:ecommerce/features/cart/presentation/widgets/cart_item_widget.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 import 'package:get/get.dart';
 
 class WebCardItemsWidget extends StatelessWidget {

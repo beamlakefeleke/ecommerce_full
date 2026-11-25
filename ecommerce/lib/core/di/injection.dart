@@ -175,6 +175,21 @@ import 'package:ecommerce/features/auth/domain/usecases/register_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_login_usecase.dart';
 import 'package:ecommerce/features/auth/domain/usecases/social_register_usecase.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecommerce/features/store/data/datasources/store_remote_data_source.dart';
+import 'package:ecommerce/features/store/data/repositories/store_repository_impl.dart';
+import 'package:ecommerce/features/store/domain/repositories/store_repository.dart';
+import 'package:ecommerce/features/store/domain/usecases/store_usecases.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/verification/data/datasources/verification_remote_data_source.dart';
+import 'package:ecommerce/features/verification/data/repositories/verification_repository_impl.dart';
+import 'package:ecommerce/features/verification/domain/repositories/verification_repository.dart';
+import 'package:ecommerce/features/verification/domain/usecases/verification_usecases.dart';
+import 'package:ecommerce/features/verification/presentation/bloc/verification_bloc.dart';
+import 'package:ecommerce/features/wallet/data/datasources/wallet_remote_data_source.dart';
+import 'package:ecommerce/features/wallet/data/repositories/wallet_repository_impl.dart';
+import 'package:ecommerce/features/wallet/domain/repositories/wallet_repository.dart';
+import 'package:ecommerce/features/wallet/domain/usecases/wallet_usecases.dart';
+import 'package:ecommerce/features/wallet/presentation/bloc/wallet_bloc.dart';
 
 /// Service locator for the migrated (Clean Architecture + BLoC) features.
 ///
@@ -220,6 +235,9 @@ void configureDependencies() {
   _registerReview();
   _registerSearch();
   _registerSplash();
+  _registerStore();
+  _registerVerification();
+  _registerWallet();
 }
 
 void _registerSplash() {
@@ -767,8 +785,7 @@ void _registerAuth() {
       // Config lives in the still-GetX splash feature; read it lazily so the
       // domain layer stays decoupled from SplashController.
       isCustomerVerificationOn: () =>
-          getIt<SplashBloc>().state.configModel?.customerVerification ??
-          false,
+          getIt<SplashBloc>().state.configModel?.customerVerification ?? false,
     ),
   );
 }
@@ -847,6 +864,91 @@ void _registerChat() {
       getMessages: getIt(),
       sendMessage: getIt(),
       repository: getIt(),
+    ),
+  );
+}
+
+void _registerStore() {
+  getIt.registerLazySingleton<StoreRemoteDataSource>(
+    () => StoreRemoteDataSourceImpl(
+      apiClient: getIt(),
+      sharedPreferences: getIt(),
+    ),
+  );
+  getIt.registerLazySingleton<StoreRepository>(
+    () => StoreRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetStoreListUseCase(getIt()));
+  getIt.registerFactory(() => GetPopularStoreListUseCase(getIt()));
+  getIt.registerFactory(() => GetLatestStoreListUseCase(getIt()));
+  getIt.registerFactory(() => GetFeaturedStoreListUseCase(getIt()));
+  getIt.registerFactory(() => GetVisitAgainStoreListUseCase(getIt()));
+  getIt.registerFactory(() => GetRecommendedStoreListUseCase(getIt()));
+  getIt.registerFactory(() => GetStoreDetailsUseCase(getIt()));
+  getIt.registerFactory(() => GetStoreItemListUseCase(getIt()));
+  getIt.registerFactory(() => GetStoreSearchItemListUseCase(getIt()));
+  getIt.registerFactory(() => GetStoreRecommendedItemListUseCase(getIt()));
+  getIt.registerFactory(() => GetCartStoreSuggestedItemListUseCase(getIt()));
+  getIt.registerFactory(() => GetStoreBannerListUseCase(getIt()));
+  // app-wide: store details are read from cart, checkout, home when deciding
+  // time slots and other per-store state.
+  getIt.registerLazySingleton(
+    () => StoreBloc(
+      getStoreList: getIt(),
+      getPopularStoreList: getIt(),
+      getLatestStoreList: getIt(),
+      getFeaturedStoreList: getIt(),
+      getVisitAgainStoreList: getIt(),
+      getRecommendedStoreList: getIt(),
+      getStoreDetails: getIt(),
+      getStoreItemList: getIt(),
+      getStoreSearchItemList: getIt(),
+      getStoreRecommendedItemList: getIt(),
+      getCartStoreSuggestedItemList: getIt(),
+      getStoreBannerList: getIt(),
+    ),
+  );
+}
+
+void _registerVerification() {
+  getIt.registerLazySingleton<VerificationRemoteDataSource>(
+    () => VerificationRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<VerificationRepository>(
+    () => VerificationRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => ForgetPasswordUseCase(getIt()));
+  getIt.registerFactory(() => ResetPasswordUseCase(getIt()));
+  getIt.registerFactory(() => VerifyPhoneUseCase(getIt()));
+  getIt.registerFactory(() => VerifyTokenUseCase(getIt()));
+  // screen-scoped: a fresh bloc per verification/forget/new-pass screen.
+  getIt.registerFactory(
+    () => VerificationBloc(
+      forgetPassword: getIt(),
+      resetPassword: getIt(),
+      verifyPhone: getIt(),
+      verifyToken: getIt(),
+      authRepository: getIt(),
+    ),
+  );
+}
+
+void _registerWallet() {
+  getIt.registerLazySingleton<WalletRemoteDataSource>(
+    () => WalletRemoteDataSourceImpl(apiClient: getIt(), sharedPreferences: getIt()),
+  );
+  getIt.registerLazySingleton<WalletRepository>(
+    () => WalletRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetWalletTransactionListUseCase(getIt()));
+  getIt.registerFactory(() => GetWalletBonusListUseCase(getIt()));
+  getIt.registerFactory(() => AddFundToWalletUseCase(getIt()));
+  // screen-scoped: a fresh bloc per wallet screen (not cross-cutting).
+  getIt.registerFactory(
+    () => WalletBloc(
+      getWalletTransactionList: getIt(),
+      getWalletBonusList: getIt(),
+      addFundToWallet: getIt(),
     ),
   );
 }

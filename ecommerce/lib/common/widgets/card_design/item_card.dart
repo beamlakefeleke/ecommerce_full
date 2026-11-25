@@ -1,3 +1,4 @@
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
@@ -313,7 +314,7 @@ class ItemCard extends StatelessWidget {
                               // SizedBox(height: item.discount != null && item.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
                               Text(
                                 PriceConverter.convertPrice(
-                                  Get.find<ItemController>().getStartingPrice(
+                                  getIt<ItemBloc>().state.getStartingPrice(
                                     item,
                                   ),
                                   discount: item.discount,

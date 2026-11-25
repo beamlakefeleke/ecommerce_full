@@ -19,7 +19,7 @@ import 'package:ecommerce/common/widgets/hover/on_hover.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:ecommerce/common/widgets/title_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/arrow_icon_button.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:get/get.dart';

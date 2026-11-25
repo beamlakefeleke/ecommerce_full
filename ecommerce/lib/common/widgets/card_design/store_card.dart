@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_state.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -21,7 +24,7 @@ import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/common/widgets/new_tag.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 
 class StoreCard extends StatelessWidget {
   final Store store;
@@ -34,7 +37,7 @@ class StoreCard extends StatelessWidget {
         getIt<SplashBloc>().state.module != null &&
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
-    double distance = Get.find<StoreController>().getRestaurantDistance(
+    double distance = StoreHelper.getRestaurantDistance(
       LatLng(double.parse(store.latitude!), double.parse(store.longitude!)),
     );
 
@@ -272,10 +275,7 @@ class StoreCard extends StatelessWidget {
                                   Images.clockIcon,
                                   height: 15,
                                   width: 15,
-                                  color:
-                                      Get.find<StoreController>().isOpenNow(
-                                        store,
-                                      )
+                                  color: StoreHelper.isOpenNow(store)
                                       ? const Color(0xffECA507)
                                       : Theme.of(context).colorScheme.error,
                                 ),
@@ -284,14 +284,11 @@ class StoreCard extends StatelessWidget {
                                 ),
 
                                 Text(
-                                  Get.find<StoreController>().isOpenNow(store)
+                                  StoreHelper.isOpenNow(store)
                                       ? 'open_now'.tr
                                       : 'closed_now'.tr,
                                   style: robotoBold.copyWith(
-                                    color:
-                                        Get.find<StoreController>().isOpenNow(
-                                          store,
-                                        )
+                                    color: StoreHelper.isOpenNow(store)
                                         ? const Color(0xffECA507)
                                         : Theme.of(context).colorScheme.error,
                                     fontSize: Dimensions.fontSizeSmall,
@@ -308,24 +305,26 @@ class StoreCard extends StatelessWidget {
 
                 Positioned(
                   top: 0,
-                  left: Get.find<LocalizationController>().isLtr ? null : 0,
-                  right: Get.find<LocalizationController>().isLtr ? 0 : null,
-                  child: GetBuilder<FavouriteController>(
-                    builder: (favouriteController) {
-                      bool isWished = favouriteController.wishStoreIdList
-                          .contains(store.id);
+                  left: getIt<LanguageBloc>().state.isLtr ? null : 0,
+                  right: getIt<LanguageBloc>().state.isLtr ? 0 : null,
+                  child: BlocBuilder<FavouriteBloc, FavouriteState>(
+                    bloc: getIt<FavouriteBloc>(),
+                    builder: (context, favouriteState) {
+                      bool isWished = favouriteState.wishStoreIdList.contains(
+                        store.id,
+                      );
                       return InkWell(
                         onTap: () {
                           if (AuthHelper.isLoggedIn()) {
                             isWished
-                                ? favouriteController.removeFromFavouriteList(
-                                    store.id,
-                                    true,
+                                ? getIt<FavouriteBloc>().add(
+                                    FavouriteRemoved(
+                                      id: store.id,
+                                      isStore: true,
+                                    ),
                                   )
-                                : favouriteController.addToFavouriteList(
-                                    null,
-                                    store,
-                                    true,
+                                : getIt<FavouriteBloc>().add(
+                                    FavouriteAdded(store: store, isStore: true),
                                   );
                           } else {
                             showCustomSnackBar('you_are_not_logged_in'.tr);

@@ -4,11 +4,6 @@ import 'dart:io';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:ecommerce/common/widgets/custom_loader.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
-import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
@@ -18,6 +13,10 @@ import 'package:ecommerce/features/auth/screens/sign_up_screen.dart';
 import 'package:ecommerce/features/auth/widgets/condition_check_box_widget.dart';
 import 'package:ecommerce/features/auth/widgets/guest_button_widget.dart';
 import 'package:ecommerce/features/auth/widgets/social_login_widget.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/helper/custom_validator.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -56,58 +55,6 @@ class SignInScreenState extends State<SignInScreen> {
 
   @override
   void initState() {
-    final fromSignUp = Get.parameters['page'] == RouteHelper.signUp;
-
-    const route = null;
-
-    Get.find<LocationController>().checkPermission(() async {
-      Get.dialog(const CustomLoader(), barrierDismissible: false);
-      AddressModel address = await Get.find<LocationController>()
-          .getCurrentLocation(true);
-      ZoneResponseModel response = await Get.find<LocationController>().getZone(
-        address.latitude,
-        address.longitude,
-        false,
-      );
-
-      if (response.isSuccess) {
-        Get.find<LocationController>().saveAddressAndNavigate(
-          address,
-          fromSignUp,
-          route,
-          route != null,
-          ResponsiveHelper.isDesktop(Get.context),
-        );
-      } else {
-        Get.back();
-        if (ResponsiveHelper.isDesktop(Get.context)) {
-          showGeneralDialog(
-            context: Get.context!,
-            pageBuilder: (_, __, ___) {
-              return const SizedBox(
-                height: 300,
-                width: 300,
-                child: PickMapScreen(
-                  fromSignUp: false,
-                  canRoute: true,
-                  fromAddAddress: false,
-                  route: route ?? RouteHelper.accessLocation,
-                ),
-              );
-            },
-          );
-        } else {
-          Get.toNamed(
-            RouteHelper.getPickMapRoute(
-              route ?? RouteHelper.accessLocation,
-              route != null,
-            ),
-          );
-          showCustomSnackBar('service_not_available_in_current_location'.tr);
-        }
-      }
-    });
-
     super.initState();
 
     final authRepository = getIt<AuthRepository>();
@@ -248,8 +195,7 @@ class SignInScreenState extends State<SignInScreen> {
                                 ),
 
                                 Align(
-                                  alignment:
-                                      Get.find<LocalizationController>().isLtr
+                                  alignment: getIt<LanguageBloc>().state.isLtr
                                       ? Alignment.topLeft
                                       : Alignment.topRight,
                                   child: Text(
@@ -281,7 +227,8 @@ class SignInScreenState extends State<SignInScreen> {
                                   },
                                   countryDialCode:
                                       _countryDialCode ??
-                                      Get.find<LocalizationController>()
+                                      getIt<LanguageBloc>()
+                                          .state
                                           .locale
                                           .countryCode,
                                 ),
@@ -555,7 +502,8 @@ class SignInScreenState extends State<SignInScreen> {
 
   /// Post-login navigation. Driven by [AuthState.nextStep] emitted by the bloc.
   void _onLoginSuccess(AuthState state) async {
-    Get.find<CartController>().getCartDataOnline();
+    // Refresh cart from server now that we have a real user token.
+    getIt<CartBloc>().add(const CartDataOnlineRequested());
 
     if (state.nextStep == AuthNextStep.verification) {
       final String password = _passwordController.text.trim();
@@ -583,57 +531,12 @@ class SignInScreenState extends State<SignInScreen> {
     _navigateAfterAuth();
   }
 
-  /// Shared location-resolution flow used on first login (and initState).
+  /// Navigate to the location selection screen (or home if already set).
+  /// Uses the migrated [LocationHelper] — no LocationController needed.
   void _navigateAfterAuth() {
     final fromSignUp = Get.parameters['page'] == RouteHelper.signUp;
-    const route = null;
-
-    Get.find<LocationController>().checkPermission(() async {
-      Get.dialog(const CustomLoader(), barrierDismissible: false);
-      AddressModel address = await Get.find<LocationController>()
-          .getCurrentLocation(true);
-      ZoneResponseModel response = await Get.find<LocationController>().getZone(
-        address.latitude,
-        address.longitude,
-        false,
-      );
-
-      if (response.isSuccess) {
-        Get.find<LocationController>().saveAddressAndNavigate(
-          address,
-          fromSignUp,
-          route,
-          route != null,
-          ResponsiveHelper.isDesktop(Get.context),
-        );
-      } else {
-        Get.back();
-        if (ResponsiveHelper.isDesktop(Get.context)) {
-          showGeneralDialog(
-            context: Get.context!,
-            pageBuilder: (_, _, _) {
-              return const SizedBox(
-                height: 300,
-                width: 300,
-                child: PickMapScreen(
-                  fromSignUp: false,
-                  canRoute: true,
-                  fromAddAddress: false,
-                  route: route ?? RouteHelper.accessLocation,
-                ),
-              );
-            },
-          );
-        } else {
-          Get.toNamed(
-            RouteHelper.getPickMapRoute(
-              route ?? RouteHelper.accessLocation,
-              route != null,
-            ),
-          );
-          showCustomSnackBar('service_not_available_in_current_location'.tr);
-        }
-      }
-    });
+    LocationHelper.navigateToLocationScreen(
+      fromSignUp ? RouteHelper.signUp : 'sign-in',
+    );
   }
 }

@@ -9,7 +9,7 @@ import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
-import 'package:ecommerce/features/auth/domain/models/social_log_in_body.dart';
+import 'package:ecommerce/features/auth/data/models/social_log_in_body.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
@@ -27,7 +27,7 @@ import 'package:ecommerce/features/auth/screens/sign_up_screen.dart';
 import 'package:ecommerce/features/auth/screens/store_registration_screen.dart';
 import 'package:ecommerce/features/category/presentation/pages/category_screen.dart';
 import 'package:ecommerce/features/location/presentation/pages/map_screen.dart';
-import 'package:ecommerce/features/store/screens/campaign_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/campaign_screen.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -50,9 +50,9 @@ import 'package:ecommerce/features/flash_sale/presentation/pages/flash_sale_deta
 import 'package:ecommerce/features/item/presentation/pages/item_campaign_screen.dart';
 import 'package:ecommerce/features/item/presentation/pages/item_details_screen.dart';
 import 'package:ecommerce/features/item/presentation/pages/popular_item_screen.dart';
-import 'package:ecommerce/features/verification/screens/forget_pass_screen.dart';
-import 'package:ecommerce/features/verification/screens/new_pass_screen.dart';
-import 'package:ecommerce/features/verification/screens/verification_screen.dart';
+import 'package:ecommerce/features/verification/presentation/pages/forget_pass_screen.dart';
+import 'package:ecommerce/features/verification/presentation/pages/new_pass_screen.dart';
+import 'package:ecommerce/features/verification/presentation/pages/verification_screen.dart';
 import 'package:ecommerce/features/html/presentation/pages/html_viewer_screen.dart';
 import 'package:ecommerce/features/interest/screens/interest_screen.dart';
 import 'package:ecommerce/features/language/presentation/pages/language_screen.dart';
@@ -70,9 +70,9 @@ import 'package:ecommerce/features/parcel/presentation/pages/parcel_location_scr
 import 'package:ecommerce/features/parcel/presentation/pages/parcel_request_screen.dart';
 import 'package:ecommerce/features/profile/presentation/pages/profile_screen.dart';
 import 'package:ecommerce/features/profile/presentation/pages/update_profile_screen.dart';
-import 'package:ecommerce/features/store/screens/all_store_screen.dart';
-import 'package:ecommerce/features/store/screens/store_item_search_screen.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/all_store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_item_search_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 import 'package:ecommerce/features/review/presentation/pages/review_screen.dart';
 import 'package:ecommerce/features/search/presentation/pages/search_screen.dart';
 import 'package:ecommerce/features/splash/presentation/pages/splash_screen.dart';
@@ -88,7 +88,7 @@ import 'package:ecommerce/features/taxi_booking/trip_history/trip_history_screen
 import 'package:ecommerce/features/update/screens/update_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/wallet/screens/wallet_screen.dart';
+import 'package:ecommerce/features/wallet/presentation/pages/wallet_screen.dart';
 
 class RouteHelper {
   static const String initial = '/';

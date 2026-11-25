@@ -2,7 +2,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
@@ -41,14 +41,8 @@ class SocialLoginWidget extends StatelessWidget {
   Widget _buildBody(BuildContext context, GoogleSignIn googleSignIn) {
     return getIt<SplashBloc>().state.configModel != null &&
             getIt<SplashBloc>().state.configModel!.socialLogin!.isNotEmpty &&
-            (getIt<SplashBloc>().state
-                    .configModel!
-                    .socialLogin![0]
-                    .status! ||
-                getIt<SplashBloc>().state
-                    .configModel!
-                    .socialLogin![1]
-                    .status!)
+            (getIt<SplashBloc>().state.configModel!.socialLogin![0].status! ||
+                getIt<SplashBloc>().state.configModel!.socialLogin![1].status!)
         ? Column(
             children: [
               Center(
@@ -68,10 +62,7 @@ class SocialLoginWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  getIt<SplashBloc>().state
-                          .configModel!
-                          .socialLogin![0]
-                          .status!
+                  getIt<SplashBloc>().state.configModel!.socialLogin![0].status!
                       ? InkWell(
                           onTap: () async {
                             GoogleSignInAccount googleAccount =
@@ -115,7 +106,8 @@ class SocialLoginWidget extends StatelessWidget {
                       : const SizedBox(),
                   SizedBox(
                     width:
-                        getIt<SplashBloc>().state
+                        getIt<SplashBloc>()
+                            .state
                             .configModel!
                             .socialLogin![0]
                             .status!
@@ -124,10 +116,7 @@ class SocialLoginWidget extends StatelessWidget {
                   ),
 
                   // SizedBox(width: Dimensions.PADDING_SIZE_SMALL),
-                  getIt<SplashBloc>().state
-                          .configModel!
-                          .socialLogin![1]
-                          .status!
+                  getIt<SplashBloc>().state.configModel!.socialLogin![1].status!
                       ? InkWell(
                           onTap: () async {
                             LoginResult result = await FacebookAuth.instance
@@ -173,11 +162,13 @@ class SocialLoginWidget extends StatelessWidget {
                       : const SizedBox(),
                   const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                  getIt<SplashBloc>().state
+                  getIt<SplashBloc>()
+                              .state
                               .configModel!
                               .appleLogin!
                               .isNotEmpty &&
-                          getIt<SplashBloc>().state
+                          getIt<SplashBloc>()
+                              .state
                               .configModel!
                               .appleLogin![0]
                               .status! &&
@@ -193,7 +184,8 @@ class SocialLoginWidget extends StatelessWidget {
                                   ],
                                   webAuthenticationOptions:
                                       WebAuthenticationOptions(
-                                        clientId: getIt<SplashBloc>().state
+                                        clientId: getIt<SplashBloc>()
+                                            .state
                                             .configModel!
                                             .appleLogin![0]
                                             .clientId!,
@@ -252,7 +244,7 @@ class SocialLoginWidget extends StatelessWidget {
     }
     switch (state.nextStep) {
       case AuthNextStep.location:
-        Get.find<LocationController>().navigateToLocationScreen('sign-in');
+        LocationHelper.navigateToLocationScreen('sign-in');
         break;
       case AuthNextStep.verification:
         Get.toNamed(

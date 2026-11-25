@@ -19,21 +19,9 @@ import 'package:ecommerce/features/auth/domain/services/deliveryman_registration
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/store/domain/repositories/store_repository.dart';
-import 'package:ecommerce/features/store/domain/repositories/store_repository_interface.dart';
-import 'package:ecommerce/features/store/domain/services/store_service.dart';
-import 'package:ecommerce/features/store/domain/services/store_service_interface.dart';
-import 'package:ecommerce/features/verification/controllers/verification_controller.dart';
-import 'package:ecommerce/features/verification/domein/reposotories/verification_repository.dart';
-import 'package:ecommerce/features/verification/domein/reposotories/verification_repository_interface.dart';
-import 'package:ecommerce/features/verification/domein/services/verification_service.dart';
-import 'package:ecommerce/features/verification/domein/services/verification_service_interface.dart';
-import 'package:ecommerce/features/wallet/controllers/wallet_controller.dart';
-import 'package:ecommerce/features/wallet/domain/repositories/wallet_repository.dart';
-import 'package:ecommerce/features/wallet/domain/repositories/wallet_repository_interface.dart';
-import 'package:ecommerce/features/wallet/domain/services/wallet_service.dart';
-import 'package:ecommerce/features/wallet/domain/services/wallet_service_interface.dart';
+// Store feature migrated to Clean Architecture + BLoC in lib/core/di/injection.dart
+// Wallet feature migrated to Clean Architecture + BLoC in lib/core/di/injection.dart
+// Verification feature migrated to Clean Architecture + BLoC in lib/core/di/injection.dart
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/features/language/data/models/language_model.dart';
 import 'package:flutter/services.dart';
@@ -73,24 +61,12 @@ Future<Map<String, Map<String, String>>> init() async {
       StoreRegistrationRepository(apiClient: Get.find());
   Get.lazyPut(() => storeRegistrationRepositoryInterface);
 
-  StoreRepositoryInterface storeRepositoryInterface = StoreRepository(
-    apiClient: Get.find(),
-    sharedPreferences: Get.find(),
-  );
-  Get.lazyPut(() => storeRepositoryInterface);
+  // StoreRepositoryInterface and StoreService moved to injection.dart (_registerStore)
+  // StoreController moved to injection.dart (_registerStore) as StoreBloc
 
-  WalletRepositoryInterface walletRepositoryInterface = WalletRepository(
-    sharedPreferences: Get.find(),
-    apiClient: Get.find(),
-  );
-  Get.lazyPut(() => walletRepositoryInterface);
+  // WalletRepository/Service moved to injection.dart (_registerWallet)
 
-  VerificationRepositoryInterface verificationRepositoryInterface =
-      VerificationRepository(
-        apiClient: Get.find(),
-        sharedPreferences: Get.find(),
-      );
-  Get.lazyPut(() => verificationRepositoryInterface);
+  // VerificationRepository/Service moved to injection.dart (_registerVerification)
 
   /// Service Interface
   DeliverymanRegistrationServiceInterface
@@ -107,22 +83,11 @@ Future<Map<String, Map<String, String>>> init() async {
       );
   Get.lazyPut(() => storeRegistrationServiceInterface);
 
-  StoreServiceInterface storeServiceInterface = StoreService(
-    storeRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => storeServiceInterface);
+  // StoreServiceInterface moved to injection.dart (_registerStore)
 
-  WalletServiceInterface walletServiceInterface = WalletService(
-    walletRepositoryInterface: Get.find(),
-  );
-  Get.lazyPut(() => walletServiceInterface);
+  // WalletService moved to injection.dart (_registerWallet)
 
-  VerificationServiceInterface verificationServiceInterface =
-      VerificationService(
-        verificationRepoInterface: Get.find(),
-        authRepoInterface: Get.find(),
-      );
-  Get.lazyPut(() => verificationServiceInterface);
+  // VerificationService moved to injection.dart (_registerVerification)
 
   /// Controller
   Get.lazyPut(() => ThemeController(sharedPreferences: Get.find()));
@@ -136,14 +101,12 @@ Future<Map<String, Map<String, String>>> init() async {
       storeRegistrationServiceInterface: Get.find(),
     ),
   );
-  Get.lazyPut(() => StoreController(storeServiceInterface: Get.find()));
-  Get.lazyPut(() => WalletController(walletServiceInterface: Get.find()));
+  // StoreController moved to StoreBloc in injection.dart
+  // WalletController moved to WalletBloc in injection.dart
   Get.lazyPut(() => RiderController(riderRepo: Get.find()));
   Get.lazyPut(() => CarSelectionController(carSelectionRepo: Get.find()));
   Get.lazyPut(() => BookingCheckoutController(riderRepo: Get.find()));
-  Get.lazyPut(
-    () => VerificationController(verificationServiceInterface: Get.find()),
-  );
+  // VerificationController moved to VerificationBloc in injection.dart
 
   /// Retrieving localized data
   Map<String, Map<String, String>> languages = {};

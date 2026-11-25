@@ -23,7 +23,10 @@ import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dar
 import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository.dart';
 import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/home/screens/home_screen.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_event.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_state.dart';
+import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -181,15 +184,17 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   /// Port of CheckoutController.initCheckoutData: resets coupon, clears prev
-  /// data, loads the store (via StoreController) and initializes time slots.
+  /// data, loads the store (via StoreBloc) and initializes time slots.
   Future<void> _initCheckoutData(int? storeId) async {
     _couponBloc.add(const CouponDataRemoved());
     _checkoutBloc.add(const CheckoutPrevDataCleared());
-    final store = await Get.find<StoreController>().getStoreDetails(
-      Store(id: storeId),
-      false,
-    );
-    _checkoutBloc.add(CheckoutTimeSlotInitialized(store!));
+    final storeBloc = getIt<StoreBloc>();
+    storeBloc.add(StoreDetailsRequested(storeID: storeId.toString()));
+    final storeState = await storeBloc.stream.firstWhere((s) => !s.isLoading);
+    final store = storeState.store;
+    if (store != null) {
+      _checkoutBloc.add(CheckoutTimeSlotInitialized(store));
+    }
   }
 
   /// Port of CheckoutController.callback — runs after a place-order result.
@@ -338,7 +343,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                   store: checkoutController.store,
                 );
                 _isOfflinePaymentActive =
-                    getIt<SplashBloc>().state
+                    getIt<SplashBloc>()
+                        .state
                         .configModel!
                         .offlinePaymentStatus! &&
                     _checkZoneOfflinePaymentOnOff(
@@ -346,12 +352,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                           AddressHelper.getUserAddressFromSharedPref(),
                     );
                 if (checkoutController.store != null) {
-                  todayClosed = Get.find<StoreController>().isStoreClosed(
+                  todayClosed = StoreHelper.isStoreClosed(
                     true,
                     checkoutController.store!.active!,
                     checkoutController.store!.schedules,
                   );
-                  tomorrowClosed = Get.find<StoreController>().isStoreClosed(
+                  tomorrowClosed = StoreHelper.isStoreClosed(
                     false,
                     checkoutController.store!.active!,
                     checkoutController.store!.schedules,
@@ -388,8 +394,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       couponController.discount!,
                     );
                     bool taxIncluded =
-                        getIt<SplashBloc>().state.configModel!.taxIncluded ==
-                        1;
+                        getIt<SplashBloc>().state.configModel!.taxIncluded == 1;
                     double orderAmount = _calculateOrderAmount(
                       price: price,
                       variations: variations,
@@ -410,12 +415,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       cartList: _cartList,
                     );
                     double additionalCharge =
-                        getIt<SplashBloc>().state
+                        getIt<SplashBloc>()
+                            .state
                             .configModel!
                             .additionalChargeStatus!
-                        ? getIt<SplashBloc>().state
-                              .configModel!
-                              .additionCharge!
+                        ? getIt<SplashBloc>().state.configModel!.additionCharge!
                         : 0;
                     double originalCharge = _calculateOriginalDeliveryCharge(
                       store: checkoutController.store,
@@ -955,7 +959,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       (checkoutController.selectedDateSlot == 1 &&
                           tomorrowClosed)) {
                     showCustomSnackBar(
-                      getIt<SplashBloc>().state
+                      getIt<SplashBloc>()
+                              .state
                               .configModel!
                               .moduleConfig!
                               .module!
@@ -981,7 +986,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       showCustomSnackBar('select_a_time'.tr);
                     } else {
                       showCustomSnackBar(
-                        getIt<SplashBloc>().state
+                        getIt<SplashBloc>()
+                                .state
                                 .configModel!
                                 .moduleConfig!
                                 .module!
@@ -1054,8 +1060,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
                         List<OrderVariation> variations = [];
                         if (getIt<SplashBloc>()
-                            .getModuleConfig(cart.item!.moduleType)
-                            ?.newVariation ?? false) {
+                                .getModuleConfig(cart.item!.moduleType)
+                                ?.newVariation ??
+                            false) {
                           for (
                             int i = 0;
                             i < cart.item!.foodVariations!.length;
@@ -1102,13 +1109,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                             cart.discountedPrice.toString(),
                             '',
                             getIt<SplashBloc>()
-                                    .getModuleConfig(cart.item!.moduleType)
-                                  ?.newVariation ?? false
+                                        .getModuleConfig(cart.item!.moduleType)
+                                        ?.newVariation ??
+                                    false
                                 ? null
                                 : cart.variation,
                             getIt<SplashBloc>()
-                                    .getModuleConfig(cart.item!.moduleType)
-                                    ?.newVariation ?? false
+                                        .getModuleConfig(cart.item!.moduleType)
+                                        ?.newVariation ??
+                                    false
                                 ? variations
                                 : null,
                             cart.quantity,
@@ -1388,8 +1397,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     if (cartList != null) {
       for (var cartModel in cartList) {
         if (getIt<SplashBloc>()
-            .getModuleConfig(cartModel!.item!.moduleType)
-            ?.newVariation ?? false) {
+                .getModuleConfig(cartModel!.item!.moduleType)
+                ?.newVariation ??
+            false) {
           price = price + (cartModel.item!.price! * cartModel.quantity!);
         } else {
           price = _calculateVariationPrice(store: store, cartList: cartList);
@@ -1443,8 +1453,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             : 'percent';
 
         if (getIt<SplashBloc>()
-            .getModuleConfig(cartModel.item!.moduleType)
-            ?.newVariation ?? false) {
+                .getModuleConfig(cartModel.item!.moduleType)
+                ?.newVariation ??
+            false) {
           for (
             int index = 0;
             index < cartModel.item!.foodVariations!.length;
@@ -1546,8 +1557,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             ? 'percent'
             : cartModel.item!.discountType;
         if (getIt<SplashBloc>()
-            .getModuleConfig(cartModel.item!.moduleType)
-            ?.newVariation ?? false) {
+                .getModuleConfig(cartModel.item!.moduleType)
+                ?.newVariation ??
+            false) {
           double d =
               ((cartModel.item!.price! -
                   PriceConverter.convertWithDiscount(
@@ -1629,10 +1641,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     double orderAmount = 0;
     double variationPrice = 0;
     if (cartList != null &&
-        cartList.isNotEmpty &&
-        getIt<SplashBloc>()
-            .getModuleConfig(cartList[0]?.item?.moduleType)
-            ?.newVariation ?? false ) {
+            cartList.isNotEmpty &&
+            getIt<SplashBloc>()
+                .getModuleConfig(cartList[0]?.item?.moduleType)
+                ?.newVariation ??
+        false) {
       variationPrice = variations;
     }
     orderAmount = (price + variationPrice - discount) + addOns - couponDiscount;
@@ -1663,9 +1676,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     bool isFoodVariation = false;
 
     if (cartList != null && cartList.isNotEmpty) {
-      isFoodVariation = getIt<SplashBloc>()
-          .getModuleConfig(cartList[0]!.item!.moduleType)
-          ?.newVariation ?? false;
+      isFoodVariation =
+          getIt<SplashBloc>()
+              .getModuleConfig(cartList[0]!.item!.moduleType)
+              ?.newVariation ??
+          false;
     }
     if (isFoodVariation) {
       subTotal = price + addOns + variations;

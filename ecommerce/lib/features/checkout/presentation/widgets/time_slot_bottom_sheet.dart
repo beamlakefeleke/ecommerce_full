@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_state.dart';
+import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
@@ -68,8 +70,9 @@ class TimeSlotBottomSheet extends StatelessWidget {
               ),
               child: BlocBuilder<CheckoutBloc, CheckoutState>(
                 builder: (context, checkoutController) {
-                  return GetBuilder<StoreController>(
-                    builder: (storeController) {
+                  return BlocBuilder<StoreBloc, StoreState>(
+                    bloc: getIt<StoreBloc>(),
+                    builder: (context, storeState) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -85,7 +88,8 @@ class TimeSlotBottomSheet extends StatelessWidget {
                                     context.read<CheckoutBloc>().add(
                                       CheckoutDateSlotUpdated(
                                         0,
-                                        Get.find<StoreController>()
+                                        getIt<StoreBloc>()
+                                            .state
                                             .store!
                                             .orderPlaceToScheduleInterval,
                                       ),
@@ -104,7 +108,8 @@ class TimeSlotBottomSheet extends StatelessWidget {
                                     context.read<CheckoutBloc>().add(
                                       CheckoutDateSlotUpdated(
                                         1,
-                                        Get.find<StoreController>()
+                                        getIt<StoreBloc>()
+                                            .state
                                             .store!
                                             .orderPlaceToScheduleInterval,
                                       ),
@@ -156,21 +161,17 @@ class TimeSlotBottomSheet extends StatelessWidget {
                                                   checkoutController
                                                           .selectedDateSlot ==
                                                       0 &&
-                                                  storeController
-                                                      .isStoreOpenNow(
-                                                        storeController
-                                                            .store!
-                                                            .active!,
-                                                        storeController
-                                                            .store!
-                                                            .schedules,
-                                                      ) &&
-                                                  (getIt<SplashBloc>().state
+                                                  StoreHelper.isStoreOpenNow(
+                                                    storeState.store!.active!,
+                                                    storeState.store!.schedules,
+                                                  ) &&
+                                                  (getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .moduleConfig!
                                                           .module!
                                                           .orderPlaceToScheduleInterval!
-                                                      ? storeController
+                                                      ? storeState
                                                                 .store!
                                                                 .orderPlaceToScheduleInterval ==
                                                             0

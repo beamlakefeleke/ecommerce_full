@@ -28,7 +28,7 @@ import 'package:ecommerce/features/checkout/presentation/widgets/partial_pay_vie
 import 'package:ecommerce/features/checkout/presentation/widgets/payment_section.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/time_slot_section.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/web_delivery_instruction_view.dart';
-import 'package:ecommerce/features/store/widgets/camera_button_sheet_widget.dart';
+import 'package:ecommerce/features/store/presentation/widgets/camera_button_sheet_widget.dart';
 import 'dart:io';
 
 class TopSection extends StatelessWidget {

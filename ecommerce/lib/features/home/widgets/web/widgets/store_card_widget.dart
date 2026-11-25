@@ -22,7 +22,7 @@ import 'package:ecommerce/common/widgets/discount_tag.dart';
 import 'package:ecommerce/common/widgets/hover/on_hover.dart';
 import 'package:ecommerce/common/widgets/not_available_widget.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
-import 'package:ecommerce/features/store/screens/store_screen.dart';
+import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 
 class StoreCardWidget extends StatelessWidget {
   final Store? store;

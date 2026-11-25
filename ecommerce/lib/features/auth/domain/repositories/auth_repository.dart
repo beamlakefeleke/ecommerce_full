@@ -55,6 +55,8 @@ abstract class AuthRepository {
 
   Future<void> updateToken();
   Future<void> updateZone();
+  Future<void> saveUserToken(String token);
+  Future<void> clearGuestId();
 
   // --- local session state (SharedPreferences) ---
   bool isLoggedIn();

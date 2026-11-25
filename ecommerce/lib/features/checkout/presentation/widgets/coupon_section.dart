@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
 import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/checkout_balance_helper.dart';
@@ -47,7 +48,7 @@ class CouponSection extends StatelessWidget {
             couponCode: couponTextController.text,
             order: (price - discount) + addOns,
             deliveryCharge: deliveryCharge,
-            storeId: Get.find<StoreController>().store!.id,
+            storeId: getIt<StoreBloc>().state.store?.id,
           ),
         );
       }
@@ -126,7 +127,7 @@ class CouponSection extends StatelessWidget {
                                 Dialog(
                                   child: CouponBottomSheet(
                                     storeId:
-                                        Get.find<StoreController>().store!.id,
+                                        getIt<StoreBloc>().state.store!.id,
                                   ),
                                 ),
                               ).then((value) {
@@ -141,7 +142,7 @@ class CouponSection extends StatelessWidget {
                                 backgroundColor: Colors.transparent,
                                 builder: (con) => CouponBottomSheet(
                                   storeId:
-                                      Get.find<StoreController>().store!.id,
+                                      getIt<StoreBloc>().state.store!.id,
                                 ),
                               ).then((value) async {
                                 if (value != null) {

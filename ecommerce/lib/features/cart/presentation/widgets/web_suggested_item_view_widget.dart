@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_state.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -24,22 +26,23 @@ class WebSuggestedItemViewWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GetBuilder<StoreController>(
-            builder: (storeController) {
+          BlocBuilder<StoreBloc, StoreState>(
+            bloc: getIt<StoreBloc>(),
+            builder: (context, storeState) {
               List<Item>? suggestedItems;
-              if (storeController.cartSuggestItemModel != null) {
+              if (storeState.cartSuggestItemModel != null) {
                 suggestedItems = [];
                 final List<int> cartIds = cartList
                     .map((c) => c.item!.id!)
                     .toList();
                 for (final Item item
-                    in storeController.cartSuggestItemModel!.items!) {
+                    in storeState.cartSuggestItemModel!.items!) {
                   if (!cartIds.contains(item.id)) {
                     suggestedItems.add(item);
                   }
                 }
               }
-              if (storeController.cartSuggestItemModel == null ||
+              if (storeState.cartSuggestItemModel == null ||
                   (suggestedItems?.isEmpty ?? true)) {
                 return const SizedBox();
               }
