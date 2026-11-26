@@ -1,8 +1,7 @@
 import 'package:ecommerce/common/widgets/title_widget.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -11,8 +10,8 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 class BasicCampaignView extends StatelessWidget {
-  final CampaignController campaignController;
-  const BasicCampaignView({super.key, required this.campaignController});
+  final CampaignState campaignState;
+  const BasicCampaignView({super.key, required this.campaignState});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +23,9 @@ class BasicCampaignView extends StatelessWidget {
         ),
         SizedBox(
           height: 80,
-          child: campaignController.basicCampaignList != null
+          child: campaignState.basicCampaignList != null
               ? ListView.builder(
-                  itemCount: campaignController.basicCampaignList!.length,
+                  itemCount: campaignState.basicCampaignList!.length,
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.only(
                     left: Dimensions.paddingSizeSmall,
@@ -36,7 +35,7 @@ class BasicCampaignView extends StatelessWidget {
                     return InkWell(
                       onTap: () => Get.toNamed(
                         RouteHelper.getBasicCampaignRoute(
-                          campaignController.basicCampaignList![index],
+                          campaignState.basicCampaignList![index],
                         ),
                       ),
                       child: Container(
@@ -63,7 +62,7 @@ class BasicCampaignView extends StatelessWidget {
                           child: CustomImage(
                             image:
                                 '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
-                                '/${campaignController.basicCampaignList![index].image}',
+                                '/${campaignState.basicCampaignList![index].image}',
                             width: 200,
                             height: 80,
                             fit: BoxFit.cover,
@@ -73,7 +72,7 @@ class BasicCampaignView extends StatelessWidget {
                     );
                   },
                 )
-              : CampaignShimmer(campaignController: campaignController),
+              : CampaignShimmer(campaignState: campaignState),
         ),
       ],
     );
@@ -81,8 +80,8 @@ class BasicCampaignView extends StatelessWidget {
 }
 
 class CampaignShimmer extends StatelessWidget {
-  final CampaignController campaignController;
-  const CampaignShimmer({super.key, required this.campaignController});
+  final CampaignState campaignState;
+  const CampaignShimmer({super.key, required this.campaignState});
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +94,7 @@ class CampaignShimmer extends StatelessWidget {
       itemBuilder: (context, index) {
         return Shimmer(
           duration: const Duration(seconds: 2),
-          enabled: campaignController.basicCampaignList == null,
+          enabled: campaignState.basicCampaignList == null,
           child: Container(
             width: 200,
             height: 80,

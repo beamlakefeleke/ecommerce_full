@@ -304,6 +304,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                                 ),
                                                               ),
                                                           child: DottedBorder(
+                                                            options: RoundedRectDottedBorderOptions(
                                                             color: Theme.of(
                                                               context,
                                                             ).primaryColor,
@@ -318,13 +319,11 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                                 const EdgeInsets.all(
                                                                   0,
                                                                 ),
-                                                            borderType:
-                                                                BorderType
-                                                                    .RRect,
+                                                          
                                                             radius: const Radius.circular(
                                                               Dimensions
                                                                   .radiusDefault,
-                                                            ),
+                                                            ),),
                                                             child: Center(
                                                               child: Visibility(
                                                                 visible:
@@ -466,6 +465,7 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                               ),
                                                             ),
                                                         child: DottedBorder(
+                                                          options: RoundedRectDottedBorderOptions(
                                                           color: Theme.of(
                                                             context,
                                                           ).primaryColor,
@@ -480,13 +480,12 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                               const EdgeInsets.all(
                                                                 0,
                                                               ),
-                                                          borderType:
-                                                              BorderType.RRect,
+                                                          
                                                           radius:
                                                               const Radius.circular(
                                                                 Dimensions
                                                                     .radiusDefault,
-                                                              ),
+                                                              ),),
                                                           child: Center(
                                                             child: Visibility(
                                                               visible:
@@ -1193,15 +1192,15 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                               ),
                                             ),
                                         child: DottedBorder(
+                                          options: RoundedRectDottedBorderOptions(
                                           color: Theme.of(context).primaryColor,
                                           strokeWidth: 1,
                                           strokeCap: StrokeCap.butt,
                                           dashPattern: const [5, 5],
-                                          padding: const EdgeInsets.all(0),
-                                          borderType: BorderType.RRect,
+                                          padding: const EdgeInsets.all(0),                                          
                                           radius: const Radius.circular(
                                             Dimensions.radiusDefault,
-                                          ),
+                                          ),),
                                           child: Center(
                                             child: Visibility(
                                               visible:
@@ -1340,15 +1339,15 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                             ),
                                           ),
                                       child: DottedBorder(
+                                        options: RoundedRectDottedBorderOptions(
                                         color: Theme.of(context).primaryColor,
                                         strokeWidth: 1,
                                         strokeCap: StrokeCap.butt,
                                         dashPattern: const [5, 5],
                                         padding: const EdgeInsets.all(0),
-                                        borderType: BorderType.RRect,
                                         radius: const Radius.circular(
                                           Dimensions.radiusDefault,
-                                        ),
+                                        ),),
                                         child: Center(
                                           child: Visibility(
                                             visible:

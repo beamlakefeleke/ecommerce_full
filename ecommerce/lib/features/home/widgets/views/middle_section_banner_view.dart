@@ -1,8 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
@@ -20,7 +21,8 @@ class MiddleSectionBannerView extends StatefulWidget {
 }
 
 class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
-  final CarouselController carouselController = CarouselController();
+  final CarouselSliderController carouselController =
+      CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +31,10 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy;
 
-    return GetBuilder<CampaignController>(
-      builder: (campaignController) {
-        return campaignController.basicCampaignList != null
-            ? campaignController.basicCampaignList!.isNotEmpty
+    return BlocBuilder<CampaignBloc, CampaignState>(
+      builder: (context, state) {
+        return state.basicCampaignList != null
+            ? state.basicCampaignList!.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: Dimensions.paddingSizeDefault,
@@ -42,8 +44,7 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
                         children: [
                           CarouselSlider.builder(
                             carouselController: carouselController,
-                            itemCount:
-                                campaignController.basicCampaignList!.length,
+                            itemCount: state.basicCampaignList!.length,
                             options: CarouselOptions(
                               height: isPharmacy ? 187 : 135,
                               //autoPlay: true,
@@ -51,7 +52,9 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
                               disableCenter: true,
                               viewportFraction: 0.95,
                               onPageChanged: (index, reason) {
-                                campaignController.setCurrentIndex(index, true);
+                                getIt<CampaignBloc>().add(
+                                  CampaignCurrentIndexChanged(index),
+                                );
                               },
                             ),
                             itemBuilder:
@@ -63,8 +66,7 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
                                   return InkWell(
                                     onTap: () => Get.toNamed(
                                       RouteHelper.getBasicCampaignRoute(
-                                        campaignController
-                                            .basicCampaignList![itemIndex],
+                                        state.basicCampaignList![itemIndex],
                                       ),
                                     ),
                                     child: Container(
@@ -83,7 +85,7 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
                                         child: CustomImage(
                                           image:
                                               '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
-                                              '/${campaignController.basicCampaignList![itemIndex].image}',
+                                              '/${state.basicCampaignList![itemIndex].image}',
                                           fit: BoxFit.cover,
                                           height: 80,
                                           width: double.infinity,
@@ -99,44 +101,37 @@ class _MiddleSectionBannerViewState extends State<MiddleSectionBannerView> {
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: campaignController.basicCampaignList!.map(
-                              (bnr) {
-                                int index = campaignController
-                                    .basicCampaignList!
-                                    .indexOf(bnr);
+                            children: state.basicCampaignList!.map((bnr) {
+                              int index = state.basicCampaignList!.indexOf(bnr);
 
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 3,
-                                  ),
-                                  child:
-                                      index == campaignController.currentIndex
-                                      ? Container(
-                                          width: 8,
-                                          height: 8,
-                                          margin: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Theme.of(
-                                              context,
-                                            ).primaryColor,
-                                          ),
-                                        )
-                                      : Container(
-                                          height: 5,
-                                          width: 6,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(
-                                              context,
-                                            ).primaryColor.withOpacity(0.5),
-                                            borderRadius: BorderRadius.circular(
-                                              Dimensions.radiusDefault,
-                                            ),
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
+                                child: index == state.currentIndex
+                                    ? Container(
+                                        width: 8,
+                                        height: 8,
+                                        margin: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      )
+                                    : Container(
+                                        height: 5,
+                                        width: 6,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(
+                                            context,
+                                          ).primaryColor.withOpacity(0.5),
+                                          borderRadius: BorderRadius.circular(
+                                            Dimensions.radiusDefault,
                                           ),
                                         ),
-                                );
-                              },
-                            ).toList(),
+                                      ),
+                              );
+                            }).toList(),
                           ),
                         ],
                       ),

@@ -1,9 +1,8 @@
 import 'package:ecommerce/common/widgets/title_widget.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -14,6 +13,7 @@ import 'package:ecommerce/common/widgets/discount_tag.dart';
 import 'package:ecommerce/common/widgets/not_available_widget.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:get/get.dart';
 
@@ -22,10 +22,10 @@ class ItemCampaignView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CampaignController>(
-      builder: (campaignController) {
-        return (campaignController.itemCampaignList != null &&
-                campaignController.itemCampaignList!.isEmpty)
+    return BlocBuilder<CampaignBloc, CampaignState>(
+      builder: (context, state) {
+        return (state.itemCampaignList != null &&
+                state.itemCampaignList!.isEmpty)
             ? const SizedBox()
             : Column(
                 children: [
@@ -40,7 +40,7 @@ class ItemCampaignView extends StatelessWidget {
 
                   SizedBox(
                     height: 150,
-                    child: campaignController.itemCampaignList != null
+                    child: state.itemCampaignList != null
                         ? ListView.builder(
                             controller: ScrollController(),
                             physics: const BouncingScrollPhysics(),
@@ -48,10 +48,9 @@ class ItemCampaignView extends StatelessWidget {
                             padding: const EdgeInsets.only(
                               left: Dimensions.paddingSizeSmall,
                             ),
-                            itemCount:
-                                campaignController.itemCampaignList!.length > 10
+                            itemCount: state.itemCampaignList!.length > 10
                                 ? 10
-                                : campaignController.itemCampaignList!.length,
+                                : state.itemCampaignList!.length,
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: const EdgeInsets.only(
@@ -60,13 +59,11 @@ class ItemCampaignView extends StatelessWidget {
                                 ),
                                 child: InkWell(
                                   onTap: () {
-                                    Get.find<ItemController>()
-                                        .navigateToItemPage(
-                                          campaignController
-                                              .itemCampaignList![index],
-                                          context,
-                                          isCampaign: true,
-                                        );
+                                    ItemHelper.navigateToItemPage(
+                                      state.itemCampaignList![index],
+                                      context,
+                                      isCampaign: true,
+                                    );
                                   },
                                   child: Container(
                                     height: 150,
@@ -108,7 +105,7 @@ class ItemCampaignView extends StatelessWidget {
                                               child: CustomImage(
                                                 image:
                                                     '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
-                                                    '/${campaignController.itemCampaignList![index].image}',
+                                                    '/${state.itemCampaignList![index].image}',
                                                 height: 90,
                                                 width: 130,
                                                 fit: BoxFit.cover,
@@ -116,28 +113,28 @@ class ItemCampaignView extends StatelessWidget {
                                             ),
                                             DiscountTag(
                                               discount:
-                                                  campaignController
+                                                  state
                                                           .itemCampaignList![index]
                                                           .storeDiscount! >
                                                       0
-                                                  ? campaignController
+                                                  ? state
                                                         .itemCampaignList![index]
                                                         .storeDiscount
-                                                  : campaignController
+                                                  : state
                                                         .itemCampaignList![index]
                                                         .discount,
                                               discountType:
-                                                  campaignController
+                                                  state
                                                           .itemCampaignList![index]
                                                           .storeDiscount! >
                                                       0
                                                   ? 'percent'
-                                                  : campaignController
+                                                  : state
                                                         .itemCampaignList![index]
                                                         .discountType,
                                             ),
-                                            Get.find<ItemController>().isAvailable(
-                                                  campaignController
+                                            ItemHelper.isAvailable(
+                                                  state
                                                       .itemCampaignList![index],
                                                 )
                                                 ? const SizedBox()
@@ -158,7 +155,7 @@ class ItemCampaignView extends StatelessWidget {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 Text(
-                                                  campaignController
+                                                  state
                                                       .itemCampaignList![index]
                                                       .name!,
                                                   style: robotoMedium.copyWith(
@@ -172,7 +169,7 @@ class ItemCampaignView extends StatelessWidget {
                                                 const SizedBox(height: 2),
 
                                                 Text(
-                                                  campaignController
+                                                  state
                                                       .itemCampaignList![index]
                                                       .storeName!,
                                                   style: robotoMedium.copyWith(
@@ -193,7 +190,7 @@ class ItemCampaignView extends StatelessWidget {
                                                     Expanded(
                                                       child: Text(
                                                         PriceConverter.convertPrice(
-                                                          campaignController
+                                                          state
                                                               .itemCampaignList![index]
                                                               .price,
                                                         ),
@@ -214,7 +211,7 @@ class ItemCampaignView extends StatelessWidget {
                                                       size: 12,
                                                     ),
                                                     Text(
-                                                      campaignController
+                                                      state
                                                           .itemCampaignList![index]
                                                           .avgRating!
                                                           .toStringAsFixed(1),
@@ -239,9 +236,7 @@ class ItemCampaignView extends StatelessWidget {
                               );
                             },
                           )
-                        : ItemCampaignShimmer(
-                            campaignController: campaignController,
-                          ),
+                        : ItemCampaignShimmer(campaignState: state),
                   ),
                 ],
               );
@@ -251,8 +246,8 @@ class ItemCampaignView extends StatelessWidget {
 }
 
 class ItemCampaignShimmer extends StatelessWidget {
-  final CampaignController campaignController;
-  const ItemCampaignShimmer({super.key, required this.campaignController});
+  final CampaignState campaignState;
+  const ItemCampaignShimmer({super.key, required this.campaignState});
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +278,7 @@ class ItemCampaignShimmer extends StatelessWidget {
           ),
           child: Shimmer(
             duration: const Duration(seconds: 2),
-            enabled: campaignController.itemCampaignList == null,
+            enabled: campaignState.itemCampaignList == null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -1,10 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_state.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/basic_campaign_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -29,14 +30,14 @@ class BannerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<BannerController>(
-      builder: (bannerController) {
+    return BlocBuilder<BannerBloc, BannerState>(
+      builder: (context, state) {
         List<String?>? bannerList = isFeatured
-            ? bannerController.featuredBannerList
-            : bannerController.bannerImageList;
+            ? state.featuredBannerList
+            : state.bannerImageList;
         List<dynamic>? bannerDataList = isFeatured
-            ? bannerController.featuredBannerDataList
-            : bannerController.bannerDataList;
+            ? state.featuredBannerDataList
+            : state.bannerDataList;
 
         return (bannerList != null && bannerList.isEmpty)
             ? const SizedBox()
@@ -61,7 +62,9 @@ class BannerView extends StatelessWidget {
                                 viewportFraction: 0.8,
                                 autoPlayInterval: const Duration(seconds: 7),
                                 onPageChanged: (index, reason) {
-                                  bannerController.setCurrentIndex(index, true);
+                                  getIt<BannerBloc>().add(
+                                    BannerIndexChanged(index),
+                                  );
                                 },
                               ),
                               itemCount: bannerList.isEmpty
@@ -70,11 +73,13 @@ class BannerView extends StatelessWidget {
                               itemBuilder: (context, index, _) {
                                 String? baseUrl =
                                     bannerDataList![index] is BasicCampaignModel
-                                    ? getIt<SplashBloc>().state
+                                    ? getIt<SplashBloc>()
+                                          .state
                                           .configModel!
                                           .baseUrls!
                                           .campaignImageUrl
-                                    : getIt<SplashBloc>().state
+                                    : getIt<SplashBloc>()
+                                          .state
                                           .configModel!
                                           .baseUrls!
                                           .bannerImageUrl;
@@ -82,8 +87,10 @@ class BannerView extends StatelessWidget {
                                   onTap: () async {
                                     if (bannerDataList[index] is Item) {
                                       Item? item = bannerDataList[index];
-                                      Get.find<ItemController>()
-                                          .navigateToItemPage(item, context);
+                                      ItemHelper.navigateToItemPage(
+                                        item,
+                                        context,
+                                      );
                                     } else if (bannerDataList[index] is Store) {
                                       Store? store = bannerDataList[index];
                                       if (isFeatured &&
@@ -94,10 +101,13 @@ class BannerView extends StatelessWidget {
                                                   .zoneData!
                                                   .isNotEmpty)) {
                                         for (ModuleModel module
-                                            in getIt<SplashBloc>().state
+                                            in getIt<SplashBloc>()
+                                                .state
                                                 .moduleList!) {
                                           if (module.id == store!.moduleId) {
-                                            getIt<SplashBloc>().add(SplashModuleSet(module);
+                                            getIt<SplashBloc>().add(
+                                              SplashModuleSet(module),
+                                            );
                                             break;
                                           }
                                         }
@@ -114,14 +124,16 @@ class BannerView extends StatelessWidget {
                                               (module) =>
                                                   module.id == store!.moduleId,
                                             );
-                                        getIt<SplashBloc>().add(SplashModuleSet(
-                                          ModuleModel(
-                                            id: module.id,
-                                            moduleName: module.moduleName,
-                                            moduleType: module.moduleType,
-                                            themeId: module.themeId,
-                                            storesCount: module.storesCount,
-                                          )),
+                                        getIt<SplashBloc>().add(
+                                          SplashModuleSet(
+                                            ModuleModel(
+                                              id: module.id,
+                                              moduleName: module.moduleName,
+                                              moduleType: module.moduleType,
+                                              themeId: module.themeId,
+                                              storesCount: module.storesCount,
+                                            ),
+                                          ),
                                         );
                                       }
                                       Get.toNamed(
@@ -180,13 +192,9 @@ class BannerView extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(
                                         Dimensions.radiusDefault,
                                       ),
-                                      child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
-                                          return CustomImage(
-                                            image:
-                                                '$baseUrl/${bannerList[index]}',
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
+                                      child: CustomImage(
+                                        image: '$baseUrl/${bannerList[index]}',
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   ),
@@ -207,7 +215,7 @@ class BannerView extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 3,
                                 ),
-                                child: index == bannerController.currentIndex
+                                child: index == state.currentIndex
                                     ? Container(
                                         decoration: BoxDecoration(
                                           color: Theme.of(context).primaryColor,

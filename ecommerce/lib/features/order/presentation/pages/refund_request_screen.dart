@@ -180,6 +180,7 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                                             ),
 
                                             DottedBorder(
+                                              options: RoundedRectDottedBorderOptions(
                                               color: Theme.of(
                                                 context,
                                               ).disabledColor,
@@ -187,9 +188,9 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                                               strokeCap: StrokeCap.butt,
                                               dashPattern: const [8, 5],
                                               padding: const EdgeInsets.all(0),
-                                              borderType: BorderType.RRect,
                                               radius: const Radius.circular(
                                                 Dimensions.radiusSmall,
+                                              ),
                                               ),
                                               child: Stack(
                                                 children: [

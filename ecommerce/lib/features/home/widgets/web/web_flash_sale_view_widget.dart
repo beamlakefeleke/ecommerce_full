@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/flash_sale/controllers/flash_sale_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/flash_sale_card_widget.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -21,32 +24,32 @@ class WebFlashSaleViewWidget extends StatefulWidget {
 class _WebFlashSaleViewWidgetState extends State<WebFlashSaleViewWidget> {
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<FlashSaleController>(
-      builder: (flashSaleController) {
+    return BlocBuilder<FlashSaleBloc, FlashSaleState>(
+      builder: (context, state) {
         Item? item;
         int stock = 0;
         int remaining = 0;
-        if (flashSaleController.flashSaleModel != null &&
-            flashSaleController.flashSaleModel!.activeProducts != null) {
-          item = flashSaleController
+        if (state.flashSaleModel != null &&
+            state.flashSaleModel!.activeProducts != null) {
+          item = state
               .flashSaleModel!
-              .activeProducts![flashSaleController.pageIndex]
+              .activeProducts![state.pageIndex]
               .item;
-          stock = flashSaleController
+          stock = state
               .flashSaleModel!
-              .activeProducts![flashSaleController.pageIndex]
+              .activeProducts![state.pageIndex]
               .stock!;
-          int sold = flashSaleController
+          int sold = state
               .flashSaleModel!
-              .activeProducts![flashSaleController.pageIndex]
+              .activeProducts![state.pageIndex]
               .sold!;
           if (stock >= sold) {
             remaining = stock - sold;
           }
         }
 
-        return flashSaleController.flashSaleModel != null
-            ? flashSaleController.flashSaleModel!.activeProducts != null
+        return state.flashSaleModel != null
+            ? state.flashSaleModel!.activeProducts != null
                   ? Container(
                       width: Get.width,
                       margin: const EdgeInsets.only(
@@ -97,16 +100,16 @@ class _WebFlashSaleViewWidgetState extends State<WebFlashSaleViewWidget> {
                                 const Spacer(),
 
                                 FlashSaleTimerView(
-                                  eventDuration: flashSaleController.duration,
+                                  eventDuration: state.duration,
                                 ),
                               ],
                             ),
                           ),
 
-                          flashSaleController.flashSaleModel!.activeProducts !=
+                          state.flashSaleModel!.activeProducts !=
                                   null
                               ? FlashSaleCard(
-                                  activeProducts: flashSaleController
+                                  activeProducts: state
                                       .flashSaleModel!
                                       .activeProducts!,
                                   soldOut: remaining == 0,
@@ -123,11 +126,23 @@ class _WebFlashSaleViewWidgetState extends State<WebFlashSaleViewWidget> {
                             height: Dimensions.paddingSizeExtraSmall,
                           ),
 
-                          (getIt<SplashBloc>().state.configModel!.moduleConfig!.module!.unit! && item.unitType != null) ? Text(
-            '(${ item.unitType ?? ''})',
-            style: robotoRegular.copyWith(color: Theme.of(context).disabledColor),
-          ) : const SizedBox(),
-          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                          (getIt<SplashBloc>()
+                                      .state
+                                      .configModel!
+                                      .moduleConfig!
+                                      .module!
+                                      .unit! &&
+                                  item.unitType != null)
+                              ? Text(
+                                  '(${item.unitType ?? ''})',
+                                  style: robotoRegular.copyWith(
+                                    color: Theme.of(context).disabledColor,
+                                  ),
+                                )
+                              : const SizedBox(),
+                          const SizedBox(
+                            height: Dimensions.paddingSizeExtraSmall,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -135,8 +150,7 @@ class _WebFlashSaleViewWidgetState extends State<WebFlashSaleViewWidget> {
                                   ? Flexible(
                                       child: Text(
                                         PriceConverter.convertPrice(
-                                          Get.find<ItemController>()
-                                              .getStartingPrice(item),
+                                          ItemHelper.getStartingPrice(item),
                                         ),
                                         style: robotoMedium.copyWith(
                                           fontSize:
@@ -161,7 +175,7 @@ class _WebFlashSaleViewWidgetState extends State<WebFlashSaleViewWidget> {
                               Flexible(
                                 child: Text(
                                   PriceConverter.convertPrice(
-                                    Get.find<ItemController>().getStartingPrice(
+                                    ItemHelper.getStartingPrice(
                                       item,
                                     ),
                                     discount: item.discount,
@@ -235,3 +249,4 @@ class WebFlashSaleShimmerView extends StatelessWidget {
     );
   }
 }
+

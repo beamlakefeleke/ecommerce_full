@@ -1,5 +1,6 @@
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/onboard/presentation/bloc/onboard_bloc.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';

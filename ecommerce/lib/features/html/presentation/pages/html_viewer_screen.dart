@@ -89,17 +89,16 @@ class _HtmlViewerView extends StatelessWidget {
                                           );
                                         },
                                       )
-                                    : SelectableHtml(
+                                    : Html(
                                         data: htmlController.htmlText,
-                                        shrinkWrap: true,
                                         onLinkTap:
                                             (
                                               String? url,
-                                              RenderContext context,
                                               Map<String, String> attributes,
                                               element,
                                             ) {
-                                              if (url!.startsWith('www.')) {
+                                              if (url == null) return;
+                                              if (url.startsWith('www.')) {
                                                 url = 'https://$url';
                                               }
                                               if (kDebugMode) {

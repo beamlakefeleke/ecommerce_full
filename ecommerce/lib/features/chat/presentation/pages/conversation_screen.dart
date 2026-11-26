@@ -1,14 +1,15 @@
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -45,7 +46,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   void initState() {
     super.initState();
     if (AuthHelper.isLoggedIn()) {
-      Get.find<ProfileController>().getUserInfo();
+      getIt<ProfileBloc>().add(const ProfileInfoRequested());
       context.read<ChatBloc>().add(
         ConversationListRequested(
           offset: 1,
@@ -254,11 +255,11 @@ class _ConversationTile extends StatelessWidget {
     String baseUrl = '';
     if (type == UserType.vendor.name) {
       baseUrl =
-          getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl ??
-          '';
+          getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl ?? '';
     } else if (type == UserType.delivery_man.name) {
       baseUrl =
-          getIt<SplashBloc>().state
+          getIt<SplashBloc>()
+              .state
               .configModel!
               .baseUrls!
               .deliveryManImageUrl ??
@@ -346,9 +347,9 @@ class _ConversationTile extends StatelessWidget {
               ),
             ),
             Positioned(
-              right: Get.find<LocalizationController>().isLtr ? 5 : null,
+              right: getIt<LanguageBloc>().state.isLtr ? 5 : null,
               bottom: 5,
-              left: Get.find<LocalizationController>().isLtr ? null : 5,
+              left: getIt<LanguageBloc>().state.isLtr ? null : 5,
               child: Text(
                 conversation.lastMessageTime != null
                     ? DateConverter.localDateToIsoStringAMPM(
@@ -363,19 +364,19 @@ class _ConversationTile extends StatelessWidget {
                 ),
               ),
             ),
-            GetBuilder<ProfileController>(
-              builder: (profileController) {
+            BlocBuilder<ProfileBloc, ProfileState>(
+              builder: (context, profileState) {
                 final bool hasUnread =
-                    profileController.userInfoModel != null &&
-                    profileController.userInfoModel!.userInfo != null &&
+                    profileState.userInfoModel != null &&
+                    profileState.userInfoModel!.userInfo != null &&
                     conversation.lastMessage?.senderId !=
-                        profileController.userInfoModel!.userInfo!.id &&
+                        profileState.userInfoModel!.userInfo!.id &&
                     (conversation.unreadMessageCount ?? 0) > 0;
                 if (!hasUnread) return const SizedBox();
                 return Positioned(
-                  right: Get.find<LocalizationController>().isLtr ? 5 : null,
+                  right: getIt<LanguageBloc>().state.isLtr ? 5 : null,
                   top: 5,
-                  left: Get.find<LocalizationController>().isLtr ? null : 5,
+                  left: getIt<LanguageBloc>().state.isLtr ? null : 5,
                   child: Container(
                     padding: const EdgeInsets.all(
                       Dimensions.paddingSizeExtraSmall,

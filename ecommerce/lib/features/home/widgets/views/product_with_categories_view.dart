@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/basic_medicine_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/web/web_basic_medicine_nearby_view_widget.dart';
@@ -23,25 +24,25 @@ class _ProductWithCategoriesViewState extends State<ProductWithCategoriesView> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
         List<Categories>? categories = [];
         List<Item>? products = [];
         if (widget.fromShop
-            ? itemController.reviewedCategoriesList != null &&
-                  itemController.reviewedItemList != null
-            : itemController.basicMedicineModel != null) {
+            ? state.reviewedCategoriesList != null &&
+                  state.reviewedItemList != null
+            : state.basicMedicineModel != null) {
           categories.add(Categories(name: 'all'.tr, id: 0));
           for (var category
               in widget.fromShop
-                  ? itemController.reviewedCategoriesList!
-                  : itemController.basicMedicineModel!.categories!) {
+                  ? state.reviewedCategoriesList!
+                  : state.basicMedicineModel!.categories!) {
             categories.add(category);
           }
           for (var product
               in widget.fromShop
-                  ? itemController.reviewedItemList!
-                  : itemController.basicMedicineModel!.products!) {
+                  ? state.reviewedItemList!
+                  : state.basicMedicineModel!.products!) {
             if (selectedCategory == 0) {
               products.add(product);
             }
@@ -179,9 +180,8 @@ class _ProductWithCategoriesViewState extends State<ProductWithCategoriesView> {
                             width: Get.width,
                             child:
                                 (widget.fromShop
-                                    ? itemController.reviewedCategoriesList !=
-                                          null
-                                    : itemController.basicMedicineModel != null)
+                                    ? state.reviewedCategoriesList != null
+                                    : state.basicMedicineModel != null)
                                 ? ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     physics: const BouncingScrollPhysics(),

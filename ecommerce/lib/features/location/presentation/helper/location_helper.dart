@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -173,7 +174,7 @@ class LocationHelper {
     final splash = getIt<SplashBloc>().state;
     if (isDesktop && splash.configModel!.module == null) {
       final Map<String, String> header = _prepareHeader(address!.zoneIds);
-      await getIt<SplashBloc>().add(SplashModulesRequested(headers: headers: header));
+      getIt<SplashBloc>().add(SplashModulesRequested(headers: header));
       if (Get.isDialogOpen!) {
         Get.back();
       }
@@ -283,7 +284,8 @@ class LocationHelper {
     await AddressHelper.saveUserAddressInSharedPref(addressModel);
 
     final splash = getIt<SplashBloc>().state;
-    await getIt<SplashBloc>().add(SplashModulesRequested(headers: ));
+    final Map<String, String> header = _prepareHeader(addressModel.zoneIds);
+    getIt<SplashBloc>().add(SplashModulesRequested(headers: header));
     for (final ModuleModel m in splash.moduleList ?? const []) {
       if (m.id == getIt<StoreBloc>().state.store?.moduleId) {
         getIt<SplashBloc>().add(SplashModuleSet(m));

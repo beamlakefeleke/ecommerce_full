@@ -1,11 +1,11 @@
 import 'package:ecommerce/common/widgets/corner_banner/banner.dart';
 import 'package:ecommerce/common/widgets/corner_banner/corner_discount_tag.dart';
 import 'package:ecommerce/common/widgets/title_widget.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -18,6 +18,7 @@ import 'package:ecommerce/common/widgets/not_available_widget.dart';
 import 'package:ecommerce/common/widgets/organic_tag.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:get/get.dart';
 
@@ -27,11 +28,11 @@ class PopularItemView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
         List<Item>? itemList = isPopular
-            ? itemController.popularItemList
-            : itemController.reviewedItemList;
+            ? state.popularItemList
+            : state.reviewedItemList;
 
         return (itemList != null && itemList.isEmpty)
             ? const SizedBox()
@@ -50,7 +51,7 @@ class PopularItemView extends StatelessWidget {
                   ),
 
                   SizedBox(
-                    height: Get.find<LocalizationController>().isLtr ? 90 : 100,
+                    height: getIt<LanguageBloc>().state.isLtr ? 90 : 100,
                     child: itemList != null
                         ? ListView.builder(
                             controller: ScrollController(),
@@ -72,18 +73,16 @@ class PopularItemView extends StatelessWidget {
                                 ),
                                 child: InkWell(
                                   onTap: () {
-                                    Get.find<ItemController>()
-                                        .navigateToItemPage(
-                                          itemList[index],
-                                          context,
-                                        );
+                                    ItemHelper.navigateToItemPage(
+                                      itemList[index],
+                                      context,
+                                    );
                                   },
                                   child: Stack(
                                     children: [
                                       Container(
                                         height:
-                                            Get.find<LocalizationController>()
-                                                .isLtr
+                                            getIt<LanguageBloc>().state.isLtr
                                             ? 90
                                             : 100,
                                         width: 250,
@@ -131,7 +130,7 @@ class PopularItemView extends StatelessWidget {
                                                   placeInImage: true,
                                                 ),
 
-                                                itemController.isAvailable(
+                                                ItemHelper.isAvailable(
                                                       itemList[index],
                                                     )
                                                     ? const SizedBox()
@@ -239,7 +238,8 @@ class PopularItemView extends StatelessWidget {
                                                               .ratingCount,
                                                     ),
 
-                                                    (getIt<SplashBloc>().state
+                                                    (getIt<SplashBloc>()
+                                                                .state
                                                                 .configModel!
                                                                 .moduleConfig!
                                                                 .module!
@@ -271,10 +271,9 @@ class PopularItemView extends StatelessWidget {
                                                             children: [
                                                               Text(
                                                                 PriceConverter.convertPrice(
-                                                                  itemController
-                                                                      .getStartingPrice(
-                                                                        itemList[index],
-                                                                      ),
+                                                                  ItemHelper.getStartingPrice(
+                                                                    itemList[index],
+                                                                  ),
                                                                   discount:
                                                                       itemList[index]
                                                                           .discount,
@@ -307,7 +306,7 @@ class PopularItemView extends StatelessWidget {
                                                                   ? Flexible(
                                                                       child: Text(
                                                                         PriceConverter.convertPrice(
-                                                                          itemController.getStartingPrice(
+                                                                          ItemHelper.getStartingPrice(
                                                                             itemList[index],
                                                                           ),
                                                                         ),
@@ -343,28 +342,25 @@ class PopularItemView extends StatelessWidget {
                                       ),
 
                                       Positioned(
-                                        right:
-                                            Get.find<LocalizationController>()
-                                                .isLtr
+                                        right: getIt<LanguageBloc>().state.isLtr
                                             ? 0
                                             : null,
-                                        left:
-                                            Get.find<LocalizationController>()
-                                                .isLtr
+                                        left: getIt<LanguageBloc>().state.isLtr
                                             ? null
                                             : 0,
                                         child: CornerDiscountTag(
                                           bannerPosition:
-                                              Get.find<LocalizationController>()
-                                                  .isLtr
+                                              getIt<LanguageBloc>().state.isLtr
                                               ? CornerBannerPosition.topRight
                                               : CornerBannerPosition.topLeft,
                                           elevation: 0,
-                                          discount: itemController.getDiscount(
+                                          discount: ItemHelper.getDiscount(
                                             itemList[index],
                                           ),
-                                          discountType: itemController
-                                              .getDiscountType(itemList[index]),
+                                          discountType:
+                                              ItemHelper.getDiscountType(
+                                                itemList[index],
+                                              ),
                                         ),
                                       ),
                                     ],

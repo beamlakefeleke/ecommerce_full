@@ -1,8 +1,9 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
 import 'package:ecommerce/features/home/widgets/components/circle_list_view_widget.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -20,10 +21,10 @@ class _JustForYouViewState extends State<JustForYouView> {
   Widget build(BuildContext context) {
     //bool isGrocery = getIt<SplashBloc>().state.module != null && getIt<SplashBloc>().state.module!.moduleType.toString() == AppConstants.grocery;
 
-    return GetBuilder<CampaignController>(
-      builder: (campaignController) {
-        return campaignController.itemCampaignList != null
-            ? campaignController.itemCampaignList!.isNotEmpty
+    return BlocBuilder<CampaignBloc, CampaignState>(
+      builder: (context, state) {
+        return state.itemCampaignList != null
+            ? state.itemCampaignList!.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: Dimensions.paddingSizeDefault,

@@ -648,7 +648,7 @@ void _registerCoupon() {
   getIt.registerFactory(() => GetTaxiCouponListUseCase(getIt()));
   getIt.registerFactory(() => ApplyCouponUseCase(getIt()));
   getIt.registerFactory(() => ApplyTaxiCouponUseCase(getIt()));
-  getIt.registerFactory(
+  getIt.registerLazySingleton(
     () => CouponBloc(
       getCouponListUseCase: getIt(),
       getTaxiCouponListUseCase: getIt(),
@@ -742,7 +742,7 @@ void _registerBanner() {
   getIt.registerFactory(() => GetPromotionalBannersUseCase(getIt()));
 
   // bloc
-  getIt.registerFactory(
+  getIt.registerLazySingleton(
     () => BannerBloc(
       getBanners: getIt(),
       getFeaturedBanners: getIt(),
@@ -819,7 +819,7 @@ void _registerAddress() {
   getIt.registerFactory(() => DeleteAddressUseCase(getIt()));
 
   // bloc (new instance per screen)
-  getIt.registerFactory(
+  getIt.registerLazySingleton(
     () => AddressBloc(
       getAddresses: getIt(),
       addAddress: getIt(),
@@ -847,7 +847,7 @@ void _registerCategory() {
   getIt.registerFactory(() => GetCategoryStoresUseCase(getIt()));
   getIt.registerFactory(() => SearchCategoryUseCase(getIt()));
   getIt.registerFactory(() => SaveInterestUseCase(getIt()));
-  getIt.registerFactory(
+  getIt.registerLazySingleton(
     () => CategoryBloc(
       getCategories: getIt(),
       getSubCategories: getIt(),

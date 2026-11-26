@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
@@ -33,7 +33,7 @@ class CouponCardWidget extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
           child: Transform.rotate(
-            angle: Get.find<LocalizationController>().isLtr ? 0 : pi,
+            angle: getIt<LanguageBloc>().state.isLtr ? 0 : pi,
             child: Image.asset(
               Get.find<ThemeController>().darkTheme
                   ? Images.couponBgDark

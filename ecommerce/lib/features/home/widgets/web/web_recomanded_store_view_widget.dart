@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -22,9 +22,9 @@ class WebRecommendedStoreView extends StatelessWidget {
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.food;
 
-    return GetBuilder<StoreController>(
-      builder: (storeController) {
-        return storeController.recommendedStoreList != null
+    return BlocBuilder<StoreBloc, StoreState>(
+      builder: (context, state) {
+        return state.recommendedStoreList != null
             ? Container(
                 margin: const EdgeInsets.only(
                   top: Dimensions.paddingSizeDefault,
@@ -59,15 +59,11 @@ class WebRecommendedStoreView extends StatelessWidget {
                           Dimensions.radiusDefault,
                         ),
                       ),
-                      child: storeController.recommendedStoreList!.isNotEmpty
+                      child: state.recommendedStoreList!.isNotEmpty
                           ? GridView.builder(
-                              itemCount:
-                                  storeController.recommendedStoreList!.length >
-                                      9
+                              itemCount: state.recommendedStoreList!.length > 9
                                   ? 9
-                                  : storeController
-                                        .recommendedStoreList!
-                                        .length,
+                                  : state.recommendedStoreList!.length,
                               shrinkWrap: true,
                               padding: const EdgeInsets.all(
                                 Dimensions.paddingSizeSmall,
@@ -87,14 +83,14 @@ class WebRecommendedStoreView extends StatelessWidget {
                                   onTap: () {
                                     Get.toNamed(
                                       RouteHelper.getStoreRoute(
-                                        id: storeController
+                                        id: state
                                             .recommendedStoreList![index]
                                             .id,
                                         page: 'store',
                                       ),
                                       arguments: StoreScreen(
-                                        store: storeController
-                                            .recommendedStoreList![index],
+                                        store:
+                                            state.recommendedStoreList![index],
                                         fromModule: false,
                                       ),
                                     );
@@ -116,7 +112,7 @@ class WebRecommendedStoreView extends StatelessWidget {
                                       child: CustomImage(
                                         image:
                                             '${getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl}'
-                                            '/${storeController.recommendedStoreList![index].logo}',
+                                            '/${state.recommendedStoreList![index].logo}',
                                         fit: BoxFit.cover,
                                         height: 60,
                                         width: double.infinity,

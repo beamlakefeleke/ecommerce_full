@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_state.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';

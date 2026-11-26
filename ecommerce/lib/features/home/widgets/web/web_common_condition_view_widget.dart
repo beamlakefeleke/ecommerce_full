@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/home/widgets/web/web_basic_medicine_nearby_view_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/arrow_icon_button.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/medicine_item_card.dart';
@@ -24,10 +26,11 @@ class _WebCommonConditionViewWidgetState
 
   @override
   void initState() {
-    if (Get.find<ItemController>().commonConditions!.isNotEmpty) {
-      Get.find<ItemController>().getConditionsWiseItem(
-        Get.find<ItemController>().commonConditions![0].id!,
-        true,
+    if (getIt<ItemBloc>().state.commonConditions!.isNotEmpty) {
+      getIt<ItemBloc>().add(
+        ConditionsWiseItemsRequested(
+          getIt<ItemBloc>().state.commonConditions![0].id!,
+        ),
       );
     }
 
@@ -60,17 +63,17 @@ class _WebCommonConditionViewWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        if (itemController.conditionWiseProduct != null &&
-            itemController.conditionWiseProduct!.length > 4 &&
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        if (state.conditionWiseProduct != null &&
+            state.conditionWiseProduct!.length > 4 &&
             isFirstTime) {
           showForwardButton = true;
           isFirstTime = false;
         }
 
-        return (itemController.commonConditions != null &&
-                itemController.commonConditions!.isNotEmpty)
+        return (state.commonConditions != null &&
+                state.commonConditions!.isNotEmpty)
             ? Container(
                 margin: const EdgeInsets.symmetric(
                   vertical: Dimensions.paddingSizeLarge,
@@ -102,23 +105,23 @@ class _WebCommonConditionViewWidgetState
                               height: 20,
                               child: ListView.builder(
                                 shrinkWrap: true,
-                                itemCount:
-                                    itemController.commonConditions!.length,
+                                itemCount: state.commonConditions!.length,
                                 scrollDirection: Axis.horizontal,
                                 itemBuilder: (context, index) {
                                   bool isSelected =
-                                      itemController.selectedCommonCondition ==
+                                      state.selectedCommonCondition ==
                                       index;
                                   return InkWell(
                                     hoverColor: Colors.transparent,
-                                    onTap: () => itemController
-                                        .selectCommonCondition(index),
+                                    onTap: () => getIt<ItemBloc>().add(
+                                      CommonConditionSelected(index),
+                                    ),
                                     child: Padding(
                                       padding: const EdgeInsets.only(
                                         right: Dimensions.paddingSizeDefault,
                                       ),
                                       child: Text(
-                                        '${itemController.commonConditions![index].name}',
+                                        '${state.commonConditions![index].name}',
                                         style: robotoMedium.copyWith(
                                           color: isSelected
                                               ? Theme.of(context).primaryColor
@@ -140,8 +143,8 @@ class _WebCommonConditionViewWidgetState
                         SizedBox(
                           height: 250,
                           width: Get.width,
-                          child: itemController.conditionWiseProduct != null
-                              ? itemController.conditionWiseProduct!.isNotEmpty
+                          child: state.conditionWiseProduct != null
+                              ? state.conditionWiseProduct!.isNotEmpty
                                     ? ListView.builder(
                                         controller: scrollController,
                                         scrollDirection: Axis.horizontal,
@@ -149,7 +152,7 @@ class _WebCommonConditionViewWidgetState
                                         padding: const EdgeInsets.only(
                                           left: Dimensions.paddingSizeDefault,
                                         ),
-                                        itemCount: itemController
+                                        itemCount: state
                                             .conditionWiseProduct!
                                             .length,
                                         itemBuilder: (context, index) {
@@ -163,7 +166,7 @@ class _WebCommonConditionViewWidgetState
                                                   Dimensions.paddingSizeDefault,
                                             ),
                                             child: MedicineItemCard(
-                                              item: itemController
+                                              item: state
                                                   .conditionWiseProduct![index],
                                             ),
                                           );
@@ -220,3 +223,4 @@ class _WebCommonConditionViewWidgetState
     );
   }
 }
+

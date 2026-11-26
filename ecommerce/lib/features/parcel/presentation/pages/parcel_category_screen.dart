@@ -9,11 +9,11 @@ import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
 import 'package:ecommerce/features/banner/presentation/bloc/banner_state.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -39,8 +39,8 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
   void initState() {
     super.initState();
     if (AuthHelper.isLoggedIn() &&
-        Get.find<ProfileController>().userInfoModel == null) {
-      Get.find<ProfileController>().getUserInfo();
+        context.read<ProfileBloc>().state.userInfoModel == null) {
+      context.read<ProfileBloc>().add(const ProfileInfoRequested());
     }
     final parcelBloc = context.read<ParcelBloc>();
     context.read<BannerBloc>().add(
@@ -188,9 +188,9 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                 height: Dimensions.paddingSizeLarge,
                               ),
 
-                              parcelController.parcelCategoryList != null
+                              parcelController.status == ParcelStatus.loaded
                                   ? parcelController
-                                            .parcelCategoryList!
+                                            .parcelCategoryList
                                             .isNotEmpty
                                         ? GridView.builder(
                                             controller: ScrollController(),
@@ -226,7 +226,7 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                                       : 80,
                                                 ),
                                             itemCount: parcelController
-                                                .parcelCategoryList!
+                                                .parcelCategoryList
                                                 .length,
                                             shrinkWrap: true,
                                             physics:
@@ -238,7 +238,7 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                                   Get.toNamed(
                                                     RouteHelper.getParcelLocationRoute(
                                                       parcelController
-                                                          .parcelCategoryList![index],
+                                                          .parcelCategoryList[index],
                                                     ),
                                                   );
                                                 },
@@ -248,12 +248,12 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                                   isDeliverItem: true,
                                                   image:
                                                       '${getIt<SplashBloc>().state.configModel!.baseUrls!.parcelCategoryImageUrl}'
-                                                      '/${parcelController.parcelCategoryList![index].image}',
+                                                      '/${parcelController.parcelCategoryList[index].image}',
                                                   itemName: parcelController
-                                                      .parcelCategoryList![index]
+                                                      .parcelCategoryList[index]
                                                       .name!,
                                                   description: parcelController
-                                                      .parcelCategoryList![index]
+                                                      .parcelCategoryList[index]
                                                       .description!,
                                                 ),
                                               );
@@ -266,8 +266,8 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                           )
                                   : ParcelShimmer(
                                       isEnabled:
-                                          parcelController.parcelCategoryList ==
-                                          null,
+                                          parcelController.status !=
+                                          ParcelStatus.loaded,
                                       isDeliveryItem: true,
                                     ),
                               const SizedBox(
@@ -339,8 +339,8 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                     )
                                   : ParcelShimmer(
                                       isEnabled:
-                                          parcelController.parcelCategoryList ==
-                                          null,
+                                          parcelController.status !=
+                                          ParcelStatus.loaded,
                                       isDeliveryItem: false,
                                     ),
                               const SizedBox(

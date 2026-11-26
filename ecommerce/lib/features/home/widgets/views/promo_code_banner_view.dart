@@ -2,10 +2,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
@@ -20,13 +22,14 @@ class PromoCodeBannerView extends StatefulWidget {
 }
 
 class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
-  final CarouselController carouselController = CarouselController();
+  final CarouselSliderController carouselController =
+      CarouselSliderController();
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CouponController>(
-      builder: (couponController) {
-        return couponController.couponList != null
-            ? couponController.couponList!.isNotEmpty
+    return BlocBuilder<CouponBloc, CouponState>(
+      builder: (context, state) {
+        return state.couponList != null
+            ? state.couponList!.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: Dimensions.paddingSizeDefault,
@@ -36,7 +39,7 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                         children: [
                           CarouselSlider.builder(
                             carouselController: carouselController,
-                            itemCount: couponController.couponList!.length,
+                            itemCount: state.couponList!.length,
                             options: CarouselOptions(
                               height: 135,
                               autoPlay: true,
@@ -44,7 +47,9 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                               disableCenter: true,
                               viewportFraction: 0.95,
                               onPageChanged: (index, reason) {
-                                couponController.setCurrentIndex(index, true);
+                                getIt<CouponBloc>().add(
+                                  CouponCurrentIndexChanged(index),
+                                );
                               },
                             ),
                             itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
@@ -89,7 +94,7 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '${couponController.couponList![itemIndex].title ?? ''} ${'min_order_of'.tr} ${PriceConverter.convertPrice(couponController.couponList![itemIndex].minPurchase)}',
+                                            '${state.couponList![itemIndex].title ?? ''} ${'min_order_of'.tr} ${PriceConverter.convertPrice(state.couponList![itemIndex].minPurchase)}',
                                             textAlign: TextAlign.center,
                                             style: robotoBold.copyWith(
                                               fontSize:
@@ -106,6 +111,7 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                                           ),
 
                                           DottedBorder(
+                                            options: RoundedRectDottedBorderOptions(
                                             color: Theme.of(
                                               context,
                                             ).primaryColor,
@@ -113,8 +119,9 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                                             strokeCap: StrokeCap.butt,
                                             dashPattern: const [5, 5],
                                             padding: const EdgeInsets.all(0),
-                                            borderType: BorderType.RRect,
+                                            
                                             radius: const Radius.circular(50),
+                                            ),
                                             child: Container(
                                               height: 35,
                                               width: 130,
@@ -128,14 +135,14 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                                               ),
                                               child: CustomInkWell(
                                                 onTap: () {
-                                                  if (couponController
+                                                  if (state
                                                           .couponList![itemIndex]
                                                           .code !=
                                                       null) {
                                                     Clipboard.setData(
                                                       ClipboardData(
                                                         text:
-                                                            couponController
+                                                            state
                                                                 .couponList![itemIndex]
                                                                 .code ??
                                                             '',
@@ -170,7 +177,7 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                                                     ),
 
                                                     Text(
-                                                      couponController
+                                                      state
                                                               .couponList![itemIndex]
                                                               .code ??
                                                           '',
@@ -200,16 +207,14 @@ class _PromoCodeBannerViewState extends State<PromoCodeBannerView> {
                           SizedBox(height: Dimensions.fontSizeSmall),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: couponController.couponList!.map((bnr) {
-                              int index = couponController.couponList!.indexOf(
-                                bnr,
-                              );
+                            children: state.couponList!.map((bnr) {
+                              int index = state.couponList!.indexOf(bnr);
 
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 3,
                                 ),
-                                child: index == couponController.currentIndex
+                                child: index == state.currentIndex
                                     ? Container(
                                         width: 8,
                                         height: 8,

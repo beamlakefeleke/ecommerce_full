@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/card_design/store_card_with_distance.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -75,9 +77,9 @@ class _WebNewOnViewWidgetState extends State<WebNewOnViewWidget> {
           ),
         ),
 
-        GetBuilder<StoreController>(
-          builder: (storeController) {
-            List<Store>? storeList = storeController.popularStoreList;
+        BlocBuilder<StoreBloc, StoreState>(
+          builder: (context, state) {
+            List<Store>? storeList = state.popularStoreList;
 
             if (storeList != null && storeList.length > 4 && isFirstTime) {
               showForwardButton = true;
@@ -100,10 +102,10 @@ class _WebNewOnViewWidgetState extends State<WebNewOnViewWidget> {
                               padding: EdgeInsets.only(
                                 bottom: Dimensions.paddingSizeDefault,
                                 top: Dimensions.paddingSizeDefault,
-                                left: Get.find<LocalizationController>().isLtr
+                                left: getIt<LanguageBloc>().state.isLtr
                                     ? 0
                                     : Dimensions.paddingSizeDefault,
-                                right: Get.find<LocalizationController>().isLtr
+                                right: getIt<LanguageBloc>().state.isLtr
                                     ? Dimensions.paddingSizeDefault
                                     : 0,
                               ),
@@ -174,10 +176,10 @@ class WebNewOnShimmerView extends StatelessWidget {
                   padding: EdgeInsets.only(
                     bottom: Dimensions.paddingSizeDefault,
                     top: Dimensions.paddingSizeDefault,
-                    left: Get.find<LocalizationController>().isLtr
+                    left: getIt<LanguageBloc>().state.isLtr
                         ? 0
                         : Dimensions.paddingSizeDefault,
-                    right: Get.find<LocalizationController>().isLtr
+                    right: getIt<LanguageBloc>().state.isLtr
                         ? Dimensions.paddingSizeDefault
                         : 0,
                   ),

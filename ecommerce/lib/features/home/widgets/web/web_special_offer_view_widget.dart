@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -60,9 +61,9 @@ class _WebSpecialOfferViewState extends State<WebSpecialOfferView> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        List<Item>? discountedItemList = itemController.discountedItemList;
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        List<Item>? discountedItemList = state.discountedItemList;
 
         if (discountedItemList != null &&
             discountedItemList.length > 5 &&
@@ -173,20 +174,15 @@ class _WebSpecialOfferViewState extends State<WebSpecialOfferView> {
                       ],
                     )
                   : const SizedBox()
-            : WebItemShimmerView(itemController: itemController);
+            : const WebItemShimmerView();
       },
     );
   }
 }
 
 class WebItemShimmerView extends StatelessWidget {
-  final ItemController itemController;
   final bool isPopularItem;
-  const WebItemShimmerView({
-    super.key,
-    required this.itemController,
-    this.isPopularItem = false,
-  });
+  const WebItemShimmerView({super.key, this.isPopularItem = false});
 
   @override
   Widget build(BuildContext context) {

@@ -1,8 +1,6 @@
-import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:ecommerce/api/api_client.dart';
 import 'package:ecommerce/core/error/exceptions.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/html_type.dart';
 
@@ -25,7 +23,8 @@ class HtmlRemoteDataSourceImpl implements HtmlRemoteDataSource {
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
         AppConstants.localizationKey:
-            Get.find<LocalizationController>().locale.languageCode,
+            apiClient.sharedPreferences.getString(AppConstants.languageCode) ??
+            AppConstants.languages[0].languageCode!,
       },
       handleError: false,
     );

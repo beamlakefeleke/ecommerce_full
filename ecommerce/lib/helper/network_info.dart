@@ -1,28 +1,28 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:image_compression_flutter/image_compression_flutter.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class NetworkInfo {
   final Connectivity connectivity;
   NetworkInfo(this.connectivity);
 
   Future<bool> get isConnected async {
-    ConnectivityResult result = await connectivity.checkConnectivity();
-    return result != ConnectivityResult.none;
+    List<ConnectivityResult> result = await connectivity.checkConnectivity();
+    return !result.contains(ConnectivityResult.none);
   }
 
   static void checkConnectivity(BuildContext context) {
-    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+    Connectivity().onConnectivityChanged.listen((
+      List<ConnectivityResult> result,
+    ) {
       if (getIt<SplashBloc>().state.firstTimeConnectionCheck) {
         getIt<SplashBloc>().add(const SplashFirstConnectionCheckDone());
       } else {
-        bool isNotConnected = result == ConnectivityResult.none;
+        bool isNotConnected = result.contains(ConnectivityResult.none);
         isNotConnected
             ? const SizedBox()
             : ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -41,28 +41,28 @@ class NetworkInfo {
   }
 
   static Future<XFile> compressImage(XFile file) async {
-    final ImageFile input = ImageFile(
-      filePath: file.path,
-      rawBytes: await file.readAsBytes(),
-    );
-    final Configuration config = Configuration(
-      outputType: ImageOutputType.webpThenPng,
-      useJpgPngNativeCompressor: false,
-      quality: (input.sizeInBytes / 1048576) < 2
-          ? 90
-          : (input.sizeInBytes / 1048576) < 5
-          ? 50
-          : (input.sizeInBytes / 1048576) < 10
-          ? 10
-          : 1,
-    );
-    final ImageFile output = await compressor.compress(
-      ImageFileConfiguration(input: input, config: config),
-    );
-    if (kDebugMode) {
-      print('Input size : ${input.sizeInBytes / 1048576}');
-      print('Output size : ${output.sizeInBytes / 1048576}');
-    }
-    return XFile.fromData(output.rawBytes);
+    final Uint8List rawBytes = await file.readAsBytes();
+    final double sizeInMb = rawBytes.lengthInBytes / 1048576;
+    final int quality = sizeInMb < 2
+        ? 90
+        : sizeInMb < 5
+        ? 50
+        : sizeInMb < 10
+        ? 10
+        : 1;
+    try {
+      final Uint8List? output = await FlutterImageCompress.compressWithList(
+        rawBytes,
+        quality: quality,
+      );
+      if (output != null) {
+        if (kDebugMode) {
+          print('Input size : $sizeInMb');
+          print('Output size : ${output.lengthInBytes / 1048576}');
+        }
+        return XFile.fromData(output);
+      }
+    } catch (_) {}
+    return file;
   }
 }

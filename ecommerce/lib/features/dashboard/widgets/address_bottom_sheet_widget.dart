@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/address_widget.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
+import 'package:ecommerce/features/address/domain/entities/address.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/helper/address_helper.dart';
+import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -18,15 +25,27 @@ import 'package:ecommerce/common/widgets/custom_loader.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 import 'package:ecommerce/features/location/presentation/pages/pick_map_screen.dart';
 
-class AddressBottomSheetWidget extends StatelessWidget {
+class AddressBottomSheetWidget extends StatefulWidget {
   final bool fromDialog;
   const AddressBottomSheetWidget({super.key, this.fromDialog = false});
 
   @override
-  Widget build(BuildContext context) {
-    if (Get.find<AddressController>().addressList == null) {
-      Get.find<AddressController>().getAddressList();
+  State<AddressBottomSheetWidget> createState() =>
+      _AddressBottomSheetWidgetState();
+}
+
+class _AddressBottomSheetWidgetState extends State<AddressBottomSheetWidget> {
+  @override
+  void initState() {
+    super.initState();
+    if (AuthHelper.isLoggedIn()) {
+      context.read<AddressBloc>().add(const AddressListRequested());
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool fromDialog = widget.fromDialog;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
@@ -49,10 +68,15 @@ class AddressBottomSheetWidget extends StatelessWidget {
           ),
         ),
       ),
-      child: GetBuilder<AddressController>(
-        builder: (addressController) {
+      child: BlocBuilder<AddressBloc, AddressState>(
+        builder: (context, addressState) {
           AddressModel? selectedAddress =
               AddressHelper.getUserAddressFromSharedPref();
+          final List<Address> addressList = addressState.addresses;
+          final bool addressLoaded =
+              addressState.status == AddressStatus.loaded ||
+              addressState.status == AddressStatus.error;
+          final bool addressListEmpty = addressLoaded && addressList.isEmpty;
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -62,7 +86,9 @@ class AddressBottomSheetWidget extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () {
-                            getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
+                            getIt<SplashBloc>().add(
+                              const SplashWebSuggestedLocationSaved(true),
+                            );
                             Get.back();
                           },
                           icon: const Icon(Icons.clear),
@@ -109,9 +135,7 @@ class AddressBottomSheetWidget extends StatelessWidget {
                       const SizedBox(height: Dimensions.paddingSizeLarge),
 
                       Center(
-                        child:
-                            addressController.addressList != null &&
-                                addressController.addressList!.isEmpty
+                        child: addressListEmpty
                             ? Column(
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -142,87 +166,89 @@ class AddressBottomSheetWidget extends StatelessWidget {
                             : const SizedBox(),
                       ),
 
-                      addressController.addressList != null &&
-                              addressController.addressList!.isEmpty
+                      addressListEmpty
                           ? const SizedBox(height: Dimensions.paddingSizeLarge)
                           : const SizedBox(),
 
-                      (addressController.addressList != null && fromDialog)
+                      (addressLoaded && fromDialog)
                           ? const SizedBox(
                               height: Dimensions.paddingSizeDefault,
                             )
                           : const SizedBox(),
                       Align(
-                        alignment:
-                            addressController.addressList != null &&
-                                addressController.addressList!.isEmpty &&
-                                !fromDialog
+                        alignment: addressListEmpty && !fromDialog
                             ? Alignment.center
                             : Alignment.topCenter,
                         child: TextButton.icon(
                           onPressed: () {
-                            Get.find<LocationController>().checkPermission(
-                              () async {
-                                Get.dialog(
-                                  const CustomLoader(),
-                                  barrierDismissible: false,
-                                );
-                                AddressModel address =
-                                    await Get.find<LocationController>()
-                                        .getCurrentLocation(true);
-                                ZoneResponseModel response =
-                                    await Get.find<LocationController>()
-                                        .getZone(
-                                          address.latitude,
-                                          address.longitude,
-                                          false,
-                                        );
-                                if (response.isSuccess) {
-                                  if (ResponsiveHelper.isDesktop(Get.context)) {
-                                    getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
-                                  }
-                                  Get.find<LocationController>()
-                                      .saveAddressAndNavigate(
-                                        address,
-                                        false,
-                                        '',
-                                        false,
-                                        ResponsiveHelper.isDesktop(Get.context),
-                                      );
-                                } else {
-                                  Get.back();
-                                  if (ResponsiveHelper.isDesktop(Get.context)) {
-                                    getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
-                                    showGeneralDialog(
-                                      context: Get.context!,
-                                      pageBuilder: (_, __, ___) {
-                                        return const SizedBox(
-                                          height: 300,
-                                          width: 300,
-                                          child: PickMapScreen(
-                                            fromSignUp: false,
-                                            canRoute: false,
-                                            fromAddAddress: true,
-                                            route: null,
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  } else {
-                                    Get.toNamed(
-                                      RouteHelper.getPickMapRoute(
-                                        RouteHelper.accessLocation,
-                                        false,
-                                      ),
-                                    );
-                                  }
-                                  showCustomSnackBar(
-                                    'service_not_available_in_current_location'
-                                        .tr,
+                            LocationHelper.checkPermission(() async {
+                              Get.dialog(
+                                const CustomLoader(),
+                                barrierDismissible: false,
+                              );
+                              final locationBloc = getIt<LocationBloc>();
+                              locationBloc.add(
+                                const CurrentLocationRequested(
+                                  fromAddress: true,
+                                ),
+                              );
+                              await locationBloc.stream.firstWhere(
+                                (s) => !s.loading,
+                              );
+                              final LocationState state = locationBloc.state;
+                              final AddressModel address = locationBloc
+                                  .buildAddressModel(fromAddress: true);
+                              final bool isSuccess =
+                                  state.lastZoneResult?.isSuccess ?? false;
+
+                              if (isSuccess) {
+                                if (ResponsiveHelper.isDesktop(Get.context)) {
+                                  getIt<SplashBloc>().add(
+                                    const SplashWebSuggestedLocationSaved(true),
                                   );
                                 }
-                              },
-                            );
+                                LocationHelper.saveAddressAndNavigate(
+                                  address,
+                                  false,
+                                  '',
+                                  false,
+                                  ResponsiveHelper.isDesktop(Get.context),
+                                );
+                              } else {
+                                Get.back();
+                                if (ResponsiveHelper.isDesktop(Get.context)) {
+                                  getIt<SplashBloc>().add(
+                                    const SplashWebSuggestedLocationSaved(true),
+                                  );
+                                  showGeneralDialog(
+                                    context: Get.context!,
+                                    pageBuilder: (_, _, _) {
+                                      return const SizedBox(
+                                        height: 300,
+                                        width: 300,
+                                        child: PickMapScreen(
+                                          fromSignUp: false,
+                                          canRoute: false,
+                                          fromAddAddress: true,
+                                          route: null,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  Get.toNamed(
+                                    RouteHelper.getPickMapRoute(
+                                      RouteHelper.accessLocation,
+                                      false,
+                                    ),
+                                  );
+                                }
+                                showCustomSnackBar(
+                                  'service_not_available_in_current_location'
+                                      .tr,
+                                );
+                              }
+                            });
                           },
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -232,17 +258,13 @@ class AddressBottomSheetWidget extends StatelessWidget {
                               ),
                             ),
                             fixedSize: const Size(200, 40),
-                            backgroundColor:
-                                addressController.addressList != null &&
-                                    addressController.addressList!.isEmpty
+                            backgroundColor: addressListEmpty
                                 ? Theme.of(context).primaryColor
                                 : Colors.transparent,
                           ),
                           icon: Icon(
                             Icons.my_location,
-                            color:
-                                addressController.addressList != null &&
-                                    addressController.addressList!.isEmpty
+                            color: addressListEmpty
                                 ? Theme.of(context).cardColor
                                 : Theme.of(context).primaryColor,
                           ),
@@ -251,20 +273,12 @@ class AddressBottomSheetWidget extends StatelessWidget {
                             style: fromDialog
                                 ? robotoRegular.copyWith(
                                     fontSize: Dimensions.fontSizeExtraSmall,
-                                    color:
-                                        addressController.addressList != null &&
-                                            addressController
-                                                .addressList!
-                                                .isEmpty
+                                    color: addressListEmpty
                                         ? Theme.of(context).cardColor
                                         : Theme.of(context).primaryColor,
                                   )
                                 : robotoMedium.copyWith(
-                                    color:
-                                        addressController.addressList != null &&
-                                            addressController
-                                                .addressList!
-                                                .isEmpty
+                                    color: addressListEmpty
                                         ? Theme.of(context).cardColor
                                         : Theme.of(context).primaryColor,
                                   ),
@@ -273,13 +287,13 @@ class AddressBottomSheetWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                      addressController.addressList != null
-                          ? addressController.addressList!.isNotEmpty
+                      addressLoaded
+                          ? addressList.isNotEmpty
                                 ? Container(
                                     decoration: BoxDecoration(
                                       color: Theme.of(
                                         context,
-                                      ).primaryColor.withOpacity(0.05),
+                                      ).primaryColor.withValues(alpha: 0.05),
                                       borderRadius: BorderRadius.circular(
                                         Dimensions.radiusDefault,
                                       ),
@@ -293,29 +307,24 @@ class AddressBottomSheetWidget extends StatelessWidget {
                                           const NeverScrollableScrollPhysics(),
                                       padding: EdgeInsets.zero,
                                       shrinkWrap: true,
-                                      itemCount:
-                                          addressController
-                                                  .addressList!
-                                                  .length >
-                                              5
+                                      itemCount: addressList.length > 5
                                           ? 5
-                                          : addressController
-                                                .addressList!
-                                                .length,
+                                          : addressList.length,
                                       itemBuilder: (context, index) {
+                                        final AddressModel address =
+                                            AddressModel.fromEntity(
+                                              addressList[index],
+                                            );
                                         bool selected = false;
-                                        if (selectedAddress!.id ==
-                                            addressController
-                                                .addressList![index]
-                                                .id) {
+                                        if (selectedAddress != null &&
+                                            selectedAddress.id == address.id) {
                                           selected = true;
                                         }
                                         return Center(
                                           child: SizedBox(
                                             width: 700,
                                             child: AddressWidget(
-                                              address: addressController
-                                                  .addressList![index],
+                                              address: address,
                                               fromAddress: false,
                                               isSelected: selected,
                                               fromDashBoard: true,
@@ -324,23 +333,21 @@ class AddressBottomSheetWidget extends StatelessWidget {
                                                   const CustomLoader(),
                                                   barrierDismissible: false,
                                                 );
-                                                AddressModel address =
-                                                    addressController
-                                                        .addressList![index];
-                                                Get.find<LocationController>()
-                                                    .saveAddressAndNavigate(
-                                                      address,
-                                                      false,
-                                                      null,
-                                                      false,
-                                                      ResponsiveHelper.isDesktop(
-                                                        context,
-                                                      ),
-                                                    );
+                                                LocationHelper.saveAddressAndNavigate(
+                                                  address,
+                                                  false,
+                                                  null,
+                                                  false,
+                                                  ResponsiveHelper.isDesktop(
+                                                    context,
+                                                  ),
+                                                );
 
-                                                getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(
-                                                      true,
-                                                    );
+                                                getIt<SplashBloc>().add(
+                                                  const SplashWebSuggestedLocationSaved(
+                                                    true,
+                                                  ),
+                                                );
                                               },
                                             ),
                                           ),
@@ -352,18 +359,17 @@ class AddressBottomSheetWidget extends StatelessWidget {
                           : const Center(child: CircularProgressIndicator()),
 
                       SizedBox(
-                        height:
-                            addressController.addressList != null &&
-                                addressController.addressList!.isEmpty
+                        height: addressListEmpty
                             ? 0
                             : Dimensions.paddingSizeSmall,
                       ),
 
-                      addressController.addressList != null &&
-                              addressController.addressList!.isNotEmpty
+                      addressLoaded && addressList.isNotEmpty
                           ? TextButton.icon(
                               onPressed: () {
-                                getIt<SplashBloc>().add(SplashWebSuggestedLocationSaved(true);
+                                getIt<SplashBloc>().add(
+                                  const SplashWebSuggestedLocationSaved(true),
+                                );
                                 Get.toNamed(
                                   RouteHelper.getAddAddressRoute(
                                     false,

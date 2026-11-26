@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/custom_circle_list_view_package.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -26,24 +26,24 @@ class _CircleListViewState extends State<CircleListView> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CampaignController>(
-      builder: (campaignController) {
-        if (campaignController.itemCampaignList != null) {
+    return BlocBuilder<CampaignBloc, CampaignState>(
+      builder: (context, state) {
+        if (state.itemCampaignList != null) {
           itemCampaignList = [];
-          if (campaignController.itemCampaignList!.length == 1) {
+          if (state.itemCampaignList!.length == 1) {
             for (int i = 0; i < 3; i++) {
-              itemCampaignList.add(campaignController.itemCampaignList![0]);
+              itemCampaignList.add(state.itemCampaignList![0]);
             }
-          } else if (campaignController.itemCampaignList!.length == 2) {
+          } else if (state.itemCampaignList!.length == 2) {
             for (int i = 0; i < 3; i++) {
-              itemCampaignList.add(campaignController.itemCampaignList![i % 2]);
+              itemCampaignList.add(state.itemCampaignList![i % 2]);
             }
           } else {
-            itemCampaignList.addAll(campaignController.itemCampaignList!);
+            itemCampaignList.addAll(state.itemCampaignList!);
           }
         }
 
-        return campaignController.itemCampaignList != null
+        return state.itemCampaignList != null
             ? itemCampaignList.isNotEmpty
                   ? SizedBox(
                       height: 200,
@@ -80,8 +80,8 @@ class _CircleListViewState extends State<CircleListView> {
                                   },
                                   itemBuilder: (context, index) {
                                     return InkWell(
-                                      onTap: () => Get.find<ItemController>()
-                                          .navigateToItemPage(
+                                      onTap: () =>
+                                          ItemHelper.navigateToItemPage(
                                             itemCampaignList[index],
                                             context,
                                             isCampaign: true,

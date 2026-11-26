@@ -1,5 +1,7 @@
-import 'package:ecommerce/features/category/controllers/category_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
+import 'package:ecommerce/features/category/presentation/bloc/category_state.dart';
+import 'package:ecommerce/features/category/domain/entities/category.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
@@ -22,7 +24,8 @@ class CategoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     ScrollController scrollController = ScrollController();
 
-    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(
+      builder: (context, splashController) {
         bool isPharmacy =
             splashController.module != null &&
             splashController.module!.moduleType.toString() ==
@@ -31,15 +34,18 @@ class CategoryView extends StatelessWidget {
             splashController.module != null &&
             splashController.module!.moduleType.toString() == AppConstants.food;
 
-        return GetBuilder<CategoryController>(
-          builder: (categoryController) {
-            return (categoryController.categoryList != null &&
-                    categoryController.categoryList!.isEmpty)
+        return BlocBuilder<CategoryBloc, CategoryState>(
+          builder: (context, categoryState) {
+            final List<Category>? categoryList =
+                categoryState.status == CategoryStatus.loaded
+                ? categoryState.categories
+                : null;
+            return (categoryList != null && categoryList.isEmpty)
                 ? const SizedBox()
                 : isPharmacy
-                ? PharmacyCategoryView(categoryController: categoryController)
+                ? PharmacyCategoryView(categoryList: categoryList)
                 : isFood
-                ? FoodCategoryView(categoryController: categoryController)
+                ? FoodCategoryView(categoryList: categoryList)
                 : Column(
                     children: [
                       Row(
@@ -47,18 +53,12 @@ class CategoryView extends StatelessWidget {
                           Expanded(
                             child: SizedBox(
                               height: 158,
-                              child: categoryController.categoryList != null
+                              child: categoryList != null
                                   ? ListView.builder(
                                       controller: scrollController,
-                                      itemCount:
-                                          categoryController
-                                                  .categoryList!
-                                                  .length >
-                                              10
+                                      itemCount: categoryList!.length > 10
                                           ? 10
-                                          : categoryController
-                                                .categoryList!
-                                                .length,
+                                          : categoryList.length,
                                       padding: const EdgeInsets.only(
                                         left: Dimensions.paddingSizeSmall,
                                         top: Dimensions.paddingSizeDefault,
@@ -76,22 +76,15 @@ class CategoryView extends StatelessWidget {
                                           child: InkWell(
                                             onTap: () {
                                               if (index == 9 &&
-                                                  categoryController
-                                                          .categoryList!
-                                                          .length >
-                                                      10) {
+                                                  categoryList!.length > 10) {
                                                 Get.toNamed(
                                                   RouteHelper.getCategoryRoute(),
                                                 );
                                               } else {
                                                 Get.toNamed(
                                                   RouteHelper.getCategoryItemRoute(
-                                                    categoryController
-                                                        .categoryList![index]
-                                                        .id,
-                                                    categoryController
-                                                        .categoryList![index]
-                                                        .name!,
+                                                    categoryList![index].id,
+                                                    categoryList[index].name!,
                                                   ),
                                                 );
                                               }
@@ -113,7 +106,7 @@ class CategoryView extends StatelessWidget {
                                                               ),
                                                           child: CustomImage(
                                                             image:
-                                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                                                '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryList![index].image}',
                                                             height: 75,
                                                             width: 75,
                                                             fit: BoxFit.cover,
@@ -121,8 +114,7 @@ class CategoryView extends StatelessWidget {
                                                         ),
 
                                                         (index == 9 &&
-                                                                categoryController
-                                                                        .categoryList!
+                                                                categoryList!
                                                                         .length >
                                                                     10)
                                                             ? Positioned(
@@ -163,7 +155,7 @@ class CategoryView extends StatelessWidget {
                                                                   ),
                                                                   child: Center(
                                                                     child: Text(
-                                                                      '+${categoryController.categoryList!.length - 10}',
+                                                                      '+${categoryList!.length - 10}',
                                                                       style: robotoMedium.copyWith(
                                                                         fontSize:
                                                                             Dimensions.fontSizeExtraLarge,
@@ -201,20 +193,17 @@ class CategoryView extends StatelessWidget {
                                                     ),
                                                     child: Text(
                                                       (index == 9 &&
-                                                              categoryController
-                                                                      .categoryList!
+                                                              categoryList!
                                                                       .length >
                                                                   10)
                                                           ? 'see_all'.tr
-                                                          : categoryController
-                                                                .categoryList![index]
+                                                          : categoryList![index]
                                                                 .name!,
                                                       style: robotoMedium.copyWith(
                                                         fontSize: 11,
                                                         color:
                                                             (index == 9 &&
-                                                                categoryController
-                                                                        .categoryList!
+                                                                categoryList!
                                                                         .length >
                                                                     10)
                                                             ? Theme.of(
@@ -226,9 +215,8 @@ class CategoryView extends StatelessWidget {
                                                                   .color,
                                                       ),
                                                       maxLines:
-                                                          Get.find<
-                                                                LocalizationController
-                                                              >()
+                                                          getIt<LanguageBloc>()
+                                                              .state
                                                               .isLtr
                                                           ? 2
                                                           : 1,
@@ -245,15 +233,13 @@ class CategoryView extends StatelessWidget {
                                         );
                                       },
                                     )
-                                  : CategoryShimmer(
-                                      categoryController: categoryController,
-                                    ),
+                                  : const CategoryShimmer(),
                             ),
                           ),
 
                           ResponsiveHelper.isMobile(context)
                               ? const SizedBox()
-                              : categoryController.categoryList != null
+                              : categoryList != null
                               ? Column(
                                   children: [
                                     InkWell(
@@ -265,8 +251,7 @@ class CategoryView extends StatelessWidget {
                                               height: 550,
                                               width: 600,
                                               child: CategoryPopUp(
-                                                categoryController:
-                                                    categoryController,
+                                                categoryList: categoryList!,
                                               ),
                                             ),
                                           ),
@@ -297,9 +282,7 @@ class CategoryView extends StatelessWidget {
                                     const SizedBox(height: 10),
                                   ],
                                 )
-                              : CategoryShimmer(
-                                  categoryController: categoryController,
-                                ),
+                              : const CategoryShimmer(),
                         ],
                       ),
                     ],
@@ -312,8 +295,8 @@ class CategoryView extends StatelessWidget {
 }
 
 class PharmacyCategoryView extends StatelessWidget {
-  final CategoryController categoryController;
-  const PharmacyCategoryView({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const PharmacyCategoryView({super.key, required this.categoryList});
 
   @override
   Widget build(BuildContext context) {
@@ -323,7 +306,7 @@ class PharmacyCategoryView extends StatelessWidget {
       children: [
         SizedBox(
           height: 160,
-          child: categoryController.categoryList != null
+          child: categoryList != null
               ? ListView.builder(
                   controller: scrollController,
                   physics: const BouncingScrollPhysics(),
@@ -333,9 +316,9 @@ class PharmacyCategoryView extends StatelessWidget {
                     left: Dimensions.paddingSizeDefault,
                     top: Dimensions.paddingSizeDefault,
                   ),
-                  itemCount: categoryController.categoryList!.length > 10
+                  itemCount: categoryList!.length > 10
                       ? 10
-                      : categoryController.categoryList!.length,
+                      : categoryList!.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.only(
@@ -345,14 +328,13 @@ class PharmacyCategoryView extends StatelessWidget {
                       ),
                       child: InkWell(
                         onTap: () {
-                          if (index == 9 &&
-                              categoryController.categoryList!.length > 10) {
+                          if (index == 9 && categoryList!.length > 10) {
                             Get.toNamed(RouteHelper.getCategoryRoute());
                           } else {
                             Get.toNamed(
                               RouteHelper.getCategoryItemRoute(
-                                categoryController.categoryList![index].id,
-                                categoryController.categoryList![index].name!,
+                                categoryList![index].id,
+                                categoryList![index].name!,
                               ),
                             );
                           }
@@ -387,18 +369,14 @@ class PharmacyCategoryView extends StatelessWidget {
                                     ),
                                     child: CustomImage(
                                       image:
-                                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                          '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryList![index].image}',
                                       height: 60,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
 
-                                  (index == 9 &&
-                                          categoryController
-                                                  .categoryList!
-                                                  .length >
-                                              10)
+                                  (index == 9 && categoryList!.length > 10)
                                       ? Positioned(
                                           right: 0,
                                           left: 0,
@@ -430,7 +408,7 @@ class PharmacyCategoryView extends StatelessWidget {
                                             ),
                                             child: Center(
                                               child: Text(
-                                                '+${categoryController.categoryList!.length - 10}',
+                                                '+${categoryList!.length - 10}',
                                                 style: robotoMedium.copyWith(
                                                   fontSize: Dimensions
                                                       .fontSizeExtraLarge,
@@ -454,23 +432,14 @@ class PharmacyCategoryView extends StatelessWidget {
 
                               Expanded(
                                 child: Text(
-                                  (index == 9 &&
-                                          categoryController
-                                                  .categoryList!
-                                                  .length >
-                                              10)
+                                  (index == 9 && categoryList!.length > 10)
                                       ? 'see_all'.tr
-                                      : categoryController
-                                            .categoryList![index]
-                                            .name!,
+                                      : categoryList![index].name!,
                                   style: robotoMedium.copyWith(
                                     fontSize: Dimensions.fontSizeSmall,
                                     color:
                                         (index == 9 &&
-                                            categoryController
-                                                    .categoryList!
-                                                    .length >
-                                                10)
+                                            categoryList!.length > 10)
                                         ? Theme.of(context).primaryColor
                                         : Theme.of(
                                             context,
@@ -488,7 +457,7 @@ class PharmacyCategoryView extends StatelessWidget {
                     );
                   },
                 )
-              : PharmacyCategoryShimmer(categoryController: categoryController),
+              : const PharmacyCategoryShimmer(),
         ),
       ],
     );
@@ -496,8 +465,8 @@ class PharmacyCategoryView extends StatelessWidget {
 }
 
 class FoodCategoryView extends StatelessWidget {
-  final CategoryController categoryController;
-  const FoodCategoryView({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const FoodCategoryView({super.key, required this.categoryList});
 
   @override
   Widget build(BuildContext context) {
@@ -509,7 +478,7 @@ class FoodCategoryView extends StatelessWidget {
           children: [
             SizedBox(
               height: 160,
-              child: categoryController.categoryList != null
+              child: categoryList != null
                   ? ListView.builder(
                       controller: scrollController,
                       physics: const BouncingScrollPhysics(),
@@ -519,9 +488,9 @@ class FoodCategoryView extends StatelessWidget {
                         left: Dimensions.paddingSizeDefault,
                         top: Dimensions.paddingSizeDefault,
                       ),
-                      itemCount: categoryController.categoryList!.length > 10
+                      itemCount: categoryList!.length > 10
                           ? 10
-                          : categoryController.categoryList!.length,
+                          : categoryList!.length,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(
@@ -531,17 +500,13 @@ class FoodCategoryView extends StatelessWidget {
                           ),
                           child: InkWell(
                             onTap: () {
-                              if (index == 9 &&
-                                  categoryController.categoryList!.length >
-                                      10) {
+                              if (index == 9 && categoryList!.length > 10) {
                                 Get.toNamed(RouteHelper.getCategoryRoute());
                               } else {
                                 Get.toNamed(
                                   RouteHelper.getCategoryItemRoute(
-                                    categoryController.categoryList![index].id,
-                                    categoryController
-                                        .categoryList![index]
-                                        .name!,
+                                    categoryList![index].id,
+                                    categoryList![index].name!,
                                   ),
                                 );
                               }
@@ -561,18 +526,14 @@ class FoodCategoryView extends StatelessWidget {
                                         ),
                                         child: CustomImage(
                                           image:
-                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                              '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryList![index].image}',
                                           height: 60,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
 
-                                      (index == 9 &&
-                                              categoryController
-                                                      .categoryList!
-                                                      .length >
-                                                  10)
+                                      (index == 9 && categoryList!.length > 10)
                                           ? Positioned(
                                               right: 0,
                                               left: 0,
@@ -602,7 +563,7 @@ class FoodCategoryView extends StatelessWidget {
                                                 ),
                                                 child: Center(
                                                   child: Text(
-                                                    '+${categoryController.categoryList!.length - 10}',
+                                                    '+${categoryList!.length - 10}',
                                                     style: robotoMedium.copyWith(
                                                       fontSize: Dimensions
                                                           .fontSizeExtraLarge,
@@ -627,24 +588,14 @@ class FoodCategoryView extends StatelessWidget {
 
                                   Expanded(
                                     child: Text(
-                                      (index == 9 &&
-                                              categoryController
-                                                      .categoryList!
-                                                      .length >
-                                                  10)
+                                      (index == 9 && categoryList!.length > 10)
                                           ? 'see_all'.tr
-                                          : categoryController
-                                                    .categoryList![index]
-                                                    .name ??
-                                                '',
+                                          : categoryList![index].name ?? '',
                                       style: robotoMedium.copyWith(
                                         fontSize: Dimensions.fontSizeSmall,
                                         color:
                                             (index == 9 &&
-                                                categoryController
-                                                        .categoryList!
-                                                        .length >
-                                                    10)
+                                                categoryList!.length > 10)
                                             ? Theme.of(context).primaryColor
                                             : Theme.of(
                                                 context,
@@ -662,7 +613,7 @@ class FoodCategoryView extends StatelessWidget {
                         );
                       },
                     )
-                  : FoodCategoryShimmer(categoryController: categoryController),
+                  : const FoodCategoryShimmer(),
             ),
           ],
         ),
@@ -672,8 +623,7 @@ class FoodCategoryView extends StatelessWidget {
 }
 
 class CategoryShimmer extends StatelessWidget {
-  final CategoryController categoryController;
-  const CategoryShimmer({super.key, required this.categoryController});
+  const CategoryShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -735,8 +685,7 @@ class CategoryShimmer extends StatelessWidget {
 }
 
 class FoodCategoryShimmer extends StatelessWidget {
-  final CategoryController categoryController;
-  const FoodCategoryShimmer({super.key, required this.categoryController});
+  const FoodCategoryShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -795,8 +744,7 @@ class FoodCategoryShimmer extends StatelessWidget {
 }
 
 class PharmacyCategoryShimmer extends StatelessWidget {
-  final CategoryController categoryController;
-  const PharmacyCategoryShimmer({super.key, required this.categoryController});
+  const PharmacyCategoryShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {

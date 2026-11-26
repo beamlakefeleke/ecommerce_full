@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
@@ -158,11 +160,11 @@ class _WebBestStoreNearbyViewWidgetState
 
           Stack(
             children: [
-              GetBuilder<StoreController>(
-                builder: (storeController) {
+              BlocBuilder<StoreBloc, StoreState>(
+                builder: (context, state) {
                   List<Store>? storeList = isPharmacy
-                      ? storeController.featuredStoreList
-                      : storeController.popularStoreList;
+                      ? state.featuredStoreList
+                      : state.popularStoreList;
 
                   if (storeList != null &&
                       storeList.length > 3 &&
@@ -190,8 +192,7 @@ class _WebBestStoreNearbyViewWidgetState
                                       child: Padding(
                                         padding: EdgeInsets.only(
                                           bottom:
-                                              Get.find<LocalizationController>()
-                                                  .isLtr
+                                              getIt<LanguageBloc>().state.isLtr
                                               ? Dimensions
                                                     .paddingSizeExtremeLarge
                                               : 0,
@@ -215,31 +216,26 @@ class _WebBestStoreNearbyViewWidgetState
                                   itemCount: storeList.length,
                                   itemBuilder: (context, index) {
                                     double distance =
-                                        Get.find<StoreController>()
-                                            .getRestaurantDistance(
-                                              LatLng(
-                                                double.parse(
-                                                  storeList[index].latitude!,
-                                                ),
-                                                double.parse(
-                                                  storeList[index].longitude!,
-                                                ),
-                                              ),
-                                            );
+                                        StoreHelper.getRestaurantDistance(
+                                          LatLng(
+                                            double.parse(
+                                              storeList[index].latitude!,
+                                            ),
+                                            double.parse(
+                                              storeList[index].longitude!,
+                                            ),
+                                          ),
+                                        );
 
                                     return Padding(
                                       padding: EdgeInsets.only(
                                         bottom:
                                             Dimensions.paddingSizeExtremeLarge,
                                         top: Dimensions.paddingSizeExtremeLarge,
-                                        left:
-                                            Get.find<LocalizationController>()
-                                                .isLtr
+                                        left: getIt<LanguageBloc>().state.isLtr
                                             ? 0
                                             : Dimensions.paddingSizeDefault,
-                                        right:
-                                            Get.find<LocalizationController>()
-                                                .isLtr
+                                        right: getIt<LanguageBloc>().state.isLtr
                                             ? Dimensions.paddingSizeDefault
                                             : 0,
                                       ),
@@ -250,16 +246,22 @@ class _WebBestStoreNearbyViewWidgetState
                                             : InkWell(
                                                 hoverColor: Colors.transparent,
                                                 onTap: () {
-                                                  if (getIt<SplashBloc>().state
+                                                  if (getIt<SplashBloc>()
+                                                          .state
                                                           .moduleList !=
                                                       null) {
                                                     for (ModuleModel module
-                                                        in getIt<SplashBloc>().state
+                                                        in getIt<SplashBloc>()
+                                                            .state
                                                             .moduleList!) {
                                                       if (module.id ==
                                                           storeList[index]
                                                               .moduleId) {
-                                                        getIt<SplashBloc>().add(SplashModuleSet(module);
+                                                        getIt<SplashBloc>().add(
+                                                          SplashModuleSet(
+                                                            module,
+                                                          ),
+                                                        );
                                                         break;
                                                       }
                                                     }
@@ -382,11 +384,11 @@ class _WebBestStoreNearbyViewWidgetState
 
                                                                       DiscountTag(
                                                                         discount:
-                                                                            storeController.getDiscount(
+                                                                            StoreHelper.getDiscount(
                                                                               storeList[index],
                                                                             ),
                                                                         discountType:
-                                                                            storeController.getDiscountType(
+                                                                            StoreHelper.getDiscountType(
                                                                               storeList[index],
                                                                             ),
                                                                         freeDelivery:
@@ -568,16 +570,14 @@ class _WebBestStoreNearbyViewWidgetState
 
                                                     AddFavouriteView(
                                                       left:
-                                                          Get.find<
-                                                                LocalizationController
-                                                              >()
+                                                          getIt<LanguageBloc>()
+                                                              .state
                                                               .isLtr
                                                           ? null
                                                           : 15,
                                                       right:
-                                                          Get.find<
-                                                                LocalizationController
-                                                              >()
+                                                          getIt<LanguageBloc>()
+                                                              .state
                                                               .isLtr
                                                           ? 15
                                                           : null,
@@ -595,9 +595,7 @@ class _WebBestStoreNearbyViewWidgetState
                               ),
                             ],
                           )
-                        : WebBestStoreNearbyShimmerView(
-                            storeController: storeController,
-                          ),
+                        : const WebBestStoreNearbyShimmerView(),
                   );
                 },
               ),
@@ -607,7 +605,7 @@ class _WebBestStoreNearbyViewWidgetState
                   top: 70,
                   left: isPharmacy
                       ? 0
-                      : Get.find<LocalizationController>().isLtr
+                      : getIt<LanguageBloc>().state.isLtr
                       ? 45
                       : 0,
                   child: ArrowIconButton(
@@ -623,7 +621,7 @@ class _WebBestStoreNearbyViewWidgetState
               if (showForwardButton)
                 Positioned(
                   top: 70,
-                  right: Get.find<LocalizationController>().isLtr ? 0 : 45,
+                  right: getIt<LanguageBloc>().state.isLtr ? 0 : 45,
                   child: ArrowIconButton(
                     onTap: () => scrollController.animateTo(
                       scrollController.offset + Dimensions.webMaxWidth,
@@ -641,18 +639,13 @@ class _WebBestStoreNearbyViewWidgetState
 }
 
 class WebBestStoreNearbyShimmerView extends StatelessWidget {
-  final StoreController storeController;
-  const WebBestStoreNearbyShimmerView({
-    super.key,
-    required this.storeController,
-  });
+  const WebBestStoreNearbyShimmerView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final bool isPharmacy =
         getIt<SplashBloc>().state.module != null &&
-        getIt<SplashBloc>().state.module!.moduleType.toString() ==
-            'pharmacy';
+        getIt<SplashBloc>().state.module!.moduleType.toString() == 'pharmacy';
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,

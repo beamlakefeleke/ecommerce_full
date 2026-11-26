@@ -6,8 +6,8 @@ import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_event.dart'
 import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_state.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -59,7 +59,7 @@ class _LoyaltyBottomSheetWidgetState extends State<LoyaltyBottomSheetWidget> {
           } else {
             Navigator.of(context).pop();
           }
-          Get.find<ProfileController>().getUserInfo();
+          context.read<ProfileBloc>().add(const ProfileInfoRequested());
           showCustomSnackBar(
             'converted_successfully_transfer_to_your_wallet'.tr,
             isError: false,
@@ -202,7 +202,7 @@ class _LoyaltyBottomSheetWidgetState extends State<LoyaltyBottomSheetWidget> {
     }
 
     final int amount = int.parse(_amountController.text.trim());
-    final int? point = Get.find<ProfileController>().userInfoModel!.loyaltyPoint;
+    final int? point = getIt<ProfileBloc>().state.userInfoModel!.loyaltyPoint;
 
     if (amount < minimumExchangePoint!) {
       if (Get.isBottomSheetOpen ?? false) {

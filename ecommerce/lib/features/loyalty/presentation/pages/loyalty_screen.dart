@@ -9,7 +9,9 @@ import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_event.dart'
 import 'package:ecommerce/features/loyalty/presentation/bloc/loyalty_state.dart';
 import 'package:ecommerce/features/loyalty/presentation/widgets/loyalty_card_widget.dart';
 import 'package:ecommerce/features/loyalty/presentation/widgets/loyalty_history_widget.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -52,7 +54,7 @@ class _LoyaltyViewState extends State<_LoyaltyView> {
 
   void initCall() {
     if (AuthHelper.isLoggedIn()) {
-      Get.find<ProfileController>().getUserInfo();
+      context.read<ProfileBloc>().add(const ProfileInfoRequested());
 
       context.read<LoyaltyBloc>().add(
         const LoyaltyTransactionsRequested(offset: 1),
@@ -106,10 +108,10 @@ class _LoyaltyViewState extends State<_LoyaltyView> {
               onPressed: () => showLoyaltyConvertDialog(context),
             )
           : null,
-      body: GetBuilder<ProfileController>(
-        builder: (profileController) {
+      body: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, profileState) {
           return isLoggedIn
-              ? profileController.userInfoModel != null
+              ? profileState.userInfoModel != null
                     ? SafeArea(
                         child: RefreshIndicator(
                           onRefresh: () async {
@@ -119,7 +121,9 @@ class _LoyaltyViewState extends State<_LoyaltyView> {
                                 reload: true,
                               ),
                             );
-                            Get.find<ProfileController>().getUserInfo();
+                            context.read<ProfileBloc>().add(
+                              const ProfileInfoRequested(),
+                            );
                           },
                           child: SingleChildScrollView(
                             controller: scrollController,

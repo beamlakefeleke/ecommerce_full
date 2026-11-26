@@ -4,9 +4,9 @@ import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart
 import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
 import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -308,7 +308,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
         !AuthHelper.isLoggedIn()) {
       getIt<AuthRepository>().guestLogin().then((result) {
         result.fold((_) {}, (_) {
-          Get.find<ProfileController>().setForceFullyUserEmpty();
+          getIt<ProfileBloc>().add(const ProfileCleared());
           Get.back();
           LocationHelper.saveAddressAndNavigate(
             address,

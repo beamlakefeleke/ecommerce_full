@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 
 class FilterView extends StatelessWidget {
-  final StoreController storeController;
-  const FilterView({super.key, required this.storeController});
+  final StoreState storeState;
+  const FilterView({super.key, required this.storeState});
 
   @override
   Widget build(BuildContext context) {
-    return storeController.storeModel != null
+    return storeState.storeModel != null
         ? PopupMenuButton(
             itemBuilder: (context) {
               return [
@@ -19,7 +20,7 @@ class FilterView extends StatelessWidget {
                   child: Text(
                     'all'.tr,
                     style: robotoMedium.copyWith(
-                      color: storeController.storeType == 'all'
+                      color: storeState.storeType == 'all'
                           ? Theme.of(context).textTheme.bodyLarge!.color
                           : Theme.of(context).disabledColor,
                     ),
@@ -30,7 +31,7 @@ class FilterView extends StatelessWidget {
                   child: Text(
                     'take_away'.tr,
                     style: robotoMedium.copyWith(
-                      color: storeController.storeType == 'take_away'
+                      color: storeState.storeType == 'take_away'
                           ? Theme.of(context).textTheme.bodyLarge!.color
                           : Theme.of(context).disabledColor,
                     ),
@@ -41,7 +42,7 @@ class FilterView extends StatelessWidget {
                   child: Text(
                     'delivery'.tr,
                     style: robotoMedium.copyWith(
-                      color: storeController.storeType == 'delivery'
+                      color: storeState.storeType == 'delivery'
                           ? Theme.of(context).textTheme.bodyLarge!.color
                           : Theme.of(context).disabledColor,
                     ),
@@ -70,7 +71,8 @@ class FilterView extends StatelessWidget {
                 ),
               ),
             ),
-            onSelected: (dynamic value) => storeController.setStoreType(value),
+            onSelected: (dynamic value) =>
+                getIt<StoreBloc>().add(StoreTypeChanged(value)),
           )
         : const SizedBox();
   }

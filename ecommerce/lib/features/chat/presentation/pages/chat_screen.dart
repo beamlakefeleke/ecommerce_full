@@ -1,3 +1,5 @@
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +10,6 @@ import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -62,29 +63,26 @@ class _ChatScreenState extends State<ChatScreen> {
           firstLoad: true,
         ),
       );
-      if (Get.find<ProfileController>().userInfoModel == null ||
-          Get.find<ProfileController>().userInfoModel!.userInfo == null) {
-        Get.find<ProfileController>().getUserInfo();
+      if (getIt<ProfileBloc>().state.userInfoModel == null ||
+          getIt<ProfileBloc>().state.userInfoModel!.userInfo == null) {
+        getIt<ProfileBloc>().add(const ProfileInfoRequested());
       }
     }
   }
 
   String _baseUrl(NotificationBodyModel? notif) {
     if (notif?.adminId != null) {
-      return getIt<SplashBloc>().state
-              .configModel!
-              .baseUrls!
-              .businessLogoUrl ??
+      return getIt<SplashBloc>().state.configModel!.baseUrls!.businessLogoUrl ??
           '';
     } else if (notif?.deliverymanId != null) {
-      return getIt<SplashBloc>().state
+      return getIt<SplashBloc>()
+              .state
               .configModel!
               .baseUrls!
               .deliveryManImageUrl ??
           '';
     }
-    return getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl ??
-        '';
+    return getIt<SplashBloc>().state.configModel!.baseUrls!.storeImageUrl ?? '';
   }
 
   String _userType(NotificationBodyModel? notif) {

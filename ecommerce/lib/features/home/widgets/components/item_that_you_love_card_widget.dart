@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -48,8 +47,7 @@ class ItemThatYouLoveCard extends StatelessWidget {
               : null,
         ),
         child: CustomInkWell(
-          onTap: () =>
-              Get.find<ItemController>().navigateToItemPage(item, context),
+          onTap: () => ItemHelper.navigateToItemPage(item, context),
           radius: Dimensions.radiusDefault,
           child: Column(
             children: [
@@ -85,7 +83,7 @@ class ItemThatYouLoveCard extends StatelessWidget {
 
                     AddFavouriteView(item: item),
 
-                    Get.find<ItemController>().isAvailable(item)
+                    ItemHelper.isAvailable(item)
                         ? const SizedBox()
                         : const NotAvailableWidget(),
 
@@ -130,7 +128,7 @@ class ItemThatYouLoveCard extends StatelessWidget {
               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
               Expanded(
-                flex: Get.find<LocalizationController>().isLtr ? 3 : 4,
+                flex: getIt<LanguageBloc>().state.isLtr ? 3 : 4,
                 child: Padding(
                   padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                   child: Column(
@@ -171,7 +169,8 @@ class ItemThatYouLoveCard extends StatelessWidget {
                         ],
                       ),
 
-                      (getIt<SplashBloc>().state
+                      (getIt<SplashBloc>()
+                                  .state
                                   .configModel!
                                   .moduleConfig!
                                   .module!
@@ -193,9 +192,7 @@ class ItemThatYouLoveCard extends StatelessWidget {
                           item.discount != null && item.discount! > 0
                               ? Text(
                                   PriceConverter.convertPrice(
-                                    Get.find<ItemController>().getStartingPrice(
-                                      item,
-                                    ),
+                                    ItemHelper.getStartingPrice(item),
                                   ),
                                   style: robotoMedium.copyWith(
                                     fontSize: Dimensions.fontSizeExtraSmall,
@@ -213,7 +210,7 @@ class ItemThatYouLoveCard extends StatelessWidget {
 
                           Text(
                             PriceConverter.convertPrice(
-                              Get.find<ItemController>().getStartingPrice(item),
+                              ItemHelper.getStartingPrice(item),
                               discount: item.discount,
                               discountType: item.discountType,
                             ),

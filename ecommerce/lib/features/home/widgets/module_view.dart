@@ -1,20 +1,7 @@
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/common/widgets/address_widget.dart';
-import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/core/di/injection.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
-import 'package:ecommerce/features/address/data/models/address_model.dart';
-import 'package:ecommerce/helper/address_helper.dart';
-import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
-import 'package:ecommerce/util/styles.dart';
-import 'package:ecommerce/common/widgets/custom_image.dart';
-import 'package:ecommerce/common/widgets/custom_loader.dart';
 import 'package:ecommerce/common/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,11 +17,7 @@ class ModuleView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetBuilder<BannerController>(
-          builder: (bannerController) {
-            return const BannerView(isFeatured: true);
-          },
-        ),
+        const BannerView(isFeatured: true),
         // splashController.moduleList != null
         //     ? splashController.moduleList!.isNotEmpty
         //         ? GridView.builder(

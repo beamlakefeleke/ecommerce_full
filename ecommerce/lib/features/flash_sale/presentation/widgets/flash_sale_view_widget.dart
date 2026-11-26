@@ -4,11 +4,10 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/features/home/widgets/components/flash_sale_card_widget.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -144,7 +143,8 @@ class _FlashSaleViewWidgetState extends State<FlashSaleViewWidget> {
                             height: Dimensions.paddingSizeExtraSmall,
                           ),
 
-                          (getIt<SplashBloc>().state
+                          (getIt<SplashBloc>()
+                                      .state
                                       .configModel!
                                       .moduleConfig!
                                       .module!
@@ -168,8 +168,7 @@ class _FlashSaleViewWidgetState extends State<FlashSaleViewWidget> {
                                   ? Flexible(
                                       child: Text(
                                         PriceConverter.convertPrice(
-                                          Get.find<ItemController>()
-                                              .getStartingPrice(item),
+                                          ItemHelper.getStartingPrice(item),
                                         ),
                                         style: robotoMedium.copyWith(
                                           fontSize:
@@ -194,9 +193,7 @@ class _FlashSaleViewWidgetState extends State<FlashSaleViewWidget> {
                               Flexible(
                                 child: Text(
                                   PriceConverter.convertPrice(
-                                    Get.find<ItemController>().getStartingPrice(
-                                      item,
-                                    ),
+                                    ItemHelper.getStartingPrice(item),
                                     discount: item.discount,
                                     discountType: item.discountType,
                                   ),

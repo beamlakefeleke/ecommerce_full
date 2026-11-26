@@ -1,7 +1,6 @@
-import 'package:ecommerce/features/category/controllers/category_controller.dart';
+import 'package:ecommerce/features/category/domain/entities/category.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -12,8 +11,8 @@ import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:get/get.dart';
 
 class CategoryPopUp extends StatelessWidget {
-  final CategoryController categoryController;
-  const CategoryPopUp({super.key, required this.categoryController});
+  final List<Category> categoryList;
+  const CategoryPopUp({super.key, required this.categoryList});
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +29,9 @@ class CategoryPopUp extends StatelessWidget {
             Expanded(
               child: SizedBox(
                 height: 80,
-                child: categoryController.categoryList != null
+                child: categoryList.isNotEmpty
                     ? GridView.builder(
-                        itemCount: categoryController.categoryList!.length,
+                        itemCount: categoryList.length,
                         padding: const EdgeInsets.only(
                           left: Dimensions.paddingSizeSmall,
                         ),
@@ -49,8 +48,8 @@ class CategoryPopUp extends StatelessWidget {
                             child: InkWell(
                               onTap: () => Get.toNamed(
                                 RouteHelper.getCategoryItemRoute(
-                                  categoryController.categoryList![index].id,
-                                  categoryController.categoryList![index].name!,
+                                  categoryList[index].id,
+                                  categoryList[index].name!,
                                 ),
                               ),
                               child: SizedBox(
@@ -84,16 +83,14 @@ class CategoryPopUp extends StatelessWidget {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryController.categoryList![index].image}',
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${categoryList[index].image}',
                                         height: 50,
                                         width: 50,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
                                     Text(
-                                      categoryController
-                                          .categoryList![index]
-                                          .name!,
+                                      categoryList[index].name!,
                                       style: robotoMedium.copyWith(
                                         fontSize: Dimensions.fontSizeSmall,
                                       ),
@@ -108,7 +105,7 @@ class CategoryPopUp extends StatelessWidget {
                           );
                         },
                       )
-                    : CategoryShimmer(categoryController: categoryController),
+                    : const CategoryShimmer(),
               ),
             ),
           ],
@@ -119,8 +116,7 @@ class CategoryPopUp extends StatelessWidget {
 }
 
 class CategoryShimmer extends StatelessWidget {
-  final CategoryController categoryController;
-  const CategoryShimmer({super.key, required this.categoryController});
+  const CategoryShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +133,7 @@ class CategoryShimmer extends StatelessWidget {
             padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
             child: Shimmer(
               duration: const Duration(seconds: 2),
-              enabled: categoryController.categoryList == null,
+              enabled: true,
               child: Column(
                 children: [
                   Container(

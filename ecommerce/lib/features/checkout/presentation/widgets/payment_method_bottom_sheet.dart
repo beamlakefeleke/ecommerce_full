@@ -4,8 +4,7 @@ import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
@@ -54,8 +53,11 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
     super.initState();
 
     if (!AuthHelper.isGuestLoggedIn()) {
-      double walletBalance =
-          Get.find<ProfileController>().userInfoModel!.walletBalance!;
+      double walletBalance = context
+          .read<ProfileBloc>()
+          .state
+          .userInfoModel!
+          .walletBalance!;
       if (walletBalance < widget.totalPrice) {
         canSelectWallet = false;
       }
@@ -65,13 +67,15 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
             'cod') {
           notHideCod = true;
           notHideDigital = false;
-        } else if (getIt<SplashBloc>().state
+        } else if (getIt<SplashBloc>()
+                .state
                 .configModel!
                 .partialPaymentMethod! ==
             'digital_payment') {
           notHideCod = false;
           notHideDigital = true;
-        } else if (getIt<SplashBloc>().state
+        } else if (getIt<SplashBloc>()
+                .state
                 .configModel!
                 .partialPaymentMethod! ==
             'both') {
@@ -296,7 +300,8 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
                                 padding: EdgeInsets.zero,
-                                itemCount: getIt<SplashBloc>().state
+                                itemCount: getIt<SplashBloc>()
+                                    .state
                                     .configModel!
                                     .activePaymentMethodList!
                                     .length,
@@ -304,7 +309,8 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                                   bool isSelected =
                                       checkoutController.paymentMethodIndex ==
                                           2 &&
-                                      getIt<SplashBloc>().state
+                                      getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .activePaymentMethodList![index]
                                               .getWay! ==
@@ -316,7 +322,8 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
                                       );
                                       context.read<CheckoutBloc>().add(
                                         CheckoutDigitalPaymentNameChanged(
-                                          getIt<SplashBloc>().state
+                                          getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .activePaymentMethodList![index]
                                               .getWay!,
@@ -380,7 +387,8 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
 
                                           Expanded(
                                             child: Text(
-                                              getIt<SplashBloc>().state
+                                              getIt<SplashBloc>()
+                                                  .state
                                                   .configModel!
                                                   .activePaymentMethodList![index]
                                                   .getWayTitle!,

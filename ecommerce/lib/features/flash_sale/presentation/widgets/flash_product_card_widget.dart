@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/flash_sale/data/models/product_flash_sale.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -38,7 +37,7 @@ class FlashProductCardWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 0),
@@ -48,10 +47,7 @@ class FlashProductCardWidget extends StatelessWidget {
       child: CustomInkWell(
         onTap: remaining == 0
             ? null
-            : () => Get.find<ItemController>().navigateToItemPage(
-                product.item,
-                context,
-              ),
+            : () => ItemHelper.navigateToItemPage(product.item, context),
         padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
         radius: Dimensions.radiusDefault,
         child: Column(
@@ -104,7 +100,7 @@ class FlashProductCardWidget extends StatelessWidget {
                                         BoxShadow(
                                           color: Theme.of(
                                             context,
-                                          ).primaryColor.withOpacity(0.1),
+                                          ).primaryColor.withValues(alpha: 0.1),
                                           spreadRadius: 1,
                                           blurRadius: 5,
                                           offset: const Offset(0, 1),
@@ -133,9 +129,9 @@ class FlashProductCardWidget extends StatelessWidget {
                                         color: Theme.of(context).cardColor,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Theme.of(
-                                              context,
-                                            ).primaryColor.withOpacity(0.1),
+                                            color: Theme.of(context)
+                                                .primaryColor
+                                                .withValues(alpha: 0.1),
                                             spreadRadius: 1,
                                             blurRadius: 5,
                                             offset: const Offset(0, 1),
@@ -178,7 +174,8 @@ class FlashProductCardWidget extends StatelessWidget {
                       style: robotoMedium,
                     ),
 
-                    (getIt<SplashBloc>().state
+                    (getIt<SplashBloc>()
+                                .state
                                 .configModel!
                                 .moduleConfig!
                                 .module!
@@ -199,9 +196,7 @@ class FlashProductCardWidget extends StatelessWidget {
                                 product.item!.discount! > 0
                             ? Text(
                                 PriceConverter.convertPrice(
-                                  Get.find<ItemController>().getStartingPrice(
-                                    product.item!,
-                                  ),
+                                  ItemHelper.getStartingPrice(product.item!),
                                 ),
                                 style: robotoMedium.copyWith(
                                   fontSize: Dimensions.fontSizeExtraSmall,
@@ -221,9 +216,7 @@ class FlashProductCardWidget extends StatelessWidget {
 
                         Text(
                           PriceConverter.convertPrice(
-                            Get.find<ItemController>().getStartingPrice(
-                              product.item!,
-                            ),
+                            ItemHelper.getStartingPrice(product.item!),
                             discount: product.item!.discount,
                             discountType: product.item!.discountType,
                           ),
@@ -269,7 +262,7 @@ class FlashProductCardWidget extends StatelessWidget {
                             ),
                             backgroundColor: Theme.of(
                               context,
-                            ).primaryColor.withOpacity(0.25),
+                            ).primaryColor.withValues(alpha: 0.25),
                           ),
                         ),
 

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/card_design/item_card.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/views/special_offer_view.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -33,9 +33,9 @@ class MostPopularItemView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         vertical: Dimensions.paddingSizeDefault,
       ),
-      child: GetBuilder<ItemController>(
-        builder: (itemController) {
-          List<Item>? itemList = itemController.popularItemList;
+      child: BlocBuilder<ItemBloc, ItemState>(
+        builder: (context, state) {
+          List<Item>? itemList = state.popularItemList;
 
           return (itemList != null)
               ? itemList.isNotEmpty

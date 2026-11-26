@@ -1,8 +1,7 @@
-import 'package:ecommerce/features/category/controllers/category_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/category/domain/entities/category.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/arrow_icon_button.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -15,8 +14,8 @@ import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/hover/text_hover.dart';
 
 class WebCategoryViewWidget extends StatefulWidget {
-  final CategoryController categoryController;
-  const WebCategoryViewWidget({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const WebCategoryViewWidget({super.key, required this.categoryList});
 
   @override
   State<WebCategoryViewWidget> createState() => _WebCategoryViewWidgetState();
@@ -68,17 +67,17 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.food;
 
-    if (widget.categoryController.categoryList != null &&
-        widget.categoryController.categoryList!.length > 9 &&
+    if (widget.categoryList != null &&
+        widget.categoryList!.length > 9 &&
         isFirstTime) {
       showForwardButton = true;
       isFirstTime = false;
     }
 
     return isPharmacy
-        ? PharmacyCategoryView(categoryController: widget.categoryController)
+        ? PharmacyCategoryView(categoryList: widget.categoryList)
         : isFood
-        ? FoodCategoryView(categoryController: widget.categoryController)
+        ? FoodCategoryView(categoryList: widget.categoryList)
         : Stack(
             children: [
               Column(
@@ -87,7 +86,7 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
                   SizedBox(
                     height: 190,
                     width: Get.width,
-                    child: widget.categoryController.categoryList != null
+                    child: widget.categoryList != null
                         ? ListView.builder(
                             controller: scrollController,
                             physics: const BouncingScrollPhysics(),
@@ -96,8 +95,7 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
                             padding: const EdgeInsets.only(
                               left: Dimensions.paddingSizeExtraSmall,
                             ),
-                            itemCount:
-                                widget.categoryController.categoryList!.length,
+                            itemCount: widget.categoryList!.length,
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: const EdgeInsets.only(
@@ -109,14 +107,8 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
                                   hoverColor: Colors.transparent,
                                   onTap: () => Get.toNamed(
                                     RouteHelper.getCategoryItemRoute(
-                                      widget
-                                          .categoryController
-                                          .categoryList![index]
-                                          .id,
-                                      widget
-                                          .categoryController
-                                          .categoryList![index]
-                                          .name!,
+                                      widget.categoryList![index].id,
+                                      widget.categoryList![index].name!,
                                     ),
                                   ),
                                   borderRadius: BorderRadius.circular(
@@ -164,7 +156,7 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
                                                     ),
                                                 child: CustomImage(
                                                   image:
-                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
+                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryList![index].image}',
                                                   height: 80,
                                                   width: double.infinity,
                                                   fit: BoxFit.cover,
@@ -179,7 +171,6 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
                                             Expanded(
                                               child: Text(
                                                 widget
-                                                    .categoryController
                                                     .categoryList![index]
                                                     .name!,
                                                 style: robotoMedium.copyWith(
@@ -203,9 +194,7 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
                               );
                             },
                           )
-                        : WebCategoryShimmer(
-                            categoryController: widget.categoryController,
-                          ),
+                        : WebCategoryShimmer(categoryList: widget.categoryList),
                   ),
                 ],
               ),
@@ -242,8 +231,8 @@ class _WebCategoryViewWidgetState extends State<WebCategoryViewWidget> {
 }
 
 class PharmacyCategoryView extends StatefulWidget {
-  final CategoryController categoryController;
-  const PharmacyCategoryView({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const PharmacyCategoryView({super.key, required this.categoryList});
 
   @override
   State<PharmacyCategoryView> createState() => _PharmacyCategoryViewState();
@@ -286,8 +275,8 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.categoryController.categoryList != null &&
-        widget.categoryController.categoryList!.length > 9 &&
+    if (widget.categoryList != null &&
+        widget.categoryList!.length > 9 &&
         isFirstTime) {
       showForwardButton = true;
       isFirstTime = false;
@@ -305,23 +294,22 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
               SizedBox(
                 height: 170,
                 width: Get.width,
-                child: widget.categoryController.categoryList != null
+                child: widget.categoryList != null
                     ? ListView.builder(
                         controller: scrollController,
                         physics: const BouncingScrollPhysics(),
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        itemCount:
-                            widget.categoryController.categoryList!.length,
+                        itemCount: widget.categoryList!.length,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
                               bottom: Dimensions.paddingSizeLarge,
                               top: Dimensions.paddingSizeSmall,
-                              left: Get.find<LocalizationController>().isLtr
+                              left: getIt<LanguageBloc>().state.isLtr
                                   ? 0
                                   : Dimensions.paddingSizeDefault,
-                              right: Get.find<LocalizationController>().isLtr
+                              right: getIt<LanguageBloc>().state.isLtr
                                   ? Dimensions.paddingSizeDefault
                                   : 0,
                             ),
@@ -329,14 +317,8 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
                               hoverColor: Colors.transparent,
                               onTap: () => Get.toNamed(
                                 RouteHelper.getCategoryItemRoute(
-                                  widget
-                                      .categoryController
-                                      .categoryList![index]
-                                      .id,
-                                  widget
-                                      .categoryController
-                                      .categoryList![index]
-                                      .name!,
+                                  widget.categoryList![index].id,
+                                  widget.categoryList![index].name!,
                                 ),
                               ),
                               borderRadius: BorderRadius.circular(
@@ -371,7 +353,7 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryList![index].image}',
                                         height: 80,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
@@ -383,10 +365,7 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
 
                                     Expanded(
                                       child: Text(
-                                        widget
-                                            .categoryController
-                                            .categoryList![index]
-                                            .name!,
+                                        widget.categoryList![index].name!,
                                         style: robotoMedium.copyWith(
                                           fontSize: Dimensions.fontSizeSmall,
                                           color: Theme.of(
@@ -405,9 +384,7 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
                           );
                         },
                       )
-                    : WebPharmacyShimmerView(
-                        categoryController: widget.categoryController,
-                      ),
+                    : WebPharmacyShimmerView(categoryList: widget.categoryList),
               ),
             ],
           ),
@@ -445,8 +422,8 @@ class _PharmacyCategoryViewState extends State<PharmacyCategoryView> {
 }
 
 class FoodCategoryView extends StatefulWidget {
-  final CategoryController categoryController;
-  const FoodCategoryView({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const FoodCategoryView({super.key, required this.categoryList});
 
   @override
   State<FoodCategoryView> createState() => _FoodCategoryViewState();
@@ -489,8 +466,8 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.categoryController.categoryList != null &&
-        widget.categoryController.categoryList!.length > 8 &&
+    if (widget.categoryList != null &&
+        widget.categoryList!.length > 8 &&
         isFirstTime) {
       showForwardButton = true;
       isFirstTime = false;
@@ -504,22 +481,22 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
             SizedBox(
               height: 205,
               width: Get.width,
-              child: widget.categoryController.categoryList != null
+              child: widget.categoryList != null
                   ? ListView.builder(
                       controller: scrollController,
                       physics: const BouncingScrollPhysics(),
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
-                      itemCount: widget.categoryController.categoryList!.length,
+                      itemCount: widget.categoryList!.length,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: EdgeInsets.only(
                             bottom: Dimensions.paddingSizeSmall,
                             top: Dimensions.paddingSizeLarge,
-                            left: Get.find<LocalizationController>().isLtr
+                            left: getIt<LanguageBloc>().state.isLtr
                                 ? 0
                                 : Dimensions.paddingSizeDefault,
-                            right: Get.find<LocalizationController>().isLtr
+                            right: getIt<LanguageBloc>().state.isLtr
                                 ? Dimensions.paddingSizeDefault
                                 : 0,
                           ),
@@ -527,14 +504,8 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
                             hoverColor: Colors.transparent,
                             onTap: () => Get.toNamed(
                               RouteHelper.getCategoryItemRoute(
-                                widget
-                                    .categoryController
-                                    .categoryList![index]
-                                    .id,
-                                widget
-                                    .categoryController
-                                    .categoryList![index]
-                                    .name!,
+                                widget.categoryList![index].id,
+                                widget.categoryList![index].name!,
                               ),
                             ),
                             borderRadius: BorderRadius.circular(
@@ -557,7 +528,7 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
                                       ),
                                       child: CustomImage(
                                         image:
-                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryController.categoryList![index].image}',
+                                            '${getIt<SplashBloc>().state.configModel!.baseUrls!.categoryImageUrl}/${widget.categoryList![index].image}',
                                         height: 120,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
@@ -570,10 +541,7 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
 
                                   Expanded(
                                     child: Text(
-                                      widget
-                                          .categoryController
-                                          .categoryList![index]
-                                          .name!,
+                                      widget.categoryList![index].name!,
                                       style: robotoMedium.copyWith(
                                         fontSize: Dimensions.fontSizeSmall,
                                         color: Theme.of(
@@ -592,9 +560,7 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
                         );
                       },
                     )
-                  : WebFoodCategoryShimmer(
-                      categoryController: widget.categoryController,
-                    ),
+                  : WebFoodCategoryShimmer(categoryList: widget.categoryList),
             ),
           ],
         ),
@@ -631,8 +597,8 @@ class _FoodCategoryViewState extends State<FoodCategoryView> {
 }
 
 class WebFoodCategoryShimmer extends StatelessWidget {
-  final CategoryController categoryController;
-  const WebFoodCategoryShimmer({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const WebFoodCategoryShimmer({super.key, required this.categoryList});
 
   @override
   Widget build(BuildContext context) {
@@ -646,10 +612,10 @@ class WebFoodCategoryShimmer extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: Dimensions.paddingSizeLarge,
             top: Dimensions.paddingSizeSmall,
-            left: Get.find<LocalizationController>().isLtr
+            left: getIt<LanguageBloc>().state.isLtr
                 ? 0
                 : Dimensions.paddingSizeDefault,
-            right: Get.find<LocalizationController>().isLtr
+            right: getIt<LanguageBloc>().state.isLtr
                 ? Dimensions.paddingSizeDefault
                 : 0,
           ),
@@ -688,8 +654,8 @@ class WebFoodCategoryShimmer extends StatelessWidget {
 }
 
 class WebCategoryShimmer extends StatelessWidget {
-  final CategoryController categoryController;
-  const WebCategoryShimmer({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const WebCategoryShimmer({super.key, required this.categoryList});
 
   @override
   Widget build(BuildContext context) {
@@ -713,7 +679,7 @@ class WebCategoryShimmer extends StatelessWidget {
               margin: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
               child: Shimmer(
                 duration: const Duration(seconds: 2),
-                enabled: categoryController.categoryList == null,
+                enabled: categoryList == null,
                 child: Column(
                   children: [
                     Container(
@@ -741,8 +707,8 @@ class WebCategoryShimmer extends StatelessWidget {
 }
 
 class WebPharmacyShimmerView extends StatelessWidget {
-  final CategoryController categoryController;
-  const WebPharmacyShimmerView({super.key, required this.categoryController});
+  final List<Category>? categoryList;
+  const WebPharmacyShimmerView({super.key, required this.categoryList});
 
   @override
   Widget build(BuildContext context) {
@@ -756,10 +722,10 @@ class WebPharmacyShimmerView extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: Dimensions.paddingSizeDefault,
             top: Dimensions.paddingSizeDefault,
-            left: Get.find<LocalizationController>().isLtr
+            left: getIt<LanguageBloc>().state.isLtr
                 ? 0
                 : Dimensions.paddingSizeDefault,
-            right: Get.find<LocalizationController>().isLtr
+            right: getIt<LanguageBloc>().state.isLtr
                 ? Dimensions.paddingSizeDefault
                 : 0,
           ),

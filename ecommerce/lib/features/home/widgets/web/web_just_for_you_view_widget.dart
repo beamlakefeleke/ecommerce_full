@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -58,17 +58,17 @@ class _WebJustForYouViewWidgetState extends State<WebJustForYouViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CampaignController>(
-      builder: (campaignController) {
-        if (campaignController.itemCampaignList != null &&
-            campaignController.itemCampaignList!.length > 5 &&
+    return BlocBuilder<CampaignBloc, CampaignState>(
+      builder: (context, state) {
+        if (state.itemCampaignList != null &&
+            state.itemCampaignList!.length > 5 &&
             isFirstTime) {
           showForwardButton = true;
           isFirstTime = false;
         }
 
-        return campaignController.itemCampaignList != null
-            ? campaignController.itemCampaignList!.isNotEmpty
+        return state.itemCampaignList != null
+            ? state.itemCampaignList!.isNotEmpty
                   ? Stack(
                       children: [
                         Column(
@@ -93,21 +93,18 @@ class _WebJustForYouViewWidgetState extends State<WebJustForYouViewWidget> {
                                 controller: scrollController,
                                 scrollDirection: Axis.horizontal,
                                 physics: const BouncingScrollPhysics(),
-                                itemCount:
-                                    campaignController.itemCampaignList!.length,
+                                itemCount: state.itemCampaignList!.length,
                                 itemBuilder: (context, index) {
                                   return Padding(
                                     padding: EdgeInsets.only(
                                       bottom: Dimensions.paddingSizeDefault,
                                       top: Dimensions.paddingSizeDefault,
                                       left:
-                                          Get.find<LocalizationController>()
-                                              .isLtr
+                                          getIt<LanguageBloc>().state.isLtr
                                           ? 0
                                           : Dimensions.paddingSizeDefault,
                                       right:
-                                          Get.find<LocalizationController>()
-                                              .isLtr
+                                          getIt<LanguageBloc>().state.isLtr
                                           ? Dimensions.paddingSizeDefault
                                           : 0,
                                     ),
@@ -115,10 +112,9 @@ class _WebJustForYouViewWidgetState extends State<WebJustForYouViewWidget> {
                                       isItem: true,
                                       child: InkWell(
                                         hoverColor: Colors.transparent,
-                                        onTap: () => Get.find<ItemController>()
-                                            .navigateToItemPage(
-                                              campaignController
-                                                  .itemCampaignList![index],
+                                        onTap: () =>
+                                            ItemHelper.navigateToItemPage(
+                                              state.itemCampaignList![index],
                                               context,
                                               isCampaign: true,
                                             ),
@@ -138,7 +134,7 @@ class _WebJustForYouViewWidgetState extends State<WebJustForYouViewWidget> {
                                             child: CustomImage(
                                               image:
                                                   '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
-                                                  '/${campaignController.itemCampaignList![index].image}',
+                                                  '/${state.itemCampaignList![index].image}',
                                               fit: BoxFit.cover,
                                               height: 185,
                                               width: 185,
@@ -185,15 +181,14 @@ class _WebJustForYouViewWidgetState extends State<WebJustForYouViewWidget> {
                       ],
                     )
                   : const SizedBox()
-            : WebJustForYouShimmerView(campaignController: campaignController);
+            : const WebJustForYouShimmerView();
       },
     );
   }
 }
 
 class WebJustForYouShimmerView extends StatelessWidget {
-  final CampaignController campaignController;
-  const WebJustForYouShimmerView({super.key, required this.campaignController});
+  const WebJustForYouShimmerView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -224,10 +219,10 @@ class WebJustForYouShimmerView extends StatelessWidget {
                     padding: EdgeInsets.only(
                       bottom: Dimensions.paddingSizeDefault,
                       top: Dimensions.paddingSizeDefault,
-                      left: Get.find<LocalizationController>().isLtr
+                      left: getIt<LanguageBloc>().state.isLtr
                           ? 0
                           : Dimensions.paddingSizeDefault,
-                      right: Get.find<LocalizationController>().isLtr
+                      right: getIt<LanguageBloc>().state.isLtr
                           ? Dimensions.paddingSizeDefault
                           : 0,
                     ),
@@ -255,3 +250,4 @@ class WebJustForYouShimmerView extends StatelessWidget {
     );
   }
 }
+

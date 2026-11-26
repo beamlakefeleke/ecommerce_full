@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -14,7 +14,8 @@ class ModuleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(
+      builder: (context, splashController) {
         return (ResponsiveHelper.isDesktop(context) &&
                 splashController.configModel!.module == null &&
                 splashController.moduleList != null &&
@@ -71,8 +72,9 @@ class ModuleWidget extends StatelessWidget {
                           preferBelow: false,
                           verticalOffset: 20,
                           child: InkWell(
-                            onTap: () =>
-                                getIt<SplashBloc>().add(SplashModuleSwitched(index, false),
+                            onTap: () => getIt<SplashBloc>().add(
+                              SplashModuleSwitched(index),
+                            ),
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(

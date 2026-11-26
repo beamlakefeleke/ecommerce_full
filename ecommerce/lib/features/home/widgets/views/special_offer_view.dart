@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -20,9 +21,9 @@ class SpecialOfferView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        List<Item>? discountedItemList = itemController.discountedItemList;
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        List<Item>? discountedItemList = state.discountedItemList;
 
         return discountedItemList != null
             ? discountedItemList.isNotEmpty

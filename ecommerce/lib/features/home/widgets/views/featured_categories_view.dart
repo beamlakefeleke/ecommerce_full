@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/basic_medicine_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/review_item_card_widget.dart';
@@ -13,31 +15,30 @@ class FeaturedCategoriesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
         List<Categories> categoryList = [];
         List<Item>? products = [];
         categoryList.add(Categories(id: 0, name: 'all'.tr));
-        if (itemController.featuredCategoriesItem != null) {
+        if (state.featuredCategoriesItem != null) {
           for (Categories category
-              in itemController.featuredCategoriesItem!.categories!) {
+              in state.featuredCategoriesItem!.categories!) {
             categoryList.add(category);
           }
 
-          for (Item product in itemController.featuredCategoriesItem!.items!) {
-            if (itemController.selectedCategory == 0) {
+          for (Item product in state.featuredCategoriesItem!.items!) {
+            if (state.selectedCategory == 0) {
               products.add(product);
             }
-            if (categoryList[itemController.selectedCategory].id ==
-                product.categoryId) {
+            if (categoryList[state.selectedCategory].id == product.categoryId) {
               products.add(product);
             }
           }
         }
 
-        return itemController.featuredCategoriesItem != null
-            ? itemController.featuredCategoriesItem!.items != null &&
-                      itemController.featuredCategoriesItem!.items!.isNotEmpty
+        return state.featuredCategoriesItem != null
+            ? state.featuredCategoriesItem!.items != null &&
+                      state.featuredCategoriesItem!.items!.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: Dimensions.paddingSizeDefault,
@@ -75,8 +76,7 @@ class FeaturedCategoriesView extends StatelessWidget {
                                       scrollDirection: Axis.horizontal,
                                       itemBuilder: (context, index) {
                                         bool isSelected =
-                                            itemController.selectedCategory ==
-                                            index;
+                                            state.selectedCategory == index;
                                         double width =
                                             double.parse(
                                               categoryList[index].name!.length
@@ -87,8 +87,10 @@ class FeaturedCategoriesView extends StatelessWidget {
                                           children: [
                                             InkWell(
                                               onTap: () {
-                                                itemController.selectCategory(
-                                                  index,
+                                                getIt<ItemBloc>().add(
+                                                  FeaturedCategorySelected(
+                                                    index,
+                                                  ),
                                                 );
                                               },
                                               child: Padding(

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/features/home/widgets/components/popular_store_card_widget.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -58,9 +59,9 @@ class _WebPopularStoresViewState extends State<WebPopularStoresView> {
       padding: const EdgeInsets.symmetric(
         vertical: Dimensions.paddingSizeLarge,
       ),
-      child: GetBuilder<StoreController>(
-        builder: (storeController) {
-          List<Store>? storeList = storeController.popularStoreList;
+      child: BlocBuilder<StoreBloc, StoreState>(
+        builder: (context, state) {
+          List<Store>? storeList = state.popularStoreList;
 
           if (storeList != null && storeList.length > 3 && isFirstTime) {
             showForwardButton = true;

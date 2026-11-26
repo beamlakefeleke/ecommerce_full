@@ -1,9 +1,7 @@
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -11,6 +9,7 @@ import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
 
@@ -75,105 +74,114 @@ class PaymentFailedDialog extends StatelessWidget {
               ),
               const SizedBox(height: Dimensions.paddingSizeLarge),
 
-              GetBuilder<OrderController>(
-                builder: (orderController) {
-                  return !orderController.isLoading
-                      ? Column(
-                          children: [
-                            isCashOnDelivery!
-                                ? CustomButton(
-                                    buttonText: 'switch_to_cash_on_delivery'.tr,
-                                    onPressed: () {
-                                      if ((((maxCodOrderAmount != null &&
-                                                      orderAmount! <
-                                                          maxCodOrderAmount!) ||
-                                                  maxCodOrderAmount == null ||
-                                                  maxCodOrderAmount == 0) &&
-                                              orderType != 'parcel') ||
-                                          orderType == 'parcel') {
-                                        orderController.switchToCOD(orderID).then((
-                                          success,
-                                        ) {
-                                          if (success) {
-                                            double total =
-                                                ((orderAmount! / 100) *
-                                                getIt<SplashBloc>()
-                                                    .state
-                                                    .configModel!
-                                                    .loyaltyPointItemPurchasePoint!);
-                                            getIt<AuthRepository>()
-                                                .saveEarningPoint(
-                                                  total.toStringAsFixed(0),
-                                                );
+              BlocListener<OrderBloc, OrderState>(
+                listenWhen: (previous, current) =>
+                    previous.actionStatus != current.actionStatus &&
+                    (current.actionType == OrderActionType.switchToCod ||
+                        current.actionType == OrderActionType.cancel),
+                listener: (context, state) {
+                  if (state.actionStatus != OrderActionStatus.success) {
+                    if (state.actionStatus == OrderActionStatus.failure) {
+                      showCustomSnackBar(state.actionMessage);
+                    }
+                    return;
+                  }
+                  if (state.actionType == OrderActionType.switchToCod) {
+                    double total =
+                        ((orderAmount! / 100) *
+                        getIt<SplashBloc>()
+                            .state
+                            .configModel!
+                            .loyaltyPointItemPurchasePoint!);
+                    getIt<AuthRepository>().saveEarningPoint(
+                      total.toStringAsFixed(0),
+                    );
+                  } else if (state.actionType == OrderActionType.cancel) {
+                    Get.offAllNamed(RouteHelper.getInitialRoute());
+                  }
+                },
+                child: BlocBuilder<OrderBloc, OrderState>(
+                  builder: (context, state) {
+                    return !state.isLoading
+                        ? Column(
+                            children: [
+                              isCashOnDelivery!
+                                  ? CustomButton(
+                                      buttonText:
+                                          'switch_to_cash_on_delivery'.tr,
+                                      onPressed: () {
+                                        if ((((maxCodOrderAmount != null &&
+                                                        orderAmount! <
+                                                            maxCodOrderAmount!) ||
+                                                    maxCodOrderAmount == null ||
+                                                    maxCodOrderAmount == 0) &&
+                                                orderType != 'parcel') ||
+                                            orderType == 'parcel') {
+                                          context.read<OrderBloc>().add(
+                                            OrderSwitchedToCod(orderID),
+                                          );
+                                        } else {
+                                          if (Get.isDialogOpen!) {
+                                            Get.back();
                                           }
-                                        });
-                                      } else {
-                                        if (Get.isDialogOpen!) {
-                                          Get.back();
+                                          showCustomSnackBar(
+                                            '${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}',
+                                          );
                                         }
-                                        showCustomSnackBar(
-                                          '${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}',
-                                        );
-                                      }
-                                    },
-                                    radius: Dimensions.radiusSmall,
-                                    height: 40,
-                                  )
-                                : const SizedBox(),
-                            SizedBox(
-                              height:
-                                  getIt<SplashBloc>()
-                                      .state
-                                      .configModel!
-                                      .cashOnDelivery!
-                                  ? Dimensions.paddingSizeLarge
-                                  : 0,
-                            ),
-
-                            TextButton(
-                              onPressed: () {
-                                Get.find<OrderController>()
-                                    .cancelOrder(
-                                      int.parse(orderID!),
-                                      'Digital payment issue',
+                                      },
+                                      radius: Dimensions.radiusSmall,
+                                      height: 40,
                                     )
-                                    .then((success) {
-                                      if (success) {
-                                        Get.offAllNamed(
-                                          RouteHelper.getInitialRoute(),
-                                        );
-                                      }
-                                    });
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).disabledColor.withOpacity(0.3),
-                                minimumSize: const Size(
-                                  Dimensions.webMaxWidth,
-                                  40,
+                                  : const SizedBox(),
+                              SizedBox(
+                                height:
+                                    getIt<SplashBloc>()
+                                        .state
+                                        .configModel!
+                                        .cashOnDelivery!
+                                    ? Dimensions.paddingSizeLarge
+                                    : 0,
+                              ),
+
+                              TextButton(
+                                onPressed: () {
+                                  context.read<OrderBloc>().add(
+                                    OrderCancelled(
+                                      orderId: int.parse(orderID!),
+                                      reason: 'Digital payment issue',
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).disabledColor.withOpacity(0.3),
+                                  minimumSize: const Size(
+                                    Dimensions.webMaxWidth,
+                                    40,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      Dimensions.radiusSmall,
+                                    ),
+                                  ),
                                 ),
-                                padding: EdgeInsets.zero,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    Dimensions.radiusSmall,
+                                child: Text(
+                                  'cancel_order'.tr,
+                                  textAlign: TextAlign.center,
+                                  style: robotoBold.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge!.color,
                                   ),
                                 ),
                               ),
-                              child: Text(
-                                'cancel_order'.tr,
-                                textAlign: TextAlign.center,
-                                style: robotoBold.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).textTheme.bodyLarge!.color,
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : const Center(child: CircularProgressIndicator());
-                },
+                            ],
+                          )
+                        : const Center(child: CircularProgressIndicator());
+                  },
+                ),
               ),
             ],
           ),

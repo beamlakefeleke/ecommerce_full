@@ -348,6 +348,7 @@ class _DeliveryManRegistrationScreenState
                                                               ),
                                                             ),
                                                         child: DottedBorder(
+                                                          options: RoundedRectDottedBorderOptions(
                                                           color: Theme.of(
                                                             context,
                                                           ).primaryColor,
@@ -362,13 +363,12 @@ class _DeliveryManRegistrationScreenState
                                                               const EdgeInsets.all(
                                                                 0,
                                                               ),
-                                                          borderType:
-                                                              BorderType.RRect,
+                                                         
                                                           radius:
                                                               const Radius.circular(
                                                                 Dimensions
                                                                     .radiusDefault,
-                                                              ),
+                                                              )),
                                                           child: Visibility(
                                                             visible:
                                                                 deliverymanRegistrationController
@@ -1006,6 +1006,7 @@ class _DeliveryManRegistrationScreenState
                                                             ),
                                                           ),
                                                       child: DottedBorder(
+                                                        options: RoundedRectDottedBorderOptions(
                                                         color: Theme.of(
                                                           context,
                                                         ).primaryColor,
@@ -1020,13 +1021,12 @@ class _DeliveryManRegistrationScreenState
                                                             const EdgeInsets.all(
                                                               5,
                                                             ),
-                                                        borderType:
-                                                            BorderType.RRect,
+                                                        
                                                         radius:
                                                             const Radius.circular(
                                                               Dimensions
                                                                   .radiusDefault,
-                                                            ),
+                                                            )),
                                                         child: SizedBox(
                                                           height: 120,
                                                           width:
@@ -1067,6 +1067,7 @@ class _DeliveryManRegistrationScreenState
                                                               .paddingSizeSmall,
                                                         ),
                                                     child: DottedBorder(
+                                                      options: RoundedRectDottedBorderOptions(
                                                       color: Theme.of(
                                                         context,
                                                       ).primaryColor,
@@ -1077,13 +1078,12 @@ class _DeliveryManRegistrationScreenState
                                                           const EdgeInsets.all(
                                                             5,
                                                           ),
-                                                      borderType:
-                                                          BorderType.RRect,
+                                                      
                                                       radius:
                                                           const Radius.circular(
                                                             Dimensions
                                                                 .radiusDefault,
-                                                          ),
+                                                          )),
                                                       child: Stack(
                                                         children: [
                                                           ClipRRect(
@@ -1327,15 +1327,16 @@ class _DeliveryManRegistrationScreenState
                                           ),
                                         ),
                                     child: DottedBorder(
+                                      options: RoundedRectDottedBorderOptions(
                                       color: Theme.of(context).primaryColor,
                                       strokeWidth: 1,
                                       strokeCap: StrokeCap.butt,
                                       dashPattern: const [5, 5],
                                       padding: const EdgeInsets.all(0),
-                                      borderType: BorderType.RRect,
+                                      
                                       radius: const Radius.circular(
                                         Dimensions.radiusDefault,
-                                      ),
+                                      ),),
                                       child: Visibility(
                                         visible:
                                             deliverymanRegistrationController
@@ -1951,15 +1952,16 @@ class _DeliveryManRegistrationScreenState
                                           ),
                                         ),
                                     child: DottedBorder(
+                                      options: RoundedRectDottedBorderOptions(
                                       color: Theme.of(context).primaryColor,
                                       strokeWidth: 1,
                                       strokeCap: StrokeCap.butt,
                                       dashPattern: const [5, 5],
                                       padding: const EdgeInsets.all(5),
-                                      borderType: BorderType.RRect,
+                                      
                                       radius: const Radius.circular(
                                         Dimensions.radiusDefault,
-                                      ),
+                                      ),),
                                       child: Container(
                                         height: 120,
                                         width: 150,

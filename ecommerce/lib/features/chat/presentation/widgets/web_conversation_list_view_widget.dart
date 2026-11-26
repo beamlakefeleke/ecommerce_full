@@ -6,11 +6,12 @@ import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_event.dart';
 import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -157,10 +158,16 @@ class _WebConversationListViewWidgetState
                                   firstLoad: true,
                                 ),
                               );
-                              final profile = Get.find<ProfileController>();
-                              if (profile.userInfoModel == null ||
-                                  profile.userInfoModel!.userInfo == null) {
-                                profile.getUserInfo();
+                              if (getIt<ProfileBloc>().state.userInfoModel ==
+                                      null ||
+                                  getIt<ProfileBloc>()
+                                          .state
+                                          .userInfoModel!
+                                          .userInfo ==
+                                      null) {
+                                getIt<ProfileBloc>().add(
+                                  const ProfileInfoRequested(),
+                                );
                               }
                               context.read<ChatBloc>().add(
                                 ChatNotificationBodySet(body),
@@ -231,13 +238,11 @@ class _WebConversationListViewWidgetState
                                 ),
                                 if (convo.lastMessageTime != null)
                                   Positioned(
-                                    right:
-                                        Get.find<LocalizationController>().isLtr
+                                    right: getIt<LanguageBloc>().state.isLtr
                                         ? 5
                                         : null,
                                     top: 15,
-                                    left:
-                                        Get.find<LocalizationController>().isLtr
+                                    left: getIt<LanguageBloc>().state.isLtr
                                         ? null
                                         : 5,
                                     child: Text(
@@ -250,32 +255,25 @@ class _WebConversationListViewWidgetState
                                       ),
                                     ),
                                   ),
-                                GetBuilder<ProfileController>(
-                                  builder: (profileController) {
+                                BlocBuilder<ProfileBloc, ProfileState>(
+                                  builder: (context, profileState) {
                                     final showBadge =
-                                        profileController.userInfoModel !=
-                                            null &&
-                                        profileController
-                                                .userInfoModel!
-                                                .userInfo !=
+                                        profileState.userInfoModel != null &&
+                                        profileState.userInfoModel!.userInfo !=
                                             null &&
                                         convo.lastMessage?.senderId !=
-                                            profileController
+                                            profileState
                                                 .userInfoModel!
                                                 .userInfo!
                                                 .id &&
                                         (convo.unreadMessageCount ?? 0) > 0;
                                     if (!showBadge) return const SizedBox();
                                     return Positioned(
-                                      right:
-                                          Get.find<LocalizationController>()
-                                              .isLtr
+                                      right: getIt<LanguageBloc>().state.isLtr
                                           ? 5
                                           : null,
                                       bottom: 8,
-                                      left:
-                                          Get.find<LocalizationController>()
-                                              .isLtr
+                                      left: getIt<LanguageBloc>().state.isLtr
                                           ? null
                                           : 5,
                                       child: Container(
@@ -338,7 +336,10 @@ class ConversationShimmer extends StatelessWidget {
             borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey[Get.isDarkMode ? 800 : 200]!,
+                color:
+                    Colors.grey[Theme.of(context).brightness == Brightness.dark
+                        ? 800
+                        : 200]!,
                 spreadRadius: 1,
                 blurRadius: 5,
               ),
@@ -367,7 +368,7 @@ class ConversationShimmer extends StatelessWidget {
                           children: [
                             Container(
                               height: 10,
-                              width: Get.width * 0.5,
+                              width: MediaQuery.of(context).size.width * 0.5,
                               color: Colors.grey[300],
                             ),
                             const SizedBox(
@@ -375,7 +376,7 @@ class ConversationShimmer extends StatelessWidget {
                             ),
                             Container(
                               height: 10,
-                              width: Get.width * 0.3,
+                              width: MediaQuery.of(context).size.width * 0.3,
                               color: Colors.grey[300],
                             ),
                           ],

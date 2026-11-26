@@ -4,16 +4,13 @@ import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
 import 'package:ecommerce/features/address/presentation/pages/address_screen.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/dashboard/widgets/bottom_nav_item_widget.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -27,7 +24,12 @@ import 'package:ecommerce/features/dashboard/widgets/address_bottom_sheet_widget
 import 'package:ecommerce/features/dashboard/widgets/parcel_bottom_sheet_widget.dart';
 import 'package:ecommerce/features/favourite/presentation/pages/favourite_screen.dart';
 import 'package:ecommerce/features/home/screens/home_screen.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/features/menu/presentation/pages/menu_screen.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/order/presentation/pages/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,7 +78,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         );
       }
       suggestAddressBottomSheet();
-      Get.find<OrderController>().getRunningOrders(1);
+      context.read<OrderBloc>().add(const RunningOrdersRequested(1));
     }
 
     _pageIndex = widget.pageIndex;
@@ -97,9 +99,9 @@ class DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> suggestAddressBottomSheet() async {
-    active = await Get.find<LocationController>().checkLocationActive();
+    active = await LocationHelper.checkLocationActive();
     if (widget.fromSplash &&
-        Get.find<LocationController>().showLocationSuggestion &&
+        getIt<LocationBloc>().state.showLocationSuggestion &&
         active) {
       Future.delayed(const Duration(seconds: 1), () {
         showModalBottomSheet(
@@ -108,7 +110,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           backgroundColor: Colors.transparent,
           builder: (con) => const AddressBottomSheetWidget(),
         ).then((value) {
-          Get.find<LocationController>().hideSuggestedLocation();
+          getIt<LocationBloc>().add(const SuggestedLocationHidden());
           setState(() {});
         });
       });
@@ -166,11 +168,11 @@ class DashboardScreenState extends State<DashboardScreen> {
             }
           },
 
-          child: GetBuilder<OrderController>(
-            builder: (orderController) {
+          child: BlocBuilder<OrderBloc, OrderState>(
+            builder: (context, orderState) {
               List<OrderModel> runningOrder =
-                  orderController.runningOrderModel != null
-                  ? orderController.runningOrderModel!.orders!
+                  orderState.runningOrderModel != null
+                  ? orderState.runningOrderModel!.orders!
                   : [];
 
               List<OrderModel> reversOrder = List.from(runningOrder.reversed);
@@ -241,18 +243,16 @@ class DashboardScreenState extends State<DashboardScreen> {
                                               )
                                               ? null
                                               : (widget.fromSplash &&
-                                                    Get.find<
-                                                          LocationController
-                                                        >()
+                                                    getIt<LocationBloc>()
+                                                        .state
                                                         .showLocationSuggestion &&
                                                     active)
                                               ? null
-                                              : (orderController
-                                                        .showBottomSheet &&
-                                                    orderController
+                                              : (orderState.showBottomSheet &&
+                                                    orderState
                                                             .runningOrderModel !=
                                                         null &&
-                                                    orderController
+                                                    orderState
                                                         .runningOrderModel!
                                                         .orders!
                                                         .isNotEmpty &&
@@ -301,9 +301,10 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                           builder: (con) =>
                                                               ParcelBottomSheetWidget(
                                                                 parcelCategoryList:
-                                                                    Get.find<
-                                                                          ParcelController
+                                                                    getIt<
+                                                                          ParcelBloc
                                                                         >()
+                                                                        .state
                                                                         .parcelCategoryList,
                                                               ),
                                                         );
@@ -335,16 +336,16 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         ResponsiveHelper.isDesktop(context)
                                             ? const SizedBox()
                                             : (widget.fromSplash &&
-                                                  Get.find<LocationController>()
+                                                  getIt<LocationBloc>()
+                                                      .state
                                                       .showLocationSuggestion &&
                                                   active)
                                             ? const SizedBox()
-                                            : (orderController
-                                                      .showBottomSheet &&
-                                                  orderController
+                                            : (orderState.showBottomSheet &&
+                                                  orderState
                                                           .runningOrderModel !=
                                                       null &&
-                                                  orderController
+                                                  orderState
                                                       .runningOrderModel!
                                                       .orders!
                                                       .isNotEmpty &&
@@ -429,20 +430,19 @@ class DashboardScreenState extends State<DashboardScreen> {
 
                   persistentContentHeight:
                       (widget.fromSplash &&
-                          Get.find<LocationController>()
-                              .showLocationSuggestion &&
+                          getIt<LocationBloc>().state.showLocationSuggestion &&
                           active)
                       ? 0
                       : 100,
 
                   onIsContractedCallback: () {
-                    if (!orderController.showOneOrder) {
-                      orderController.showOrders();
+                    if (!orderState.showOneOrder) {
+                      context.read<OrderBloc>().add(const OrderListToggled());
                     }
                   },
                   onIsExtendedCallback: () {
-                    if (orderController.showOneOrder) {
-                      orderController.showOrders();
+                    if (orderState.showOneOrder) {
+                      context.read<OrderBloc>().add(const OrderListToggled());
                     }
                   },
 
@@ -450,33 +450,33 @@ class DashboardScreenState extends State<DashboardScreen> {
 
                   expandableContent:
                       (widget.fromSplash &&
-                          Get.find<LocationController>()
-                              .showLocationSuggestion &&
+                          getIt<LocationBloc>().state.showLocationSuggestion &&
                           active &&
                           !ResponsiveHelper.isDesktop(context))
                       ? const SizedBox()
                       : (ResponsiveHelper.isDesktop(context) ||
                             !_isLogin ||
-                            orderController.runningOrderModel == null ||
-                            orderController
-                                .runningOrderModel!
-                                .orders!
-                                .isEmpty ||
-                            !orderController.showBottomSheet)
+                            orderState.runningOrderModel == null ||
+                            orderState.runningOrderModel!.orders!.isEmpty ||
+                            !orderState.showBottomSheet)
                       ? const SizedBox()
                       : Dismissible(
                           key: UniqueKey(),
                           onDismissed: (direction) {
-                            if (orderController.showBottomSheet) {
-                              orderController.showRunningOrders();
+                            if (orderState.showBottomSheet) {
+                              context.read<OrderBloc>().add(
+                                const RunningOrderSheetToggled(),
+                              );
                             }
                           },
                           child: RunningOrderViewWidget(
                             reversOrder: reversOrder,
                             onOrderTap: () {
                               _setPage(3);
-                              if (orderController.showBottomSheet) {
-                                orderController.showRunningOrders();
+                              if (orderState.showBottomSheet) {
+                                context.read<OrderBloc>().add(
+                                  const RunningOrderSheetToggled(),
+                                );
                               }
                             },
                           ),

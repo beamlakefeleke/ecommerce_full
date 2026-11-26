@@ -7,11 +7,12 @@ import 'package:ecommerce/features/address/presentation/bloc/address_state.dart'
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/checkout/data/models/place_order_body_model.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/cart/data/models/cart_model.dart';
@@ -21,11 +22,8 @@ import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
 import 'package:ecommerce/features/checkout/domain/repositories/checkout_repository.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/home/screens/home_screen.dart';
 import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
-import 'package:ecommerce/features/store/presentation/bloc/store_event.dart';
-import 'package:ecommerce/features/store/presentation/bloc/store_state.dart';
 import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/address_helper.dart';
@@ -142,8 +140,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     if (isLoggedIn) {
-      if (Get.find<ProfileController>().userInfoModel == null) {
-        Get.find<ProfileController>().getUserInfo();
+      if (context.read<ProfileBloc>().state.userInfoModel == null) {
+        context.read<ProfileBloc>().add(const ProfileInfoRequested());
       }
 
       _couponBloc.add(const CouponListRequested());
@@ -205,8 +203,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
         context.read<CartBloc>().add(const CartCleared());
       }
       _checkoutBloc.add(const CheckoutGuestAddressSet(null));
-      if (!Get.find<OrderController>().showBottomSheet) {
-        Get.find<OrderController>().showRunningOrders(canUpdate: false);
+      if (!context.read<OrderBloc>().state.showBottomSheet) {
+        context.read<OrderBloc>().add(const RunningOrderSheetToggled());
       }
       if (_checkoutBloc.state.isDmTipSave) {
         _checkoutBloc.repository.saveSharedPrefDmTipIndex(
@@ -221,7 +219,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           Get.offNamed(
             RouteHelper.getPaymentRoute(
               orderID,
-              Get.find<ProfileController>().userInfoModel?.id ??
+              context.read<ProfileBloc>().state.userInfoModel?.id ??
                   int.tryParse(AuthHelper.getGuestId()) ??
                   0,
               _checkoutBloc.state.orderType,
@@ -236,7 +234,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           Get.offNamed(
             RouteHelper.getPaymentRoute(
               orderID,
-              Get.find<ProfileController>().userInfoModel?.id ?? 0,
+              context.read<ProfileBloc>().state.userInfoModel?.id ?? 0,
               _checkoutBloc.state.orderType,
               _pendingAmount,
               _pendingIsCodActive,
@@ -451,7 +449,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                     final double computedTotal =
                         total -
                         (checkoutController.isPartialPay
-                            ? Get.find<ProfileController>()
+                            ? context
+                                  .read<ProfileBloc>()
+                                  .state
                                   .userInfoModel!
                                   .walletBalance!
                             : 0);
@@ -1043,8 +1043,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
                     if (!isGuestLogIn &&
                         finalAddress!.contactPersonNumber == 'null') {
-                      finalAddress.contactPersonNumber =
-                          Get.find<ProfileController>().userInfoModel!.phone;
+                      finalAddress.contactPersonNumber = context
+                          .read<ProfileBloc>()
+                          .state
+                          .userInfoModel!
+                          .phone;
                     }
 
                     if (widget.storeId == null) {
@@ -1167,11 +1170,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                         addressType: finalAddress.addressType,
                         contactPersonName:
                             finalAddress.contactPersonName ??
-                            '${Get.find<ProfileController>().userInfoModel!.fName} '
-                                '${Get.find<ProfileController>().userInfoModel!.lName}',
+                            '${context.read<ProfileBloc>().state.userInfoModel!.fName} '
+                                '${context.read<ProfileBloc>().state.userInfoModel!.lName}',
                         contactPersonNumber:
                             finalAddress.contactPersonNumber ??
-                            Get.find<ProfileController>().userInfoModel!.phone,
+                            context
+                                .read<ProfileBloc>()
+                                .state
+                                .userInfoModel!
+                                .phone,
                         streetNumber: isGuestLogIn
                             ? finalAddress.streetNumber ?? ''
                             : streetNumberController.text.trim(),
@@ -1641,11 +1648,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     double orderAmount = 0;
     double variationPrice = 0;
     if (cartList != null &&
-            cartList.isNotEmpty &&
-            getIt<SplashBloc>()
+        cartList.isNotEmpty &&
+        (getIt<SplashBloc>()
                 .getModuleConfig(cartList[0]?.item?.moduleType)
                 ?.newVariation ??
-        false) {
+            false)) {
       variationPrice = variations;
     }
     orderAmount = (price + variationPrice - discount) + addOns - couponDiscount;

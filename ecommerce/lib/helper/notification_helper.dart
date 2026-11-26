@@ -38,7 +38,7 @@ class NotificationHelper {
         >()!
         .requestNotificationsPermission();
     flutterLocalNotificationsPlugin.initialize(
-      initializationsSettings,
+      settings: initializationsSettings,
       onDidReceiveNotificationResponse: (NotificationResponse load) async {
         try {
           NotificationBodyModel payload;
@@ -300,10 +300,10 @@ class NotificationHelper {
       android: androidPlatformChannelSpecifics,
     );
     await fln.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
+      id: 0,
+      title: title,
+      body: body,
+      notificationDetails: platformChannelSpecifics,
       payload: notificationBody != null
           ? jsonEncode(notificationBody.toJson())
           : null,
@@ -337,10 +337,10 @@ class NotificationHelper {
       android: androidPlatformChannelSpecifics,
     );
     await fln.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
+      id: 0,
+      title: title,
+      body: body,
+      notificationDetails: platformChannelSpecifics,
       payload: notificationBody != null
           ? jsonEncode(notificationBody.toJson())
           : null,
@@ -384,10 +384,10 @@ class NotificationHelper {
       android: androidPlatformChannelSpecifics,
     );
     await fln.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
+      id: 0,
+      title: title,
+      body: body,
+      notificationDetails: platformChannelSpecifics,
       payload: notificationBody != null
           ? jsonEncode(notificationBody.toJson())
           : null,

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -161,18 +161,20 @@ class _ReceiverDetailsBottomSheetWidgetState
 
                   parcelBloc.add(DestinationAddressSet(address));
                   AddressModel pickedAddress = parcelBloc.state.pickupAddress!;
+                  final userInfo = context
+                      .read<ProfileBloc>()
+                      .state
+                      .userInfoModel;
                   if ((pickedAddress.contactPersonName == null ||
                           pickedAddress.contactPersonName!.isEmpty) &&
-                      Get.find<ProfileController>().userInfoModel != null) {
+                      userInfo != null) {
                     pickedAddress.contactPersonName =
-                        '${Get.find<ProfileController>().userInfoModel!.fName}'
-                        ' ${Get.find<ProfileController>().userInfoModel!.lName}';
+                        '${userInfo.fName} ${userInfo.lName}';
                   }
                   if ((pickedAddress.contactPersonNumber == null ||
                           pickedAddress.contactPersonNumber!.isEmpty) &&
-                      Get.find<ProfileController>().userInfoModel != null) {
-                    pickedAddress.contactPersonNumber =
-                        Get.find<ProfileController>().userInfoModel!.phone;
+                      userInfo != null) {
+                    pickedAddress.contactPersonNumber = userInfo.phone;
                   }
                   parcelBloc.add(PickupAddressSet(pickedAddress));
                   Get.toNamed(

@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -151,7 +152,7 @@ class GuestDeliveryAddress extends StatelessWidget {
                       },
                       countryDialCode:
                           checkoutController.countryDialCode ??
-                          Get.find<LocalizationController>().locale.countryCode,
+                          getIt<LanguageBloc>().state.locale.countryCode,
                     ),
                     const SizedBox(height: Dimensions.paddingSizeLarge),
 

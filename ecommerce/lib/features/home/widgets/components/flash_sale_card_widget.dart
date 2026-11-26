@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/flash_sale/data/models/flash_sale_model.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -124,7 +123,7 @@ class _FlashSaleCardState extends State<FlashSaleCard> {
                 hoverColor: Colors.transparent,
                 onTap: widget.soldOut
                     ? null
-                    : () => Get.find<ItemController>().navigateToItemPage(
+                    : () => ItemHelper.navigateToItemPage(
                         activeProduct.item,
                         context,
                       ),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/review_item_card_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/arrow_icon_button.dart';
@@ -65,9 +66,9 @@ class _WebBestReviewItemViewWidgetState
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.ecommerce;
 
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        List<Item>? reviewItemList = itemController.reviewedItemList;
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        List<Item>? reviewItemList = state.reviewedItemList;
 
         if (reviewItemList != null &&
             reviewItemList.length > 5 &&
@@ -111,24 +112,21 @@ class _WebBestReviewItemViewWidgetState
                                 padding: EdgeInsets.only(
                                   bottom: Dimensions.paddingSizeDefault,
                                   top: Dimensions.paddingSizeDefault,
-                                  left: Get.find<LocalizationController>().isLtr
+                                  left: getIt<LanguageBloc>().state.isLtr
                                       ? 0
                                       : Dimensions.paddingSizeDefault,
-                                  right:
-                                      Get.find<LocalizationController>().isLtr
+                                  right: getIt<LanguageBloc>().state.isLtr
                                       ? Dimensions.paddingSizeDefault
                                       : 0,
                                 ),
                                 child: InkWell(
                                   hoverColor: Colors.transparent,
-                                  onTap: () => Get.find<ItemController>()
-                                      .navigateToItemPage(
-                                        reviewItemList[index],
-                                        context,
-                                      ),
+                                  onTap: () => ItemHelper.navigateToItemPage(
+                                    reviewItemList[index],
+                                    context,
+                                  ),
                                   child: ReviewItemCard(
-                                    item:
-                                        itemController.reviewedItemList![index],
+                                    item: state.reviewedItemList![index],
                                   ),
                                 ),
                               );
@@ -190,10 +188,10 @@ class WebBestReviewItemShimmer extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: Dimensions.paddingSizeDefault,
             top: Dimensions.paddingSizeDefault,
-            left: Get.find<LocalizationController>().isLtr
+            left: getIt<LanguageBloc>().state.isLtr
                 ? 0
                 : Dimensions.paddingSizeDefault,
-            right: Get.find<LocalizationController>().isLtr
+            right: getIt<LanguageBloc>().state.isLtr
                 ? Dimensions.paddingSizeDefault
                 : 0,
           ),

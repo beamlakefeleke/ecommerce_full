@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
@@ -11,6 +10,8 @@ import 'package:ecommerce/features/location/presentation/widgets/serach_location
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -54,8 +55,8 @@ class _ReceiverViewWidgetState extends State<ReceiverViewWidget> {
       context.read<AddressBloc>().add(const AddressListRequested());
     }
     if (AuthHelper.isLoggedIn() &&
-        Get.find<ProfileController>().userInfoModel == null) {
-      Get.find<ProfileController>().getUserInfo();
+        context.read<ProfileBloc>().state.userInfoModel == null) {
+      context.read<ProfileBloc>().add(const ProfileInfoRequested());
     }
   }
 

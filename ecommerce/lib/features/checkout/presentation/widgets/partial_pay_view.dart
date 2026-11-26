@@ -5,7 +5,7 @@ import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
@@ -28,15 +28,16 @@ class PartialPayView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CheckoutBloc, CheckoutState>(
       builder: (context, state) {
-        return getIt<SplashBloc>().state
-                    .configModel!
-                    .partialPaymentStatus! &&
+        return getIt<SplashBloc>().state.configModel!.partialPaymentStatus! &&
                 !isPrescription &&
-                getIt<SplashBloc>().state
-                        .configModel!
-                        .customerWalletStatus ==
+                getIt<SplashBloc>().state.configModel!.customerWalletStatus ==
                     1 &&
-                Get.find<ProfileController>().userInfoModel!.walletBalance! > 0
+                context
+                        .read<ProfileBloc>()
+                        .state
+                        .userInfoModel!
+                        .walletBalance! >
+                    0
             ? AnimatedContainer(
                 duration: const Duration(seconds: 2),
                 decoration: BoxDecoration(
@@ -68,8 +69,7 @@ class PartialPayView extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 state.isPartialPay ||
-                                        state.paymentMethodIndex ==
-                                            1
+                                        state.paymentMethodIndex == 1
                                     ? Row(
                                         children: [
                                           Container(
@@ -114,7 +114,9 @@ class PartialPayView extends StatelessWidget {
 
                                 Text(
                                   PriceConverter.convertPrice(
-                                    Get.find<ProfileController>()
+                                    context
+                                        .read<ProfileBloc>()
+                                        .state
                                         .userInfoModel!
                                         .walletBalance!,
                                   ),
@@ -126,7 +128,7 @@ class PartialPayView extends StatelessWidget {
 
                                 state.paymentMethodIndex == 1
                                     ? Text(
-                                        '${'remaining_wallet_balance'.tr}: ${PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance! - totalPrice)}',
+                                        '${'remaining_wallet_balance'.tr}: ${PriceConverter.convertPrice(context.read<ProfileBloc>().state.userInfoModel!.walletBalance! - totalPrice)}',
                                         style: robotoMedium.copyWith(
                                           fontSize:
                                               Dimensions.fontSizeExtraSmall,
@@ -141,7 +143,9 @@ class PartialPayView extends StatelessWidget {
 
                           InkWell(
                             onTap: () {
-                              if (Get.find<ProfileController>()
+                              if (context
+                                      .read<ProfileBloc>()
+                                      .state
                                       .userInfoModel!
                                       .walletBalance! <
                                   totalPrice) {
@@ -164,16 +168,13 @@ class PartialPayView extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color:
                                     state.isPartialPay ||
-                                        state.paymentMethodIndex ==
-                                            1
+                                        state.paymentMethodIndex == 1
                                     ? Theme.of(context).cardColor
                                     : Theme.of(context).primaryColor,
                                 border: Border.all(
                                   color:
                                       state.isPartialPay ||
-                                          state
-                                                  .paymentMethodIndex ==
-                                              1
+                                          state.paymentMethodIndex == 1
                                       ? Colors.red
                                       : Theme.of(context).primaryColor,
                                   width: 0.5,
@@ -188,17 +189,14 @@ class PartialPayView extends StatelessWidget {
                               ),
                               child: Text(
                                 state.isPartialPay ||
-                                        state.paymentMethodIndex ==
-                                            1
+                                        state.paymentMethodIndex == 1
                                     ? 'remove'.tr
                                     : 'use'.tr,
                                 style: robotoBold.copyWith(
                                   fontSize: Dimensions.fontSizeDefault,
                                   color:
                                       state.isPartialPay ||
-                                          state
-                                                  .paymentMethodIndex ==
-                                              1
+                                          state.paymentMethodIndex == 1
                                       ? Colors.red
                                       : Colors.white,
                                 ),
@@ -227,7 +225,9 @@ class PartialPayView extends StatelessWidget {
                                 children: [
                                   Text(
                                     PriceConverter.convertPrice(
-                                      Get.find<ProfileController>()
+                                      context
+                                          .read<ProfileBloc>()
+                                          .state
                                           .userInfoModel!
                                           .walletBalance!,
                                     ),
@@ -299,7 +299,9 @@ class PartialPayView extends StatelessWidget {
 
                               InkWell(
                                 onTap: () {
-                                  if (Get.find<ProfileController>()
+                                  if (context
+                                          .read<ProfileBloc>()
+                                          .state
                                           .userInfoModel!
                                           .walletBalance! <
                                       totalPrice) {
@@ -322,17 +324,13 @@ class PartialPayView extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color:
                                         state.isPartialPay ||
-                                            state
-                                                    .paymentMethodIndex ==
-                                                1
+                                            state.paymentMethodIndex == 1
                                         ? Theme.of(context).cardColor
                                         : Theme.of(context).primaryColor,
                                     border: Border.all(
                                       color:
                                           state.isPartialPay ||
-                                              state
-                                                      .paymentMethodIndex ==
-                                                  1
+                                              state.paymentMethodIndex == 1
                                           ? Colors.red
                                           : Theme.of(context).primaryColor,
                                       width: 0.5,
@@ -347,18 +345,14 @@ class PartialPayView extends StatelessWidget {
                                   ),
                                   child: Text(
                                     state.isPartialPay ||
-                                            state
-                                                    .paymentMethodIndex ==
-                                                1
+                                            state.paymentMethodIndex == 1
                                         ? 'remove'.tr
                                         : 'use'.tr,
                                     style: robotoBold.copyWith(
                                       fontSize: Dimensions.fontSizeLarge,
                                       color:
                                           state.isPartialPay ||
-                                              state
-                                                      .paymentMethodIndex ==
-                                                  1
+                                              state.paymentMethodIndex == 1
                                           ? Colors.red
                                           : Colors.white,
                                     ),
@@ -370,7 +364,7 @@ class PartialPayView extends StatelessWidget {
 
                           state.paymentMethodIndex == 1
                               ? Text(
-                                  '${'remaining_wallet_balance'.tr}: ${PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance! - totalPrice)}',
+                                  '${'remaining_wallet_balance'.tr}: ${PriceConverter.convertPrice(context.read<ProfileBloc>().state.userInfoModel!.walletBalance! - totalPrice)}',
                                   style: robotoMedium.copyWith(
                                     fontSize: Dimensions.fontSizeSmall,
                                   ),

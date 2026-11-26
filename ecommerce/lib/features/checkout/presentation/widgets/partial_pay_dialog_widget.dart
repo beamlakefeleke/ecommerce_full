@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -88,7 +88,7 @@ class PartialPayDialogWidget extends StatelessWidget {
 
             Text(
               PriceConverter.convertPrice(
-                Get.find<ProfileController>().userInfoModel!.walletBalance!,
+                context.read<ProfileBloc>().state.userInfoModel!.walletBalance!,
               ),
               style: robotoBold.copyWith(
                 fontSize: Dimensions.fontSizeOverLarge,
@@ -101,7 +101,7 @@ class PartialPayDialogWidget extends StatelessWidget {
               child: Text(
                 isPartialPay
                     ? 'can_be_paid_via_wallet'.tr
-                    : '${'remaining_wallet_balance'.tr}: ${PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance! - totalPrice)}',
+                    : '${'remaining_wallet_balance'.tr}: ${PriceConverter.convertPrice(context.read<ProfileBloc>().state.userInfoModel!.walletBalance! - totalPrice)}',
                 style: robotoMedium.copyWith(
                   fontSize: Dimensions.fontSizeLarge,
                   color: Theme.of(context).hintColor,

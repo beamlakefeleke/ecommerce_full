@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -20,8 +21,8 @@ class RunningOrderViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<OrderController>(
-      builder: (orderController) {
+    return BlocBuilder<OrderBloc, OrderState>(
+      builder: (context, _) {
         return Container(
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
@@ -79,6 +80,7 @@ class RunningOrderViewWidget extends StatelessWidget {
 
                   return InkWell(
                     onTap: () async {
+                      final orderBloc = context.read<OrderBloc>();
                       await Get.toNamed(
                         RouteHelper.getOrderDetailsRoute(reversOrder[index].id),
                         arguments: OrderDetailsScreen(
@@ -86,8 +88,8 @@ class RunningOrderViewWidget extends StatelessWidget {
                           orderModel: reversOrder[index],
                         ),
                       );
-                      if (orderController.showBottomSheet) {
-                        orderController.showRunningOrders();
+                      if (orderBloc.state.showBottomSheet) {
+                        orderBloc.add(const RunningOrderSheetToggled());
                       }
                     },
                     child: Container(
@@ -256,7 +258,7 @@ class RunningOrderViewWidget extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
-                                ).primaryColor.withOpacity(0.1),
+                                ).primaryColor.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: isFirstOrder
@@ -323,7 +325,7 @@ class RunningOrderViewWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: status
             ? Theme.of(context).primaryColor
-            : Theme.of(context).disabledColor.withOpacity(0.5),
+            : Theme.of(context).disabledColor.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
       ),
     );

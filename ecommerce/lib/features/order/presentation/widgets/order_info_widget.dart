@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
 import 'package:ecommerce/features/order/domain/models/order_details_model.dart';
@@ -1164,9 +1163,10 @@ class OrderInfoWidget extends StatelessWidget {
                 ? Text(
                     parcel
                         ? 'parcel_category'.tr
-                        : getIt<SplashBloc>()
-                              .getModuleConfig(order.moduleType)
-                              .showRestaurantText!
+                        : (getIt<SplashBloc>()
+                                  .getModuleConfig(order.moduleType)
+                                  ?.showRestaurantText ??
+                              false)
                         ? 'restaurant_details'.tr
                         : 'store_details'.tr,
                     style: robotoMedium,
@@ -1202,9 +1202,9 @@ class OrderInfoWidget extends StatelessWidget {
                       ? Text(
                           parcel
                               ? 'parcel_category'.tr
-                              : getIt<SplashBloc>()
+                              : (getIt<SplashBloc>()
                                     .getModuleConfig(order.moduleType)
-                                    .showRestaurantText!
+                                    ?.showRestaurantText ?? false)
                               ? 'restaurant_details'.tr
                               : 'store_details'.tr,
                           style: robotoMedium,

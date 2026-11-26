@@ -1,8 +1,9 @@
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class StoreSortingButton extends StatelessWidget {
   final String storeType;
@@ -15,20 +16,20 @@ class StoreSortingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<StoreController>(
-      builder: (storeController) {
+    return BlocBuilder<StoreBloc, StoreState>(
+      builder: (context, state) {
         return Container(
           padding: const EdgeInsets.symmetric(
             horizontal: Dimensions.paddingSizeExtraSmall,
             vertical: Dimensions.paddingSizeExtraSmall,
           ),
           decoration: BoxDecoration(
-            color: storeController.storeType == storeType
+            color: state.storeType == storeType
                 ? Theme.of(context).primaryColor.withOpacity(0.1)
                 : Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
             border: Border.all(
-              color: storeController.storeType == storeType
+              color: state.storeType == storeType
                   ? Theme.of(context).primaryColor
                   : Theme.of(context).disabledColor,
             ),
@@ -36,10 +37,10 @@ class StoreSortingButton extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                storeController.storeType == storeType
+                state.storeType == storeType
                     ? Icons.check_circle
                     : Icons.circle_outlined,
-                color: storeController.storeType == storeType
+                color: state.storeType == storeType
                     ? Theme.of(context).primaryColor
                     : Theme.of(context).disabledColor,
                 size: 16,
@@ -48,7 +49,7 @@ class StoreSortingButton extends StatelessWidget {
               Text(
                 storeTypeText,
                 style: robotoMedium.copyWith(
-                  color: storeController.storeType == storeType
+                  color: state.storeType == storeType
                       ? Theme.of(context).primaryColor
                       : Theme.of(context).disabledColor,
                 ),
@@ -60,3 +61,4 @@ class StoreSortingButton extends StatelessWidget {
     );
   }
 }
+

@@ -1,9 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/card_design/visit_again_card.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/features/home/widgets/components/custom_triangle_shape.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -19,13 +20,14 @@ class WebVisitAgainView extends StatefulWidget {
 }
 
 class _WebVisitAgainViewState extends State<WebVisitAgainView> {
-  final CarouselController carouselController = CarouselController();
+  final CarouselSliderController carouselController =
+      CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<StoreController>(
-      builder: (storeController) {
-        List<Store>? stores = storeController.visitAgainStoreList;
+    return BlocBuilder<StoreBloc, StoreState>(
+      builder: (context, state) {
+        List<Store>? stores = state.visitAgainStoreList;
         return stores != null
             ? stores.isNotEmpty
                   ? Padding(
@@ -133,15 +135,14 @@ class _WebVisitAgainViewState extends State<WebVisitAgainView> {
                       ),
                     )
                   : const SizedBox()
-            : WebVisitAgainShimmerView(storeController: storeController);
+            : const WebVisitAgainShimmerView();
       },
     );
   }
 }
 
 class WebVisitAgainShimmerView extends StatelessWidget {
-  final StoreController storeController;
-  const WebVisitAgainShimmerView({super.key, required this.storeController});
+  const WebVisitAgainShimmerView({super.key});
 
   @override
   Widget build(BuildContext context) {

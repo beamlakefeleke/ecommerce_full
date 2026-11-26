@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/basic_medicine_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/arrow_icon_button.dart';
@@ -57,17 +58,17 @@ class _WebBasicMedicineNearbyViewWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
         List<Categories>? categories = [];
         List<Item>? products = [];
 
-        if (itemController.basicMedicineModel != null) {
+        if (state.basicMedicineModel != null) {
           categories.add(Categories(name: 'all'.tr, id: 0));
-          for (var category in itemController.basicMedicineModel!.categories!) {
+          for (var category in state.basicMedicineModel!.categories!) {
             categories.add(category);
           }
-          for (var product in itemController.basicMedicineModel!.products!) {
+          for (var product in state.basicMedicineModel!.products!) {
             if (selectedCategory == 0) {
               products.add(product);
             }
@@ -77,7 +78,7 @@ class _WebBasicMedicineNearbyViewWidgetState
           }
         }
 
-        if (itemController.basicMedicineModel != null &&
+        if (state.basicMedicineModel != null &&
             products.length > 4 &&
             isFirstTime) {
           showForwardButton = true;
@@ -163,7 +164,7 @@ class _WebBasicMedicineNearbyViewWidgetState
                         child: SizedBox(
                           height: 250,
                           width: Get.width,
-                          child: itemController.basicMedicineModel != null
+                          child: state.basicMedicineModel != null
                               ? ListView.builder(
                                   controller: scrollController,
                                   scrollDirection: Axis.horizontal,

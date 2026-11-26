@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -18,7 +16,9 @@ import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
 import 'package:ecommerce/common/widgets/web_menu_bar.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/payment_failed_dialog.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 class OrderSuccessfulScreen extends StatefulWidget {
@@ -51,11 +51,13 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
       }
     }
 
-    Get.find<OrderController>().trackOrder(
-      orderId.toString(),
-      null,
-      false,
-      contactNumber: widget.contactPersonNumber,
+    context.read<OrderBloc>().add(
+      OrderTrackRequested(
+        orderId: orderId.toString(),
+        order: null,
+        fromTracking: false,
+        contactNumber: widget.contactPersonNumber,
+      ),
     );
   }
 
@@ -71,26 +73,24 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
         appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
         endDrawer: const MenuDrawer(),
         endDrawerEnableOpenDragGesture: false,
-        body: GetBuilder<OrderController>(
-          builder: (orderController) {
+        body: BlocBuilder<OrderBloc, OrderState>(
+          builder: (context, state) {
             double total = 0;
             bool success = true;
             bool parcel = false;
             double? maximumCodOrderAmount;
-            if (orderController.trackModel != null) {
+            if (state.trackModel != null) {
               total =
-                  ((orderController.trackModel!.orderAmount! / 100) *
+                  ((state.trackModel!.orderAmount! / 100) *
                   getIt<SplashBloc>()
                       .state
                       .configModel!
                       .loyaltyPointItemPurchasePoint!);
               success =
-                  orderController.trackModel!.paymentStatus == 'paid' ||
-                  orderController.trackModel!.paymentMethod ==
-                      'cash_on_delivery' ||
-                  orderController.trackModel!.paymentMethod ==
-                      'partial_payment';
-              parcel = orderController.trackModel!.paymentMethod == 'parcel';
+                  state.trackModel!.paymentStatus == 'paid' ||
+                  state.trackModel!.paymentMethod == 'cash_on_delivery' ||
+                  state.trackModel!.paymentMethod == 'partial_payment';
+              parcel = state.trackModel!.paymentMethod == 'parcel';
               for (ZoneData zData
                   in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
                 for (Modules m in zData.modules!) {
@@ -107,7 +107,7 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
 
               if (!success &&
                   !Get.isDialogOpen! &&
-                  orderController.trackModel!.orderStatus != 'canceled' &&
+                  state.trackModel!.orderStatus != 'canceled' &&
                   Get.currentRoute.startsWith(RouteHelper.orderSuccess)) {
                 Future.delayed(const Duration(seconds: 1), () {
                   Get.dialog(
@@ -124,7 +124,7 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
               }
             }
 
-            return orderController.trackModel != null
+            return state.trackModel != null
                 ? Center(
                     child: SingleChildScrollView(
                       child: FooterView(

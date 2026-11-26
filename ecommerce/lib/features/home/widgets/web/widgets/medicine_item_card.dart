@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -49,8 +47,7 @@ class MedicineItemCard extends StatelessWidget {
           color: Theme.of(context).cardColor,
         ),
         child: CustomInkWell(
-          onTap: () =>
-              Get.find<ItemController>().navigateToItemPage(item, context),
+          onTap: () => ItemHelper.navigateToItemPage(item, context),
           radius: Dimensions.radiusDefault,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,9 +169,7 @@ class MedicineItemCard extends StatelessWidget {
                       item.discount != null && item.discount! > 0
                           ? Text(
                               PriceConverter.convertPrice(
-                                Get.find<ItemController>().getStartingPrice(
-                                  item,
-                                ),
+                                ItemHelper.getStartingPrice(item),
                               ),
                               style: robotoMedium.copyWith(
                                 fontSize: Dimensions.fontSizeExtraSmall,
@@ -196,9 +191,7 @@ class MedicineItemCard extends StatelessWidget {
                           children: [
                             Text(
                               PriceConverter.convertPrice(
-                                Get.find<ItemController>().getStartingPrice(
-                                  item,
-                                ),
+                                ItemHelper.getStartingPrice(item),
                                 discount: item.discount,
                                 discountType: item.discountType,
                               ),
@@ -209,7 +202,8 @@ class MedicineItemCard extends StatelessWidget {
                               width: Dimensions.paddingSizeExtraSmall,
                             ),
 
-                            (getIt<SplashBloc>().state
+                            (getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .moduleConfig!
                                         .module!

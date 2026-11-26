@@ -1,5 +1,5 @@
 import 'package:ecommerce/common/widgets/card_design/store_card_with_distance.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/features/home/widgets/web/web_new_on_view_widget.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -9,6 +9,7 @@ import 'package:ecommerce/common/widgets/card_design/store_card.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:ecommerce/common/widgets/title_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:get/get.dart';
 
@@ -25,11 +26,10 @@ class NewOnMartView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<StoreController>(
-      builder: (storeController) {
+    return BlocBuilder<StoreBloc, StoreState>(
+      builder: (context, state) {
         List<Store>? storeList = /*(isNewStore || isPharmacy || isShop) ?*/
-            storeController
-                .latestStoreList /* : storeController.popularStoreList*/;
+            state.latestStoreList /* : state.popularStoreList*/;
 
         return storeList != null
             ? storeList.isNotEmpty
@@ -113,8 +113,7 @@ class NewOnMartView extends StatelessWidget {
 }
 
 class PopularStoreShimmer extends StatelessWidget {
-  final StoreController storeController;
-  const PopularStoreShimmer({super.key, required this.storeController});
+  const PopularStoreShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/home/widgets/web/web_basic_medicine_nearby_view_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/widgets/medicine_item_card.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -13,10 +15,10 @@ class CommonConditionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        return itemController.commonConditions != null
-            ? itemController.commonConditions!.isNotEmpty
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        return state.commonConditions != null
+            ? state.commonConditions!.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: Dimensions.paddingSizeDefault,
@@ -33,10 +35,10 @@ class CommonConditionView extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.only(
                                 top: Dimensions.paddingSizeDefault,
-                                left: Get.find<LocalizationController>().isLtr
+                                left: getIt<LanguageBloc>().state.isLtr
                                     ? Dimensions.paddingSizeDefault
                                     : 0,
-                                right: Get.find<LocalizationController>().isLtr
+                                right: getIt<LanguageBloc>().state.isLtr
                                     ? 0
                                     : Dimensions.paddingSizeDefault,
                               ),
@@ -57,19 +59,16 @@ class CommonConditionView extends StatelessWidget {
                                     height: 35,
                                     child: ListView.builder(
                                       shrinkWrap: true,
-                                      itemCount: itemController
-                                          .commonConditions!
-                                          .length,
+                                      itemCount: state.commonConditions!.length,
                                       scrollDirection: Axis.horizontal,
                                       padding: EdgeInsets.zero,
                                       itemBuilder: (context, index) {
                                         bool isSelected =
-                                            itemController
-                                                .selectedCommonCondition ==
+                                            state.selectedCommonCondition ==
                                             index;
                                         double width =
                                             double.parse(
-                                              itemController
+                                              state
                                                   .commonConditions![index]
                                                   .name!
                                                   .length
@@ -77,8 +76,9 @@ class CommonConditionView extends StatelessWidget {
                                             ) *
                                             5;
                                         return InkWell(
-                                          onTap: () => itemController
-                                              .selectCommonCondition(index),
+                                          onTap: () => getIt<ItemBloc>().add(
+                                            CommonConditionSelected(index),
+                                          ),
                                           child: Padding(
                                             padding: const EdgeInsets.only(
                                               right:
@@ -87,7 +87,7 @@ class CommonConditionView extends StatelessWidget {
                                             child: Column(
                                               children: [
                                                 Text(
-                                                  '${itemController.commonConditions![index].name}',
+                                                  '${state.commonConditions![index].name}',
                                                   style: robotoMedium.copyWith(
                                                     color: isSelected
                                                         ? Theme.of(
@@ -127,10 +127,8 @@ class CommonConditionView extends StatelessWidget {
                               ),
                             ),
 
-                            itemController.conditionWiseProduct != null &&
-                                    itemController
-                                        .conditionWiseProduct!
-                                        .isNotEmpty
+                            state.conditionWiseProduct != null &&
+                                    state.conditionWiseProduct!.isNotEmpty
                                 ? GridView.builder(
                                     gridDelegate:
                                         SliverGridDelegateWithFixedCrossAxisCount(
@@ -148,15 +146,14 @@ class CommonConditionView extends StatelessWidget {
                                     padding: const EdgeInsets.all(
                                       Dimensions.paddingSizeDefault,
                                     ),
-                                    itemCount: itemController
-                                        .conditionWiseProduct!
-                                        .length,
+                                    itemCount:
+                                        state.conditionWiseProduct!.length,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
                                     itemBuilder: (context, index) {
                                       return MedicineItemCard(
-                                        item: itemController
-                                            .conditionWiseProduct![index],
+                                        item:
+                                            state.conditionWiseProduct![index],
                                       );
                                     },
                                   )

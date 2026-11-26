@@ -3,8 +3,7 @@ import 'package:get/get.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -331,8 +330,7 @@ class BottomSection extends StatelessWidget {
               ),
 
               (!takeAway &&
-                      getIt<SplashBloc>().state.configModel!.dmTipsStatus ==
-                          1)
+                      getIt<SplashBloc>().state.configModel!.dmTipsStatus == 1)
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -348,10 +346,7 @@ class BottomSection extends StatelessWidget {
               SizedBox(
                 height:
                     !takeAway &&
-                        getIt<SplashBloc>().state
-                                .configModel!
-                                .dmTipsStatus ==
-                            1
+                        getIt<SplashBloc>().state.configModel!.dmTipsStatus == 1
                     ? Dimensions.paddingSizeSmall
                     : 0.0,
               ),
@@ -390,7 +385,8 @@ class BottomSection extends StatelessWidget {
 
               SizedBox(
                 height:
-                    getIt<SplashBloc>().state
+                    getIt<SplashBloc>()
+                            .state
                             .configModel!
                             .additionalChargeStatus! &&
                         !(AuthHelper.isGuestLoggedIn() &&
@@ -404,7 +400,8 @@ class BottomSection extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          getIt<SplashBloc>().state
+                          getIt<SplashBloc>()
+                              .state
                               .configModel!
                               .additionalChargeName!,
                           style: robotoRegular,
@@ -429,7 +426,7 @@ class BottomSection extends StatelessWidget {
                       children: [
                         Text('paid_by_wallet'.tr, style: robotoRegular),
                         Text(
-                          '(-) ${PriceConverter.convertPrice(Get.find<ProfileController>().userInfoModel!.walletBalance!)}',
+                          '(-) ${PriceConverter.convertPrice(getIt<ProfileBloc>().state.userInfoModel!.walletBalance!)}',
                           style: robotoRegular,
                           textDirection: TextDirection.ltr,
                         ),

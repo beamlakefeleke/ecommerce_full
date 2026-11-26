@@ -3,7 +3,9 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
 import 'package:ecommerce/features/home/widgets/views/promo_code_banner_view.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -20,14 +22,15 @@ class WebCouponBannerViewWidget extends StatefulWidget {
 }
 
 class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
-  final CarouselController carouselController = CarouselController();
+  final CarouselSliderController carouselController =
+      CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CouponController>(
-      builder: (couponController) {
-        return couponController.couponList != null
-            ? couponController.couponList!.isNotEmpty
+    return BlocBuilder<CouponBloc, CouponState>(
+      builder: (context, state) {
+        return state.couponList != null
+            ? state.couponList!.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: Dimensions.paddingSizeExtraLarge,
@@ -36,14 +39,16 @@ class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
                         children: [
                           CarouselSlider.builder(
                             carouselController: carouselController,
-                            itemCount: couponController.couponList!.length,
+                            itemCount: state.couponList!.length,
                             options: CarouselOptions(
                               height: 135,
                               enlargeCenterPage: true,
                               disableCenter: true,
                               viewportFraction: 1,
                               onPageChanged: (index, reason) {
-                                couponController.setCurrentIndex(index, true);
+                                getIt<CouponBloc>().add(
+                                  CouponCurrentIndexChanged(index),
+                                );
                               },
                             ),
                             itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
@@ -88,7 +93,7 @@ class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
                                                 MainAxisAlignment.center,
                                             children: [
                                               Text(
-                                                couponController
+                                                state
                                                         .couponList![itemIndex]
                                                         .title ??
                                                     '',
@@ -132,7 +137,7 @@ class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
 
                                                   Text(
                                                     PriceConverter.convertPrice(
-                                                      couponController
+                                                      state
                                                           .couponList![itemIndex]
                                                           .minPurchase,
                                                     ),
@@ -160,23 +165,24 @@ class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
                                     const Spacer(),
 
                                     DottedBorder(
-                                      color: Theme.of(context).primaryColor,
-                                      strokeWidth: 1,
-                                      strokeCap: StrokeCap.butt,
-                                      dashPattern: const [5, 5],
-                                      padding: const EdgeInsets.all(0),
-                                      borderType: BorderType.RRect,
-                                      radius: const Radius.circular(50),
+                                      options: RoundedRectDottedBorderOptions(
+                                        color: Theme.of(context).primaryColor,
+                                        strokeWidth: 1,
+                                        strokeCap: StrokeCap.butt,
+                                        dashPattern: const [5, 5],
+                                        padding: const EdgeInsets.all(0),
+                                        radius: const Radius.circular(50),
+                                      ),
                                       child: InkWell(
                                         onTap: () {
-                                          if (couponController
+                                          if (state
                                                   .couponList![itemIndex]
                                                   .code !=
                                               null) {
                                             Clipboard.setData(
                                               ClipboardData(
                                                 text:
-                                                    couponController
+                                                    state
                                                         .couponList![itemIndex]
                                                         .code ??
                                                     '',
@@ -218,7 +224,7 @@ class _WebCouponBannerViewWidgetState extends State<WebCouponBannerViewWidget> {
                                               ),
 
                                               Text(
-                                                couponController
+                                                state
                                                         .couponList![itemIndex]
                                                         .code ??
                                                     '',

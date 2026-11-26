@@ -1,25 +1,29 @@
 import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/category/controllers/category_controller.dart';
-import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
-import 'package:ecommerce/features/flash_sale/controllers/flash_sale_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
+import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
+import 'package:ecommerce/features/category/presentation/bloc/category_event.dart';
+import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
+import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
+import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
-import 'package:ecommerce/features/home/screens/modules/food_home_screen.dart';
-import 'package:ecommerce/features/home/screens/modules/grocery_home_screen.dart';
-import 'package:ecommerce/features/home/screens/modules/pharmacy_home_screen.dart';
-import 'package:ecommerce/features/home/screens/modules/shop_home_screen.dart';
-import 'package:ecommerce/features/parcel/controllers/parcel_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
+import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -28,12 +32,9 @@ import 'package:ecommerce/util/app_constants.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
-import 'package:ecommerce/common/widgets/item_view.dart';
 import 'package:ecommerce/common/widgets/menu_drawer.dart';
-import 'package:ecommerce/common/widgets/paginated_list_view.dart';
 import 'package:ecommerce/common/widgets/web_menu_bar.dart';
 import 'package:ecommerce/features/home/screens/web_new_home_screen.dart';
-import 'package:ecommerce/features/home/widgets/filter_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -44,74 +45,76 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static Future<void> loadData(bool reload, {bool fromModule = false}) async {
-    Get.find<LocationController>().syncZoneData();
-    Get.find<FlashSaleController>().setEmptyFlashSale(fromModule: fromModule);
+    LocationHelper.syncZoneData();
+    getIt<FlashSaleBloc>().add(FlashSaleEmptied(fromModule: fromModule));
     if (getIt<SplashBloc>().state.module != null &&
-        !getIt<SplashBloc>().state
+        !getIt<SplashBloc>()
+            .state
             .configModel!
             .moduleConfig!
             .module!
             .isParcel!) {
-      Get.find<BannerController>().getBannerList(reload);
+      getIt<BannerBloc>().add(BannerListRequested(reload: reload));
       if (getIt<SplashBloc>().state.module!.moduleType.toString() ==
           AppConstants.grocery) {
-        Get.find<FlashSaleController>().getFlashSale(reload, false);
+        getIt<FlashSaleBloc>().add(FlashSaleRequested(reload: reload));
       }
       if (getIt<SplashBloc>().state.module!.moduleType.toString() ==
           AppConstants.ecommerce) {
-        Get.find<ItemController>().getFeaturedCategoriesItemList(false, false);
-        Get.find<FlashSaleController>().getFlashSale(reload, false);
+        getIt<ItemBloc>().add(const FeaturedCategoriesItemsRequested());
+        getIt<FlashSaleBloc>().add(FlashSaleRequested(reload: reload));
       }
-      Get.find<BannerController>().getPromotionalBannerList(reload);
-      Get.find<ItemController>().getDiscountedItemList(reload, false, 'all');
-      Get.find<CategoryController>().getCategoryList(reload);
-      Get.find<StoreController>().getPopularStoreList(reload, 'all', false);
-      Get.find<CampaignController>().getBasicCampaignList(reload);
-      Get.find<CampaignController>().getItemCampaignList(reload);
-      Get.find<ItemController>().getPopularItemList(reload, 'all', false);
-      Get.find<StoreController>().getLatestStoreList(reload, 'all', false);
-      Get.find<ItemController>().getReviewedItemList(reload, 'all', false);
-      Get.find<ItemController>().getRecommendedItemList(reload, 'all', false);
-      Get.find<StoreController>().getStoreList(1, reload);
-      Get.find<StoreController>().getRecommendedStoreList();
+      getIt<BannerBloc>().add(PromotionalBannerRequested(reload: reload));
+      getIt<ItemBloc>().add(DiscountedItemsRequested(reload: reload));
+      getIt<CategoryBloc>().add(CategoryListRequested(reload: reload));
+      getIt<StoreBloc>().add(
+        PopularStoreListRequested(type: 'all', reload: reload),
+      );
+      getIt<CampaignBloc>().add(BasicCampaignListRequested(reload: reload));
+      getIt<CampaignBloc>().add(ItemCampaignListRequested(reload: reload));
+      getIt<ItemBloc>().add(PopularItemsRequested(reload: reload));
+      getIt<StoreBloc>().add(
+        LatestStoreListRequested(type: 'all', reload: reload),
+      );
+      getIt<ItemBloc>().add(ReviewedItemsRequested(reload: reload));
+      getIt<ItemBloc>().add(RecommendedItemsRequested(reload: reload));
+      getIt<StoreBloc>().add(
+        const StoreListRequested(offset: 1, filterBy: 'all'),
+      );
+      getIt<StoreBloc>().add(const RecommendedStoreListRequested());
     }
     if (AuthHelper.isLoggedIn()) {
-      Get.find<ProfileController>().getUserInfo();
-      Get.find<NotificationController>().getNotificationList(reload);
-      Get.find<StoreController>().getVisitAgainStoreList(
-        fromModule: fromModule,
+      getIt<ProfileBloc>().add(const ProfileInfoRequested());
+      getIt<NotificationBloc>().add(NotificationListRequested(reload: reload));
+      getIt<StoreBloc>().add(
+        VisitAgainStoreListRequested(fromModule: fromModule),
       );
-      Get.find<CouponController>().getCouponList();
+      getIt<CouponBloc>().add(const CouponListRequested());
     }
     getIt<SplashBloc>().add(const SplashModulesRequested());
     if (getIt<SplashBloc>().state.module == null &&
         getIt<SplashBloc>().state.configModel!.module == null) {
-      Get.find<BannerController>().getFeaturedBanner();
-      Get.find<StoreController>().getFeaturedStoreList();
+      getIt<BannerBloc>().add(const FeaturedBannerRequested());
+      getIt<StoreBloc>().add(const FeaturedStoreListRequested());
       if (AuthHelper.isLoggedIn()) {
-        Get.find<AddressController>().getAddressList();
+        getIt<AddressBloc>().add(const AddressListRequested());
       }
     }
     if (getIt<SplashBloc>().state.module != null &&
-        getIt<SplashBloc>().state
+        getIt<SplashBloc>()
+            .state
             .configModel!
             .moduleConfig!
             .module!
             .isParcel!) {
-      Get.find<ParcelController>().getParcelCategoryList();
+      getIt<ParcelBloc>().add(const ParcelCategoryListRequested());
     }
     if (getIt<SplashBloc>().state.module != null &&
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.pharmacy) {
-      Get.find<ItemController>().getBasicMedicine(reload, false);
-      Get.find<StoreController>().getFeaturedStoreList();
-      await Get.find<ItemController>().getCommonConditions(false);
-      if (Get.find<ItemController>().commonConditions!.isNotEmpty) {
-        Get.find<ItemController>().getConditionsWiseItem(
-          Get.find<ItemController>().commonConditions![0].id!,
-          false,
-        );
-      }
+      getIt<ItemBloc>().add(BasicMedicineRequested(reload: reload));
+      getIt<StoreBloc>().add(const FeaturedStoreListRequested());
+      getIt<ItemBloc>().add(const CommonConditionsRequested());
     }
   }
 
@@ -127,11 +130,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     HomeScreen.loadData(false);
     if (!ResponsiveHelper.isWeb()) {
-      Get.find<LocationController>().getZone(
-        AddressHelper.getUserAddressFromSharedPref()!.latitude,
-        AddressHelper.getUserAddressFromSharedPref()!.longitude,
-        false,
-        updateInAddress: true,
+      getIt<LocationBloc>().add(
+        ZoneRequested(
+          lat: AddressHelper.getUserAddressFromSharedPref()!.latitude,
+          lng: AddressHelper.getUserAddressFromSharedPref()!.longitude,
+          markerLoad: false,
+          updateInAddress: true,
+        ),
       );
     }
   }
@@ -144,7 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
+    return BlocBuilder<SplashBloc, SplashState>(
+      builder: (context, splashController) {
         bool showMobileModule =
             !ResponsiveHelper.isDesktop(context) &&
             splashController.module == null &&
@@ -177,83 +183,95 @@ class _HomeScreenState extends State<HomeScreen> {
               : SafeArea(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      getIt<SplashBloc>().add(SplashRefreshingSet(true);
+                      getIt<SplashBloc>().add(const SplashRefreshingSet(true));
                       if (getIt<SplashBloc>().state.module != null) {
-                        await Get.find<LocationController>().syncZoneData();
-                        await Get.find<BannerController>().getBannerList(true);
+                        await LocationHelper.syncZoneData();
+                        getIt<BannerBloc>().add(
+                          const BannerListRequested(reload: true),
+                        );
                         if (isGrocery) {
-                          await Get.find<FlashSaleController>().getFlashSale(
-                            true,
-                            true,
+                          getIt<FlashSaleBloc>().add(
+                            const FlashSaleRequested(reload: true),
                           );
                         }
-                        await Get.find<BannerController>()
-                            .getPromotionalBannerList(true);
-                        await Get.find<ItemController>().getDiscountedItemList(
-                          true,
-                          false,
-                          'all',
+                        getIt<BannerBloc>().add(
+                          const PromotionalBannerRequested(reload: true),
                         );
-                        await Get.find<CategoryController>().getCategoryList(
-                          true,
+                        getIt<ItemBloc>().add(
+                          const DiscountedItemsRequested(reload: true),
                         );
-                        await Get.find<StoreController>().getPopularStoreList(
-                          true,
-                          'all',
-                          false,
+                        getIt<CategoryBloc>().add(
+                          const CategoryListRequested(reload: true),
                         );
-                        await Get.find<CampaignController>()
-                            .getItemCampaignList(true);
-                        Get.find<CampaignController>().getBasicCampaignList(
-                          true,
+                        getIt<StoreBloc>().add(
+                          const PopularStoreListRequested(
+                            type: 'all',
+                            reload: true,
+                          ),
                         );
-                        await Get.find<ItemController>().getPopularItemList(
-                          true,
-                          'all',
-                          false,
+                        getIt<CampaignBloc>().add(
+                          const ItemCampaignListRequested(reload: true),
                         );
-                        await Get.find<StoreController>().getLatestStoreList(
-                          true,
-                          'all',
-                          false,
+                        getIt<CampaignBloc>().add(
+                          const BasicCampaignListRequested(reload: true),
                         );
-                        await Get.find<ItemController>().getReviewedItemList(
-                          true,
-                          'all',
-                          false,
+                        getIt<ItemBloc>().add(
+                          const PopularItemsRequested(reload: true),
                         );
-                        await Get.find<StoreController>().getStoreList(1, true);
+                        getIt<StoreBloc>().add(
+                          const LatestStoreListRequested(
+                            type: 'all',
+                            reload: true,
+                          ),
+                        );
+                        getIt<ItemBloc>().add(
+                          const ReviewedItemsRequested(reload: true),
+                        );
+                        getIt<StoreBloc>().add(
+                          const StoreListRequested(offset: 1, filterBy: 'all'),
+                        );
                         if (AuthHelper.isLoggedIn()) {
-                          await Get.find<ProfileController>().getUserInfo();
-                          await Get.find<NotificationController>()
-                              .getNotificationList(true);
-                          Get.find<CouponController>().getCouponList();
+                          getIt<ProfileBloc>().add(
+                            const ProfileInfoRequested(),
+                          );
+                          getIt<NotificationBloc>().add(
+                            const NotificationListRequested(reload: true),
+                          );
+                          getIt<CouponBloc>().add(const CouponListRequested());
                         }
                         if (isPharmacy) {
-                          Get.find<ItemController>().getBasicMedicine(
-                            true,
-                            true,
+                          getIt<ItemBloc>().add(
+                            const BasicMedicineRequested(reload: true),
                           );
-                          Get.find<ItemController>().getCommonConditions(true);
+                          getIt<ItemBloc>().add(
+                            const CommonConditionsRequested(),
+                          );
                         }
                         if (isShop) {
-                          await Get.find<FlashSaleController>().getFlashSale(
-                            true,
-                            true,
+                          getIt<FlashSaleBloc>().add(
+                            const FlashSaleRequested(reload: true),
                           );
-                          Get.find<ItemController>()
-                              .getFeaturedCategoriesItemList(true, true);
+                          getIt<ItemBloc>().add(
+                            const FeaturedCategoriesItemsRequested(
+                              reload: true,
+                            ),
+                          );
                         }
                       } else {
-                        await Get.find<BannerController>().getFeaturedBanner();
-                        await getIt<SplashBloc>().add(const SplashModulesRequested());
+                        getIt<BannerBloc>().add(
+                          const FeaturedBannerRequested(),
+                        );
+                        getIt<SplashBloc>().add(const SplashModulesRequested());
                         if (AuthHelper.isLoggedIn()) {
-                          await Get.find<AddressController>().getAddressList();
+                          getIt<AddressBloc>().add(
+                            const AddressListRequested(),
+                          );
                         }
-                        await Get.find<StoreController>()
-                            .getFeaturedStoreList();
+                        getIt<StoreBloc>().add(
+                          const FeaturedStoreListRequested(),
+                        );
                       }
-                      getIt<SplashBloc>().add(SplashRefreshingSet(false);
+                      getIt<SplashBloc>().add(const SplashRefreshingSet(false));
                     },
                     child: ResponsiveHelper.isDesktop(context)
                         ? WebNewHomeScreen(scrollController: _scrollController)
@@ -276,8 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 title: Center(
                                   child: Container(
                                     width: Dimensions.webMaxWidth,
-                                    height:
-                                        Get.find<LocalizationController>().isLtr
+                                    height: getIt<LanguageBloc>().state.isLtr
                                         ? 60
                                         : 70,
                                     color: Theme.of(
@@ -291,7 +308,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         .module ==
                                                     null)
                                             ? InkWell(
-                                                onTap: () => getIt<SplashBloc>().add(const SplashModuleRemoved()),
+                                                onTap: () =>
+                                                    getIt<SplashBloc>().add(
+                                                      const SplashModuleRemoved(),
+                                                    ),
                                                 child: Image.asset(
                                                   Images.moduleIcon,
                                                   height: 25,
@@ -316,10 +336,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Expanded(
                                           child: InkWell(
                                             onTap: () =>
-                                                Get.find<LocationController>()
-                                                    .navigateToLocationScreen(
-                                                      'home',
-                                                    ),
+                                                LocationHelper.navigateToLocationScreen(
+                                                  'home',
+                                                ),
                                             child: Padding(
                                               padding: EdgeInsets.symmetric(
                                                 vertical:
@@ -332,8 +351,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           .paddingSizeSmall
                                                     : 0,
                                               ),
-                                              child: GetBuilder<LocationController>(
-                                                builder: (locationController) {
+                                              child: BlocBuilder<LocationBloc, LocationState>(
+                                                builder: (context, locationState) {
                                                   return Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
@@ -392,8 +411,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         InkWell(
-                                          child: GetBuilder<NotificationController>(
-                                            builder: (notificationController) {
+                                          child: BlocBuilder<NotificationBloc, NotificationState>(
+                                            builder: (context, notificationState) {
                                               return Stack(
                                                 children: [
                                                   Icon(
@@ -404,7 +423,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         .bodyLarge!
                                                         .color,
                                                   ),
-                                                  notificationController
+                                                  notificationState
                                                           .hasNotification
                                                       ? Positioned(
                                                           top: 0,
@@ -511,7 +530,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     ),
                                                     Expanded(
                                                       child: Text(
-                                                        getIt<SplashBloc>().state
+                                                        getIt<SplashBloc>()
+                                                                .state
                                                                 .configModel!
                                                                 .moduleConfig!
                                                                 .module!

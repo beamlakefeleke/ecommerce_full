@@ -1,12 +1,16 @@
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
-import 'package:ecommerce/features/category/controllers/category_controller.dart';
-import 'package:ecommerce/features/flash_sale/controllers/flash_sale_controller.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_state.dart';
+import 'package:ecommerce/features/category/presentation/bloc/category_bloc.dart';
+import 'package:ecommerce/features/category/presentation/bloc/category_state.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
+import 'package:ecommerce/features/flash_sale/presentation/bloc/flash_sale_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_event.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/home/widgets/web/middle_section_multiple_banner_view_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/module_widget.dart';
 import 'package:ecommerce/features/home/widgets/web/web_basic_medicine_nearby_view_widget.dart';
@@ -67,7 +71,7 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
   }
 
   Future<void> suggestAddressBottomSheet() async {
-    active = await Get.find<LocationController>().checkLocationActive();g
+    active = await LocationHelper.checkLocationActive();
     if (!getIt<SplashBloc>().state.webSuggestedLocation && active) {
       Future.delayed(const Duration(seconds: 1), () {
         Get.dialog(
@@ -97,7 +101,7 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
         getIt<SplashBloc>().state.module != null &&
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.ecommerce;
-    Get.find<BannerController>().setCurrentIndex(0, false);
+    getIt<BannerBloc>().add(const BannerIndexChanged(0));
     bool isLoggedIn = AuthHelper.isLoggedIn();
 
     return Stack(
@@ -122,13 +126,13 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
                         children: [
                           Expanded(
                             flex: 3,
-                            child: GetBuilder<BannerController>(
-                              builder: (bannerController) {
-                                return bannerController.bannerImageList == null
+                            child: BlocBuilder<BannerBloc, BannerState>(
+                              builder: (context, bannerState) {
+                                return bannerState.bannerImageList == null
                                     ? const WebNewBannerViewWidget(
                                         isFeatured: false,
                                       )
-                                    : bannerController.bannerImageList!.isEmpty
+                                    : bannerState.bannerImageList!.isEmpty
                                     ? const SizedBox()
                                     : const WebNewBannerViewWidget(
                                         isFeatured: false,
@@ -138,26 +142,20 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
                           ),
                           const SizedBox(width: Dimensions.paddingSizeDefault),
 
-                          GetBuilder<StoreController>(
-                            builder: (storeController) {
-                              return GetBuilder<FlashSaleController>(
-                                builder: (flashController) {
-                                  bool isFlashSaleActive =
-                                      (flashController
-                                              .flashSaleModel
-                                              ?.activeProducts !=
-                                          null &&
-                                      flashController
-                                          .flashSaleModel!
-                                          .activeProducts!
-                                          .isNotEmpty);
-                                  return Expanded(
-                                    flex: 1,
-                                    child: isFlashSaleActive
-                                        ? const WebFlashSaleViewWidget()
-                                        : const WebRecommendedStoreView(),
-                                  );
-                                },
+                          BlocBuilder<FlashSaleBloc, FlashSaleState>(
+                            builder: (context, flashState) {
+                              bool isFlashSaleActive =
+                                  (flashState.flashSaleModel?.activeProducts !=
+                                      null &&
+                                  flashState
+                                      .flashSaleModel!
+                                      .activeProducts!
+                                      .isNotEmpty);
+                              return Expanded(
+                                flex: 1,
+                                child: isFlashSaleActive
+                                    ? const WebFlashSaleViewWidget()
+                                    : const WebRecommendedStoreView(),
                               );
                             },
                           ),
@@ -166,16 +164,20 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
 
                       const BadWeatherWidget(),
 
-                      GetBuilder<CategoryController>(
-                        builder: (categoryController) {
-                          return categoryController.categoryList == null
+                      BlocBuilder<CategoryBloc, CategoryState>(
+                        builder: (context, categoryState) {
+                          final categoryList =
+                              categoryState.status == CategoryStatus.loaded
+                              ? categoryState.categories
+                              : null;
+                          return categoryList == null
                               ? WebCategoryViewWidget(
-                                  categoryController: categoryController,
+                                  categoryList: categoryList,
                                 )
-                              : categoryController.categoryList!.isEmpty
+                              : categoryList.isEmpty
                               ? const SizedBox()
                               : WebCategoryViewWidget(
-                                  categoryController: categoryController,
+                                  categoryList: categoryList,
                                 );
                         },
                       ),
@@ -222,20 +224,13 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
                               isFood: false,
                               isShop: true,
                             )
-                          : GetBuilder<CampaignController>(
-                              builder: (campaignController) {
-                                return campaignController.basicCampaignList ==
-                                        null
-                                    ? WebMostPopularItemBannerViewWidget(
-                                        campaignController: campaignController,
-                                      )
-                                    : campaignController
-                                          .basicCampaignList!
-                                          .isEmpty
+                          : BlocBuilder<CampaignBloc, CampaignState>(
+                              builder: (context, campaignState) {
+                                return campaignState.basicCampaignList == null
+                                    ? const WebMostPopularItemBannerViewWidget()
+                                    : campaignState.basicCampaignList!.isEmpty
                                     ? const SizedBox()
-                                    : WebMostPopularItemBannerViewWidget(
-                                        campaignController: campaignController,
-                                      );
+                                    : const WebMostPopularItemBannerViewWidget();
                               },
                             ),
 
@@ -292,25 +287,26 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
 
                       Padding(
                         padding: const EdgeInsets.fromLTRB(10, 20, 0, 5),
-                        child: GetBuilder<StoreController>(
-                          builder: (storeController) {
+                        child: BlocBuilder<StoreBloc, StoreState>(
+                          builder: (context, storeState) {
                             return Row(
                               children: [
                                 Expanded(
                                   child: Text(
-                                    '${storeController.storeModel?.totalSize ?? 0} ${getIt<SplashBloc>().state.configModel!.moduleConfig!.module!.showRestaurantText! ? 'restaurants'.tr : 'stores'.tr}',
+                                    '${storeState.storeModel?.totalSize ?? 0} ${getIt<SplashBloc>().state.configModel!.moduleConfig!.module!.showRestaurantText! ? 'restaurants'.tr : 'stores'.tr}',
                                     style: robotoMedium.copyWith(
                                       fontSize: Dimensions.fontSizeLarge,
                                     ),
                                   ),
                                 ),
 
-                                storeController.storeModel != null
+                                storeState.storeModel != null
                                     ? Row(
                                         children: [
                                           InkWell(
-                                            onTap: () => storeController
-                                                .setStoreType('all'),
+                                            onTap: () => getIt<StoreBloc>().add(
+                                              const StoreTypeChanged('all'),
+                                            ),
                                             child: StoreSortingButton(
                                               storeType: 'all',
                                               storeTypeText: 'all'.tr,
@@ -321,8 +317,11 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
                                           ),
 
                                           InkWell(
-                                            onTap: () => storeController
-                                                .setStoreType('delivery'),
+                                            onTap: () => getIt<StoreBloc>().add(
+                                              const StoreTypeChanged(
+                                                'delivery',
+                                              ),
+                                            ),
                                             child: StoreSortingButton(
                                               storeType: 'delivery',
                                               storeTypeText: 'delivery'.tr,
@@ -333,8 +332,11 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
                                           ),
 
                                           InkWell(
-                                            onTap: () => storeController
-                                                .setStoreType('take_away'),
+                                            onTap: () => getIt<StoreBloc>().add(
+                                              const StoreTypeChanged(
+                                                'take_away',
+                                              ),
+                                            ),
                                             child: StoreSortingButton(
                                               storeType: 'take_away',
                                               storeTypeText: 'take_away'.tr,
@@ -349,21 +351,23 @@ class _WebNewHomeScreenState extends State<WebNewHomeScreen> {
                         ),
                       ),
 
-                      GetBuilder<StoreController>(
-                        builder: (storeController) {
+                      BlocBuilder<StoreBloc, StoreState>(
+                        builder: (context, storeState) {
                           return PaginatedListView(
                             scrollController: widget.scrollController,
-                            totalSize: storeController.storeModel?.totalSize,
-                            offset: storeController.storeModel?.offset,
+                            totalSize: storeState.storeModel?.totalSize,
+                            offset: storeState.storeModel?.offset,
                             onPaginate: (int? offset) async =>
-                                await storeController.getStoreList(
-                                  offset!,
-                                  false,
+                                getIt<StoreBloc>().add(
+                                  StoreListRequested(
+                                    offset: offset!,
+                                    filterBy: 'all',
+                                  ),
                                 ),
                             itemView: ItemsView(
                               isStore: true,
                               items: null,
-                              stores: storeController.storeModel?.stores,
+                              stores: storeState.storeModel?.stores,
                               padding: EdgeInsets.symmetric(
                                 horizontal: ResponsiveHelper.isDesktop(context)
                                     ? Dimensions.paddingSizeExtraSmall

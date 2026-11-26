@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +17,6 @@ import 'package:ecommerce/features/location/presentation/bloc/location_event.dar
 import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/location/domain/models/prediction_model.dart';
@@ -485,10 +487,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                       result,
                                                     ) {
                                                       result.fold((_) {}, (_) {
-                                                        Get.find<
-                                                              ProfileController
-                                                            >()
-                                                            .setForceFullyUserEmpty();
+                                                        getIt<ProfileBloc>().add(const ProfileCleared());
                                                         LocationHelper.saveAddressAndNavigate(
                                                           _address,
                                                           widget.fromSignUp,
@@ -787,7 +786,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                                                           onTap: () {
                                                             getIt<SplashBloc>().add(SplashModuleIndexSelected(
                                                                   index,
-                                                                );
+                                                                ));
                                                             _pageController
                                                                 .animateToPage(
                                                                   index,

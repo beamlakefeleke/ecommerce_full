@@ -4,9 +4,10 @@ import 'package:get/get.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -32,8 +33,9 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).cardColor,
-      body: GetBuilder<ProfileController>(
-        builder: (profileController) {
+      body: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          final profileController = state;
           final bool isLoggedIn = AuthHelper.isLoggedIn();
 
           return Column(
@@ -253,18 +255,21 @@ class _MenuScreenState extends State<MenuScreen> {
                                     title: 'coupon'.tr,
                                     route: RouteHelper.getCouponRoute(),
                                     hideDivider:
-                                        getIt<SplashBloc>().state
+                                        getIt<SplashBloc>()
+                                                    .state
                                                     .configModel!
                                                     .loyaltyPointStatus ==
                                                 1 ||
-                                            getIt<SplashBloc>().state
+                                            getIt<SplashBloc>()
+                                                    .state
                                                     .configModel!
                                                     .customerWalletStatus ==
                                                 1
                                         ? false
                                         : true,
                                   ),
-                                  (getIt<SplashBloc>().state
+                                  (getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .loyaltyPointStatus ==
                                           1)
@@ -273,7 +278,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                           title: 'loyalty_points'.tr,
                                           route: RouteHelper.getLoyaltyRoute(),
                                           hideDivider:
-                                              getIt<SplashBloc>().state
+                                              getIt<SplashBloc>()
+                                                      .state
                                                       .configModel!
                                                       .customerWalletStatus ==
                                                   1
@@ -284,7 +290,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                               : '${profileController.userInfoModel?.loyaltyPoint != null ? profileController.userInfoModel!.loyaltyPoint.toString() : '0'} ${'points'.tr}',
                                         )
                                       : const SizedBox(),
-                                  (getIt<SplashBloc>().state
+                                  (getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .customerWalletStatus ==
                                           1)
@@ -311,15 +318,18 @@ class _MenuScreenState extends State<MenuScreen> {
                             ),
                           ],
                         ),
-                        (getIt<SplashBloc>().state
+                        (getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .refEarningStatus ==
                                     1) ||
-                                (getIt<SplashBloc>().state
+                                (getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .toggleDmRegistration! &&
                                     !ResponsiveHelper.isDesktop(context)) ||
-                                (getIt<SplashBloc>().state
+                                (getIt<SplashBloc>()
+                                        .state
                                         .configModel!
                                         .toggleStoreRegistration! &&
                                     !ResponsiveHelper.isDesktop(context))
@@ -367,7 +377,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                     ),
                                     child: Column(
                                       children: [
-                                        (getIt<SplashBloc>().state
+                                        (getIt<SplashBloc>()
+                                                    .state
                                                     .configModel!
                                                     .refEarningStatus ==
                                                 1)
@@ -377,13 +388,15 @@ class _MenuScreenState extends State<MenuScreen> {
                                                 route:
                                                     RouteHelper.getReferAndEarnRoute(),
                                                 hideDivider:
-                                                    (getIt<SplashBloc>().state
+                                                    (getIt<SplashBloc>()
+                                                                .state
                                                                 .configModel!
                                                                 .toggleDmRegistration! &&
                                                             !ResponsiveHelper.isDesktop(
                                                               context,
                                                             )) ||
-                                                        (getIt<SplashBloc>().state
+                                                        (getIt<SplashBloc>()
+                                                                .state
                                                                 .configModel!
                                                                 .toggleStoreRegistration! &&
                                                             !ResponsiveHelper.isDesktop(
@@ -393,7 +406,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                                     : true,
                                               )
                                             : const SizedBox(),
-                                        (getIt<SplashBloc>().state
+                                        (getIt<SplashBloc>()
+                                                    .state
                                                     .configModel!
                                                     .toggleDmRegistration! &&
                                                 !ResponsiveHelper.isDesktop(
@@ -406,7 +420,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                                 route:
                                                     RouteHelper.getDeliverymanRegistrationRoute(),
                                                 hideDivider:
-                                                    (getIt<SplashBloc>().state
+                                                    (getIt<SplashBloc>()
+                                                            .state
                                                             .configModel!
                                                             .toggleStoreRegistration! &&
                                                         !ResponsiveHelper.isDesktop(
@@ -416,7 +431,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                                     : true,
                                               )
                                             : const SizedBox(),
-                                        (getIt<SplashBloc>().state
+                                        (getIt<SplashBloc>()
+                                                    .state
                                                     .configModel!
                                                     .toggleStoreRegistration! &&
                                                 !ResponsiveHelper.isDesktop(
@@ -507,7 +523,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                       'privacy-policy',
                                     ),
                                   ),
-                                  (getIt<SplashBloc>().state
+                                  (getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .refundPolicyStatus ==
                                           1)
@@ -518,11 +535,13 @@ class _MenuScreenState extends State<MenuScreen> {
                                             'refund-policy',
                                           ),
                                           hideDivider:
-                                              (getIt<SplashBloc>().state
+                                              (getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .cancellationPolicyStatus ==
                                                       1) ||
-                                                  (getIt<SplashBloc>().state
+                                                  (getIt<SplashBloc>()
+                                                          .state
                                                           .configModel!
                                                           .shippingPolicyStatus ==
                                                       1)
@@ -530,7 +549,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                               : true,
                                         )
                                       : const SizedBox(),
-                                  (getIt<SplashBloc>().state
+                                  (getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .cancellationPolicyStatus ==
                                           1)
@@ -541,7 +561,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                             'cancellation-policy',
                                           ),
                                           hideDivider:
-                                              (getIt<SplashBloc>().state
+                                              (getIt<SplashBloc>()
+                                                      .state
                                                       .configModel!
                                                       .shippingPolicyStatus ==
                                                   1)
@@ -549,7 +570,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                               : true,
                                         )
                                       : const SizedBox(),
-                                  (getIt<SplashBloc>().state
+                                  (getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .shippingPolicyStatus ==
                                           1)
@@ -576,8 +598,9 @@ class _MenuScreenState extends State<MenuScreen> {
                                   description: 'are_you_sure_to_logout'.tr,
                                   isLogOut: true,
                                   onYesPressed: () {
-                                    Get.find<ProfileController>()
-                                        .clearUserInfo();
+                                    context.read<ProfileBloc>().add(
+                                      const ProfileCleared(),
+                                    );
                                     getIt<AuthRepository>().clearSharedData();
                                     context.read<FavouriteBloc>().add(
                                       const FavouriteCleared(),
@@ -605,7 +628,9 @@ class _MenuScreenState extends State<MenuScreen> {
                                 RouteHelper.getSignInRoute(Get.currentRoute),
                               );
                               if (AuthHelper.isLoggedIn()) {
-                                profileController.getUserInfo();
+                                context.read<ProfileBloc>().add(
+                                  const ProfileInfoRequested(),
+                                );
                               }
                             }
                           },

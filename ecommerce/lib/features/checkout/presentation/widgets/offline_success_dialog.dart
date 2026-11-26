@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
 import 'package:ecommerce/features/order/domain/models/order_model.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_button.dart';
@@ -80,8 +81,8 @@ class OfflineSuccessDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                GetBuilder<OrderController>(
-                  builder: (orderController) {
+                BlocBuilder<OrderBloc, OrderState>(
+                  builder: (context, orderController) {
                     return Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor.withOpacity(0.1),

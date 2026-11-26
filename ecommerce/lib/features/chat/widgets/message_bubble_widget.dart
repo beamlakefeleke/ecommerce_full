@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_state.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -30,7 +30,7 @@ class MessageBubbleWidget extends StatelessWidget {
     BaseUrls? baseUrl = getIt<SplashBloc>().state.configModel!.baseUrls;
     bool isReply =
         message.senderId !=
-        Get.find<ProfileController>().userInfoModel!.userInfo!.id;
+        getIt<ProfileBloc>().state.userInfoModel!.userInfo!.id;
 
     return (isReply)
         ? Container(
@@ -187,8 +187,8 @@ class MessageBubbleWidget extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(Dimensions.paddingSizeSmall),
             ),
-            child: GetBuilder<ProfileController>(
-              builder: (profileController) {
+            child: BlocBuilder<ProfileBloc, ProfileState>(
+              builder: (context, profileState) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -322,8 +322,8 @@ class MessageBubbleWidget extends StatelessWidget {
                             fit: BoxFit.cover,
                             width: 40,
                             height: 40,
-                            image: profileController.userInfoModel != null
-                                ? '${baseUrl!.customerImageUrl}/${profileController.userInfoModel!.image}'
+                            image: profileState.userInfoModel != null
+                                ? '${baseUrl!.customerImageUrl}/${profileState.userInfoModel!.image}'
                                 : '',
                           ),
                         ),

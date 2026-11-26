@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
@@ -126,8 +126,7 @@ class CouponSection extends StatelessWidget {
                               Get.dialog(
                                 Dialog(
                                   child: CouponBottomSheet(
-                                    storeId:
-                                        getIt<StoreBloc>().state.store!.id,
+                                    storeId: getIt<StoreBloc>().state.store!.id,
                                   ),
                                 ),
                               ).then((value) {
@@ -141,8 +140,7 @@ class CouponSection extends StatelessWidget {
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
                                 builder: (con) => CouponBottomSheet(
-                                  storeId:
-                                      getIt<StoreBloc>().state.store!.id,
+                                  storeId: getIt<StoreBloc>().state.store!.id,
                                 ),
                               ).then((value) async {
                                 if (value != null) {
@@ -216,12 +214,12 @@ class CouponSection extends StatelessWidget {
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.horizontal(
                                       left: Radius.circular(
-                                        Get.find<LocalizationController>().isLtr
+                                        getIt<LanguageBloc>().state.isLtr
                                             ? 10
                                             : 0,
                                       ),
                                       right: Radius.circular(
-                                        Get.find<LocalizationController>().isLtr
+                                        getIt<LanguageBloc>().state.isLtr
                                             ? 0
                                             : 10,
                                       ),

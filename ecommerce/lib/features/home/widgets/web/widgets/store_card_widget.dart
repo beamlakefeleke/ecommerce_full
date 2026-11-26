@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -110,23 +110,27 @@ class StoreCardWidget extends StatelessWidget {
                       Positioned(
                         top: Dimensions.paddingSizeSmall,
                         right: Dimensions.paddingSizeSmall,
-                        child: GetBuilder<FavouriteController>(
-                          builder: (favouriteController) {
-                            bool isWished = favouriteController.wishStoreIdList
-                                .contains(store!.id);
+                        child: BlocBuilder<FavouriteBloc, FavouriteState>(
+                          builder: (context, state) {
+                            bool isWished = state.wishStoreIdList.contains(
+                              store!.id,
+                            );
                             return InkWell(
                               onTap: () {
                                 if (AuthHelper.isLoggedIn()) {
                                   isWished
-                                      ? favouriteController
-                                            .removeFromFavouriteList(
-                                              store!.id,
-                                              true,
-                                            )
-                                      : favouriteController.addToFavouriteList(
-                                          null,
-                                          store!,
-                                          true,
+                                      ? getIt<FavouriteBloc>().add(
+                                          FavouriteRemoved(
+                                            id: store!.id,
+                                            isStore: true,
+                                          ),
+                                        )
+                                      : getIt<FavouriteBloc>().add(
+                                          FavouriteAdded(
+                                            product: null,
+                                            store: store!,
+                                            isStore: true,
+                                          ),
                                         );
                                 } else {
                                   showCustomSnackBar(
@@ -150,10 +154,10 @@ class StoreCardWidget extends StatelessWidget {
 
                       Positioned(
                         bottom: -15,
-                        left: Get.find<LocalizationController>().isLtr
+                        left: getIt<LanguageBloc>().state.isLtr
                             ? null
                             : 10,
-                        right: Get.find<LocalizationController>().isLtr
+                        right: getIt<LanguageBloc>().state.isLtr
                             ? 10
                             : null,
                         child: Container(
@@ -384,3 +388,4 @@ class StoreCardShimmer extends StatelessWidget {
     );
   }
 }
+

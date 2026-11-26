@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -7,11 +7,8 @@ import 'package:ecommerce/common/widgets/custom_ink_well.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_state.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -104,8 +101,7 @@ class StoreCardWithDistance extends StatelessWidget {
 
                         DiscountTag(
                           discount: StoreHelper.getDiscount(store),
-                          discountType: Get.find<StoreController>()
-                              .getDiscountType(store),
+                          discountType: StoreHelper.getDiscountType(store),
                           freeDelivery: store.freeDelivery,
                         ),
 

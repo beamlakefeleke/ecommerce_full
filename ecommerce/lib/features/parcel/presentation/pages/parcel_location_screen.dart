@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
 import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
@@ -15,6 +13,11 @@ import 'package:ecommerce/features/parcel/data/models/parcel_category_model.dart
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_state.dart';
+import 'package:ecommerce/features/profile/domain/models/userinfo_model.dart';
+import 'package:ecommerce/features/profile/domain/usecases/profile_usecases.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/core/usecase/usecase.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -92,43 +95,28 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
       context.read<AddressBloc>().add(const AddressListRequested());
     }
     if (AuthHelper.isLoggedIn()) {
-      if (Get.find<ProfileController>().userInfoModel == null) {
-        await Get.find<ProfileController>().getUserInfo();
-        _senderNameController.text =
-            Get.find<ProfileController>().userInfoModel != null
-            ? '${Get.find<ProfileController>().userInfoModel!.fName!} ${Get.find<ProfileController>().userInfoModel!.lName!}'
-            : '';
-        _countryDialCode = await splitPhoneNumber(
-          Get.find<ProfileController>().userInfoModel != null
-              ? Get.find<ProfileController>().userInfoModel!.phone!
-              : '',
-          true,
-        );
-        _senderPhoneController.text = await splitPhoneNumber(
-          Get.find<ProfileController>().userInfoModel != null
-              ? Get.find<ProfileController>().userInfoModel!.phone!
-              : '',
-          false,
-        );
-      } else {
-        _senderNameController.text =
-            '${Get.find<ProfileController>().userInfoModel!.fName!} ${Get.find<ProfileController>().userInfoModel!.lName!}';
-        _countryDialCode = await splitPhoneNumber(
-          Get.find<ProfileController>().userInfoModel != null
-              ? Get.find<ProfileController>().userInfoModel!.phone!
-              : '',
-          true,
-        );
-        _senderPhoneController.text = await splitPhoneNumber(
-          Get.find<ProfileController>().userInfoModel != null
-              ? Get.find<ProfileController>().userInfoModel!.phone!
-              : '',
-          false,
-        );
+      final profileBloc = context.read<ProfileBloc>();
+      UserInfoModel? userInfo = profileBloc.state.userInfoModel;
+      if (userInfo == null) {
+        // Fetch once and refresh the app-wide ProfileBloc cache.
+        final result = await getIt<GetUserInfoUseCase>()(const NoParams());
+        userInfo = result.fold((_) => null, (user) => user);
+        profileBloc.add(const ProfileInfoRequested());
       }
+      _senderNameController.text = userInfo != null
+          ? '${userInfo.fName!} ${userInfo.lName!}'
+          : '';
+      _countryDialCode = await splitPhoneNumber(
+        userInfo != null ? userInfo.phone! : '',
+        true,
+      );
+      _senderPhoneController.text = await splitPhoneNumber(
+        userInfo != null ? userInfo.phone! : '',
+        false,
+      );
       parcelBloc.add(CountryCodeSet(_countryDialCode!, true));
       parcelBloc.add(CountryCodeSet(_countryDialCode!, false));
-      setState(() {});
+      if (mounted) setState(() {});
     }
 
     _tabController?.addListener(() {
@@ -315,6 +303,7 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
             if (_tabController!.index == 0) {
               _validateSender(parcelController);
             } else {
+              final parcelBloc = context.read<ParcelBloc>();
               String numberWithCountryCode =
                   '${parcelController.receiverCountryCode ?? ''}${_receiverPhoneController.text.trim()}';
               PhoneValid phoneValid = await CustomValidator.isPhoneValid(
@@ -349,14 +338,12 @@ class _ParcelLocationScreenState extends State<ParcelLocationScreen>
                   floor: _receiverFloorController.text.trim(),
                 );
 
-                context.read<ParcelBloc>().add(
-                  DestinationAddressSet(destination),
-                );
+                parcelBloc.add(DestinationAddressSet(destination));
 
                 Get.toNamed(
                   RouteHelper.getParcelRequestRoute(
                     widget.category,
-                    context.read<ParcelBloc>().state.pickupAddress!,
+                    parcelBloc.state.pickupAddress!,
                     destination,
                   ),
                 );

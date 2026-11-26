@@ -2,10 +2,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/item_that_you_love_card_widget.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -28,7 +29,8 @@ class WebItemThatYouLoveViewWidget extends StatefulWidget {
 
 class _WebItemThatYouLoveViewWidgetState
     extends State<WebItemThatYouLoveViewWidget> {
-  final CarouselController carouselController = CarouselController();
+  final CarouselSliderController carouselController =
+      CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +38,9 @@ class _WebItemThatYouLoveViewWidgetState
         getIt<SplashBloc>().state.module != null &&
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.ecommerce;
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        List<Item>? recommendItems = itemController.recommendedItemList;
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        List<Item>? recommendItems = state.recommendedItemList;
 
         return recommendItems != null
             ? recommendItems.isNotEmpty
@@ -109,11 +111,10 @@ class _WebItemThatYouLoveViewWidgetState
                                             child: InkWell(
                                               hoverColor: Colors.transparent,
                                               onTap: () =>
-                                                  Get.find<ItemController>()
-                                                      .navigateToItemPage(
-                                                        recommendItems[index],
-                                                        context,
-                                                      ),
+                                                  ItemHelper.navigateToItemPage(
+                                                    recommendItems[index],
+                                                    context,
+                                                  ),
                                               child: Container(
                                                 width: 210,
                                                 height: 285,
@@ -172,19 +173,13 @@ class _WebItemThatYouLoveViewWidgetState
 
                                                           DiscountTag(
                                                             discount:
-                                                                Get.find<
-                                                                      ItemController
-                                                                    >()
-                                                                    .getDiscount(
-                                                                      recommendItems[index],
-                                                                    ),
+                                                                ItemHelper.getDiscount(
+                                                                  recommendItems[index],
+                                                                ),
                                                             discountType:
-                                                                Get.find<
-                                                                      ItemController
-                                                                    >()
-                                                                    .getDiscountType(
-                                                                      recommendItems[index],
-                                                                    ),
+                                                                ItemHelper.getDiscountType(
+                                                                  recommendItems[index],
+                                                                ),
                                                           ),
 
                                                           Positioned(
@@ -299,12 +294,9 @@ class _WebItemThatYouLoveViewWidgetState
                                                                                 ? Flexible(
                                                                                     child: Text(
                                                                                       PriceConverter.convertPrice(
-                                                                                        Get.find<
-                                                                                              ItemController
-                                                                                            >()
-                                                                                            .getStartingPrice(
-                                                                                              recommendItems[index],
-                                                                                            ),
+                                                                                        ItemHelper.getStartingPrice(
+                                                                                          recommendItems[index],
+                                                                                        ),
                                                                                       ),
                                                                                       style: robotoRegular.copyWith(
                                                                                         fontSize: Dimensions.fontSizeExtraSmall,
@@ -326,12 +318,9 @@ class _WebItemThatYouLoveViewWidgetState
 
                                                                             Text(
                                                                               PriceConverter.convertPrice(
-                                                                                Get.find<
-                                                                                      ItemController
-                                                                                    >()
-                                                                                    .getStartingPrice(
-                                                                                      recommendItems[index],
-                                                                                    ),
+                                                                                ItemHelper.getStartingPrice(
+                                                                                  recommendItems[index],
+                                                                                ),
                                                                                 discount: recommendItems[index].discount,
                                                                                 discountType: recommendItems[index].discountType,
                                                                               ),
@@ -381,7 +370,7 @@ class _WebItemThatYouLoveViewWidgetState
                       ],
                     )
                   : const SizedBox()
-            : WebItemThatYouLoveShimmerView(itemController: itemController);
+            : const WebItemThatYouLoveShimmerView();
       },
     );
   }
@@ -432,9 +421,9 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        List<Item>? recommendItems = itemController.recommendedItemList;
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        List<Item>? recommendItems = state.recommendedItemList;
 
         if (recommendItems != null &&
             recommendItems.length > 5 &&
@@ -483,8 +472,8 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
                                     child: OnHover(
                                       isItem: true,
                                       child: InkWell(
-                                        onTap: () => Get.find<ItemController>()
-                                            .navigateToItemPage(
+                                        onTap: () =>
+                                            ItemHelper.navigateToItemPage(
                                               recommendItems[index],
                                               context,
                                             ),
@@ -541,19 +530,13 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
 
                                                     DiscountTag(
                                                       discount:
-                                                          Get.find<
-                                                                ItemController
-                                                              >()
-                                                              .getDiscount(
-                                                                recommendItems[index],
-                                                              ),
+                                                          ItemHelper.getDiscount(
+                                                            recommendItems[index],
+                                                          ),
                                                       discountType:
-                                                          Get.find<
-                                                                ItemController
-                                                              >()
-                                                              .getDiscountType(
-                                                                recommendItems[index],
-                                                              ),
+                                                          ItemHelper.getDiscountType(
+                                                            recommendItems[index],
+                                                          ),
                                                     ),
 
                                                     Positioned(
@@ -681,12 +664,9 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
                                                                           ? Flexible(
                                                                               child: Text(
                                                                                 PriceConverter.convertPrice(
-                                                                                  Get.find<
-                                                                                        ItemController
-                                                                                      >()
-                                                                                      .getStartingPrice(
-                                                                                        recommendItems[index],
-                                                                                      ),
+                                                                                  ItemHelper.getStartingPrice(
+                                                                                    recommendItems[index],
+                                                                                  ),
                                                                                 ),
                                                                                 style: robotoRegular.copyWith(
                                                                                   fontSize: Dimensions.fontSizeExtraSmall,
@@ -708,12 +688,9 @@ class _WebItemThatYouLoveForShopState extends State<WebItemThatYouLoveForShop> {
 
                                                                       Text(
                                                                         PriceConverter.convertPrice(
-                                                                          Get.find<
-                                                                                ItemController
-                                                                              >()
-                                                                              .getStartingPrice(
-                                                                                recommendItems[index],
-                                                                              ),
+                                                                          ItemHelper.getStartingPrice(
+                                                                            recommendItems[index],
+                                                                          ),
                                                                           discount:
                                                                               recommendItems[index].discount,
                                                                           discountType:
@@ -965,11 +942,7 @@ class WebItemThatYouLoveForShopShimmer extends StatelessWidget {
 }
 
 class WebItemThatYouLoveShimmerView extends StatelessWidget {
-  final ItemController itemController;
-  const WebItemThatYouLoveShimmerView({
-    super.key,
-    required this.itemController,
-  });
+  const WebItemThatYouLoveShimmerView({super.key});
 
   @override
   Widget build(BuildContext context) {

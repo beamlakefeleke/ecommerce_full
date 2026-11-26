@@ -1,9 +1,11 @@
 import 'dart:math';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/features/home/widgets/components/item_that_you_love_card_widget.dart';
 import 'package:ecommerce/features/home/widgets/components/review_item_card_widget.dart';
@@ -29,8 +31,8 @@ class _ItemThatYouLoveViewState extends State<ItemThatYouLoveView> {
   @override
   void initState() {
     super.initState();
-    if (Get.find<ItemController>().recommendedItemList != null) {
-      _currentPage = Get.find<ItemController>().recommendedItemList!.length > 1
+    if (getIt<ItemBloc>().state.recommendedItemList != null) {
+      _currentPage = getIt<ItemBloc>().state.recommendedItemList!.length > 1
           ? 1
           : 0;
     }
@@ -48,9 +50,9 @@ class _ItemThatYouLoveViewState extends State<ItemThatYouLoveView> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemController>(
-      builder: (itemController) {
-        List<Item>? recommendItems = itemController.recommendedItemList;
+    return BlocBuilder<ItemBloc, ItemState>(
+      builder: (context, state) {
+        List<Item>? recommendItems = state.recommendedItemList;
 
         return recommendItems != null
             ? recommendItems.isNotEmpty

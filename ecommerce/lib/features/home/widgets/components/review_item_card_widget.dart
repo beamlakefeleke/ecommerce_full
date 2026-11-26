@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/util/app_constants.dart';
@@ -52,10 +51,7 @@ class ReviewItemCard extends StatelessWidget {
                 ],
               ),
               child: CustomInkWell(
-                onTap: () => Get.find<ItemController>().navigateToItemPage(
-                  item,
-                  context,
-                ),
+                onTap: () => ItemHelper.navigateToItemPage(item, context),
                 radius: Dimensions.radiusDefault,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,11 +86,8 @@ class ReviewItemCard extends StatelessWidget {
 
                           DiscountTag(
                             isFloating: true,
-                            discount: Get.find<ItemController>().getDiscount(
-                              item!,
-                            ),
-                            discountType: Get.find<ItemController>()
-                                .getDiscountType(item!),
+                            discount: ItemHelper.getDiscount(item!),
+                            discountType: ItemHelper.getDiscountType(item!),
                           ),
                         ],
                       ),
@@ -168,8 +161,7 @@ class ReviewItemCard extends StatelessWidget {
                                 item!.discount != null && item!.discount! > 0
                                     ? Text(
                                         PriceConverter.convertPrice(
-                                          Get.find<ItemController>()
-                                              .getStartingPrice(item!),
+                                          ItemHelper.getStartingPrice(item!),
                                         ),
                                         style: robotoRegular.copyWith(
                                           fontSize:
@@ -192,9 +184,7 @@ class ReviewItemCard extends StatelessWidget {
 
                                 Text(
                                   PriceConverter.convertPrice(
-                                    Get.find<ItemController>().getStartingPrice(
-                                      item!,
-                                    ),
+                                    ItemHelper.getStartingPrice(item!),
                                     discount: item!.discount,
                                     discountType: item!.discountType,
                                   ),
@@ -258,11 +248,8 @@ class ReviewItemCard extends StatelessWidget {
 
                         DiscountTag(
                           isFloating: true,
-                          discount: Get.find<ItemController>().getDiscount(
-                            item!,
-                          ),
-                          discountType: Get.find<ItemController>()
-                              .getDiscountType(item!),
+                          discount: ItemHelper.getDiscount(item!),
+                          discountType: ItemHelper.getDiscountType(item!),
                         ),
 
                         OrganicTag(item: item!, placeInImage: false),
@@ -381,12 +368,9 @@ class ReviewItemCard extends StatelessWidget {
                                                 item!.discount! > 0
                                                     ? Text(
                                                         PriceConverter.convertPrice(
-                                                          Get.find<
-                                                                ItemController
-                                                              >()
-                                                              .getStartingPrice(
-                                                                item!,
-                                                              ),
+                                                          ItemHelper.getStartingPrice(
+                                                            item!,
+                                                          ),
                                                         ),
                                                         style: robotoRegular.copyWith(
                                                           fontSize: Dimensions
@@ -409,10 +393,9 @@ class ReviewItemCard extends StatelessWidget {
 
                                                 Text(
                                                   PriceConverter.convertPrice(
-                                                    Get.find<ItemController>()
-                                                        .getStartingPrice(
-                                                          item!,
-                                                        ),
+                                                    ItemHelper.getStartingPrice(
+                                                      item!,
+                                                    ),
                                                     discount: item!.discount,
                                                     discountType:
                                                         item!.discountType,
@@ -480,7 +463,8 @@ class ReviewItemCard extends StatelessWidget {
                                               ],
                                             ),
 
-                                            (getIt<SplashBloc>().state
+                                            (getIt<SplashBloc>()
+                                                        .state
                                                         .configModel!
                                                         .moduleConfig!
                                                         .module!
@@ -505,12 +489,9 @@ class ReviewItemCard extends StatelessWidget {
                                                 item!.discount! > 0
                                                     ? Text(
                                                         PriceConverter.convertPrice(
-                                                          Get.find<
-                                                                ItemController
-                                                              >()
-                                                              .getStartingPrice(
-                                                                item!,
-                                                              ),
+                                                          ItemHelper.getStartingPrice(
+                                                            item!,
+                                                          ),
                                                         ),
                                                         style: robotoRegular.copyWith(
                                                           fontSize: Dimensions
@@ -528,10 +509,9 @@ class ReviewItemCard extends StatelessWidget {
                                                 // SizedBox(height: item!.discount! > 0 ? Dimensions.paddingSizeExtraSmall : 0),
                                                 Text(
                                                   PriceConverter.convertPrice(
-                                                    Get.find<ItemController>()
-                                                        .getStartingPrice(
-                                                          item!,
-                                                        ),
+                                                    ItemHelper.getStartingPrice(
+                                                      item!,
+                                                    ),
                                                     discount: item!.discount,
                                                     discountType:
                                                         item!.discountType,

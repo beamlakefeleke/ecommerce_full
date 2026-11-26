@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/item/controllers/campaign_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/campaign_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -14,17 +14,17 @@ class MiddleSectionMultipleBannerViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CampaignController>(
-      builder: (campaignController) {
-        return campaignController.basicCampaignList != null
-            ? campaignController.basicCampaignList!.isNotEmpty
+    return BlocBuilder<CampaignBloc, CampaignState>(
+      builder: (context, state) {
+        return state.basicCampaignList != null
+            ? state.basicCampaignList!.isNotEmpty
                   ? Container(
                       padding: const EdgeInsets.only(
                         top: Dimensions.paddingSizeExtremeLarge,
                         bottom: Dimensions.paddingSizeDefault,
                       ),
                       child: GridView.builder(
-                        itemCount: campaignController.basicCampaignList!.length,
+                        itemCount: state.basicCampaignList!.length,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
@@ -41,7 +41,7 @@ class MiddleSectionMultipleBannerViewWidget extends StatelessWidget {
                             hoverColor: Colors.transparent,
                             onTap: () => Get.toNamed(
                               RouteHelper.getBasicCampaignRoute(
-                                campaignController.basicCampaignList![index],
+                                state.basicCampaignList![index],
                               ),
                             ),
                             child: Container(
@@ -58,7 +58,7 @@ class MiddleSectionMultipleBannerViewWidget extends StatelessWidget {
                                 child: CustomImage(
                                   image:
                                       '${getIt<SplashBloc>().state.configModel!.baseUrls!.campaignImageUrl}'
-                                      '/${campaignController.basicCampaignList![index].image}',
+                                      '/${state.basicCampaignList![index].image}',
                                   fit: BoxFit.cover,
                                   height: 230,
                                   width: double.infinity,

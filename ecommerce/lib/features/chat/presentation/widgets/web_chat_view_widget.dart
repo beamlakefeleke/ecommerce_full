@@ -7,8 +7,8 @@ import 'package:ecommerce/features/chat/presentation/bloc/chat_state.dart';
 import 'package:ecommerce/features/chat/enums/user_type_enum.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/chat/domain/entities/conversation.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -263,8 +263,9 @@ class _WebChatViewWidgetState extends State<WebChatViewWidget>
                                                     -1,
                                                   ),
                                                 );
-                                                Get.find<ProfileController>()
-                                                    .getUserInfo();
+                                                getIt<ProfileBloc>().add(
+                                                  const ProfileInfoRequested(),
+                                                );
                                               },
                                               child: Container(
                                                 decoration: BoxDecoration(

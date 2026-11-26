@@ -1,9 +1,9 @@
 import 'package:ecommerce/common/widgets/custom_image.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -11,6 +11,7 @@ import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -26,13 +27,13 @@ class PopularStoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<StoreController>(
-      builder: (storeController) {
+    return BlocBuilder<StoreBloc, StoreState>(
+      builder: (context, state) {
         List<Store>? storeList = isFeatured
-            ? storeController.featuredStoreList
+            ? state.featuredStoreList
             : isPopular
-            ? storeController.popularStoreList
-            : storeController.latestStoreList;
+            ? state.popularStoreList
+            : state.latestStoreList;
 
         return (storeList != null && storeList.isEmpty)
             ? const SizedBox()
@@ -80,15 +81,17 @@ class PopularStoreView extends StatelessWidget {
                                 child: CustomInkWell(
                                   onTap: () {
                                     if (isFeatured && // set as true
-                                        getIt<SplashBloc>().state
-                                                .moduleList !=
+                                        getIt<SplashBloc>().state.moduleList !=
                                             null) {
                                       for (ModuleModel module
-                                          in getIt<SplashBloc>().state
+                                          in getIt<SplashBloc>()
+                                              .state
                                               .moduleList!) {
                                         if (module.id ==
                                             storeList[index].moduleId) {
-                                          getIt<SplashBloc>().add(SplashModuleSet(module);
+                                          getIt<SplashBloc>().add(
+                                            SplashModuleSet(module),
+                                          );
                                           break;
                                         }
                                       }
@@ -319,7 +322,7 @@ class PopularStoreView extends StatelessWidget {
                         //       );
                         //     },
                         //   )
-                        : PopularStoreShimmer(storeController: storeController),
+                        : PopularStoreShimmer(storeState: state),
                   ),
                 ],
               );
@@ -329,8 +332,8 @@ class PopularStoreView extends StatelessWidget {
 }
 
 class PopularStoreShimmer extends StatelessWidget {
-  final StoreController storeController;
-  const PopularStoreShimmer({super.key, required this.storeController});
+  final StoreState storeState;
+  const PopularStoreShimmer({super.key, required this.storeState});
 
   @override
   Widget build(BuildContext context) {

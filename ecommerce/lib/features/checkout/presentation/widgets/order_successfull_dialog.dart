@@ -4,7 +4,8 @@ import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/location/domain/models/zone_response_model.dart';
-import 'package:ecommerce/features/order/controllers/order_controller.dart';
+import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -27,10 +28,12 @@ class _OrderSuccessfulDialogState extends State<OrderSuccessfulDialog> {
   @override
   void initState() {
     super.initState();
-    Get.find<OrderController>().trackOrder(
-      widget.orderID.toString(),
-      null,
-      false,
+    context.read<OrderBloc>().add(
+      OrderTrackRequested(
+        orderId: widget.orderID.toString(),
+        order: null,
+        fromTracking: false,
+      ),
     );
   }
 
@@ -41,24 +44,25 @@ class _OrderSuccessfulDialogState extends State<OrderSuccessfulDialog> {
       onPopInvoked: (value) async {
         await Get.offAllNamed(RouteHelper.getInitialRoute());
       },
-      child: GetBuilder<OrderController>(
-        builder: (orderController) {
+      child: BlocBuilder<OrderBloc, OrderState>(
+        builder: (context, state) {
           double total = 0;
           bool success = true;
           bool parcel = false;
           double? maximumCodOrderAmount;
-          if (orderController.trackModel != null) {
+          if (state.trackModel != null) {
             total =
-                ((orderController.trackModel!.orderAmount! / 100) *
-                getIt<SplashBloc>().state
+                ((state.trackModel!.orderAmount! / 100) *
+                getIt<SplashBloc>()
+                    .state
                     .configModel!
                     .loyaltyPointItemPurchasePoint!);
             success =
-                orderController.trackModel!.paymentStatus == 'paid' ||
-                orderController.trackModel!.paymentMethod ==
+                state.trackModel!.paymentStatus == 'paid' ||
+                state.trackModel!.paymentMethod ==
                     'cash_on_delivery' ||
-                orderController.trackModel!.paymentMethod == 'partial_payment';
-            parcel = orderController.trackModel!.paymentMethod == 'parcel';
+                state.trackModel!.paymentMethod == 'partial_payment';
+            parcel = state.trackModel!.paymentMethod == 'parcel';
             for (ZoneData zData
                 in AddressHelper.getUserAddressFromSharedPref()!.zoneData!) {
               for (Modules m in zData.modules!) {
@@ -75,7 +79,7 @@ class _OrderSuccessfulDialogState extends State<OrderSuccessfulDialog> {
 
             if (!success &&
                 !Get.isDialogOpen! &&
-                orderController.trackModel!.orderStatus != 'canceled') {
+                state.trackModel!.orderStatus != 'canceled') {
               Future.delayed(const Duration(seconds: 1), () {
                 Get.dialog(
                   PaymentFailedDialog(
@@ -91,7 +95,7 @@ class _OrderSuccessfulDialogState extends State<OrderSuccessfulDialog> {
             }
           }
 
-          return orderController.trackModel != null
+          return state.trackModel != null
               ? Center(
                   child: Container(
                     width: 500,

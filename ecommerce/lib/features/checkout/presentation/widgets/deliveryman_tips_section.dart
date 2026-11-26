@@ -4,11 +4,10 @@ import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_event.dart';
 import 'package:ecommerce/features/checkout/presentation/bloc/checkout_state.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/checkout/presentation/widgets/checkout_balance_helper.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/price_converter.dart';
@@ -267,9 +266,9 @@ class _DeliveryManTipsSectionState extends State<DeliveryManTipsSection> {
                                                       ),
                                                     );
                                                 widget.onTotalChange(total);
-                                                if (Get.find<
-                                                              ProfileController
-                                                            >()
+                                                if (context
+                                                            .read<ProfileBloc>()
+                                                            .state
                                                             .userInfoModel!
                                                             .walletBalance! <
                                                         total &&
@@ -282,9 +281,9 @@ class _DeliveryManTipsSectionState extends State<DeliveryManTipsSection> {
                                                     0,
                                                   );
                                                   canCheckSmall = true;
-                                                } else if (Get.find<
-                                                              ProfileController
-                                                            >()
+                                                } else if (context
+                                                            .read<ProfileBloc>()
+                                                            .state
                                                             .userInfoModel!
                                                             .walletBalance! >
                                                         total &&
@@ -390,8 +389,7 @@ class _DeliveryManTipsSectionState extends State<DeliveryManTipsSection> {
               height:
                   (!widget.takeAway &&
                       widget.storeId == null &&
-                      getIt<SplashBloc>().state.configModel!.dmTipsStatus ==
-                          1)
+                      getIt<SplashBloc>().state.configModel!.dmTipsStatus == 1)
                   ? Dimensions.paddingSizeSmall
                   : 0,
             ),

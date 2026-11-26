@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
 
@@ -10,13 +12,13 @@ class WebPromotionalBannerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<BannerController>(
-      builder: (bannerController) {
+    return BlocBuilder<BannerBloc, BannerState>(
+      builder: (context, state) {
         return Padding(
           padding: const EdgeInsets.symmetric(
             vertical: Dimensions.paddingSizeLarge,
           ),
-          child: bannerController.promotionalBanner != null
+          child: state.promotionalBanner != null
               ? Container(
                   height: 235,
                   width: context.width,
@@ -32,7 +34,7 @@ class WebPromotionalBannerView extends StatelessWidget {
                     ),
                     child: CustomImage(
                       image:
-                          '${bannerController.promotionalBanner!.promotionalBannerUrl}/${bannerController.promotionalBanner!.bottomSectionBanner}',
+                          '${state.promotionalBanner!.promotionalBannerUrl}/${state.promotionalBanner!.bottomSectionBanner}',
                       fit: BoxFit.cover,
                       height: 235,
                       width: double.infinity,

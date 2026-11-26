@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:ecommerce/common/widgets/card_design/store_card.dart';
 import 'package:ecommerce/common/widgets/card_design/store_card_with_distance.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/store/controllers/store_controller.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/store/domain/helpers/store_helper.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/common/models/module_model.dart';
 import 'package:ecommerce/features/store/domain/models/store_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
@@ -41,11 +43,11 @@ class BestStoreNearbyView extends StatelessWidget {
         getIt<SplashBloc>().state.module!.moduleType.toString() ==
             AppConstants.food;
 
-    return GetBuilder<StoreController>(
-      builder: (storeController) {
+    return BlocBuilder<StoreBloc, StoreState>(
+      builder: (context, storeState) {
         List<Store>? storeList = isPharmacy
-            ? storeController.featuredStoreList
-            : storeController.popularStoreList;
+            ? storeState.featuredStoreList
+            : storeState.popularStoreList;
 
         return Padding(
           padding: const EdgeInsets.symmetric(
@@ -178,16 +180,20 @@ class BestStoreNearbyView extends StatelessWidget {
                                           ),
                                           child: InkWell(
                                             onTap: () {
-                                              if (getIt<SplashBloc>().state
+                                              if (getIt<SplashBloc>()
+                                                      .state
                                                       .moduleList !=
                                                   null) {
                                                 for (ModuleModel module
-                                                    in getIt<SplashBloc>().state
+                                                    in getIt<SplashBloc>()
+                                                        .state
                                                         .moduleList!) {
                                                   if (module.id ==
                                                       storeList[index]
                                                           .moduleId) {
-                                                    getIt<SplashBloc>().add(SplashModuleSet(module);
+                                                    getIt<SplashBloc>().add(
+                                                      SplashModuleSet(module),
+                                                    );
                                                     break;
                                                   }
                                                 }
@@ -242,19 +248,18 @@ class BestStoreNearbyView extends StatelessWidget {
                                             itemCount: storeList.length,
                                             itemBuilder: (context, index) {
                                               double distance =
-                                                  Get.find<StoreController>()
-                                                      .getRestaurantDistance(
-                                                        LatLng(
-                                                          double.parse(
-                                                            storeList[index]
-                                                                .latitude!,
-                                                          ),
-                                                          double.parse(
-                                                            storeList[index]
-                                                                .longitude!,
-                                                          ),
-                                                        ),
-                                                      );
+                                                  StoreHelper.getRestaurantDistance(
+                                                    LatLng(
+                                                      double.parse(
+                                                        storeList[index]
+                                                            .latitude!,
+                                                      ),
+                                                      double.parse(
+                                                        storeList[index]
+                                                            .longitude!,
+                                                      ),
+                                                    ),
+                                                  );
 
                                               return Padding(
                                                 padding: const EdgeInsets.only(
@@ -286,18 +291,29 @@ class BestStoreNearbyView extends StatelessWidget {
                                                       ),
                                                       child: CustomInkWell(
                                                         onTap: () {
-                                                          if (getIt<SplashBloc>().state
+                                                          if (getIt<
+                                                                    SplashBloc
+                                                                  >()
+                                                                  .state
                                                                   .moduleList !=
                                                               null) {
                                                             for (ModuleModel
                                                                 module
-                                                                in getIt<SplashBloc>().state
+                                                                in getIt<
+                                                                      SplashBloc
+                                                                    >()
+                                                                    .state
                                                                     .moduleList!) {
                                                               if (module.id ==
                                                                   storeList[index]
                                                                       .moduleId) {
-                                                                getIt<SplashBloc>().add(SplashModuleSet(
-                                                                      module,
+                                                                getIt<
+                                                                      SplashBloc
+                                                                    >()
+                                                                    .add(
+                                                                      SplashModuleSet(
+                                                                        module,
+                                                                      ),
                                                                     );
                                                                 break;
                                                               }
@@ -442,16 +458,14 @@ class BestStoreNearbyView extends StatelessWidget {
                                                     Positioned(
                                                       top: -5,
                                                       left:
-                                                          Get.find<
-                                                                LocalizationController
-                                                              >()
+                                                          getIt<LanguageBloc>()
+                                                              .state
                                                               .isLtr
                                                           ? 15
                                                           : null,
                                                       right:
-                                                          Get.find<
-                                                                LocalizationController
-                                                              >()
+                                                          getIt<LanguageBloc>()
+                                                              .state
                                                               .isLtr
                                                           ? null
                                                           : 15,
@@ -511,15 +525,14 @@ class BestStoreNearbyView extends StatelessWidget {
                                                                 ),
 
                                                                 DiscountTag(
-                                                                  discount: storeController
-                                                                      .getDiscount(
+                                                                  discount:
+                                                                      StoreHelper.getDiscount(
                                                                         storeList[index],
                                                                       ),
                                                                   discountType:
-                                                                      storeController
-                                                                          .getDiscountType(
-                                                                            storeList[index],
-                                                                          ),
+                                                                      StoreHelper.getDiscountType(
+                                                                        storeList[index],
+                                                                      ),
                                                                 ),
 
                                                                 Positioned(
@@ -592,63 +605,75 @@ class BestStoreNearbyView extends StatelessWidget {
                                                     Positioned(
                                                       top: 40,
                                                       left:
-                                                          Get.find<
-                                                                LocalizationController
-                                                              >()
+                                                          getIt<LanguageBloc>()
+                                                              .state
                                                               .isLtr
                                                           ? null
                                                           : 15,
                                                       right:
-                                                          Get.find<
-                                                                LocalizationController
-                                                              >()
+                                                          getIt<LanguageBloc>()
+                                                              .state
                                                               .isLtr
                                                           ? 15
                                                           : null,
-                                                      child: GetBuilder<FavouriteController>(
-                                                        builder: (favouriteController) {
-                                                          bool isWished =
-                                                              favouriteController
-                                                                  .wishStoreIdList
-                                                                  .contains(
-                                                                    storeList[index]
-                                                                        .id,
-                                                                  );
-                                                          return InkWell(
-                                                            onTap: () {
-                                                              if (AuthHelper.isLoggedIn()) {
-                                                                isWished
-                                                                    ? favouriteController.removeFromFavouriteList(
+                                                      child:
+                                                          BlocBuilder<
+                                                            FavouriteBloc,
+                                                            FavouriteState
+                                                          >(
+                                                            builder:
+                                                                (
+                                                                  context,
+                                                                  favouriteState,
+                                                                ) {
+                                                                  bool
+                                                                  isWished = favouriteState
+                                                                      .wishStoreIdList
+                                                                      .contains(
                                                                         storeList[index]
                                                                             .id,
-                                                                        true,
-                                                                      )
-                                                                    : favouriteController.addToFavouriteList(
-                                                                        null,
-                                                                        storeList[index],
-                                                                        true,
                                                                       );
-                                                              } else {
-                                                                showCustomSnackBar(
-                                                                  'you_are_not_logged_in'
-                                                                      .tr,
-                                                                );
-                                                              }
-                                                            },
-                                                            child: Icon(
-                                                              isWished
-                                                                  ? Icons
-                                                                        .favorite
-                                                                  : Icons
-                                                                        .favorite_border,
-                                                              size: 20,
-                                                              color: Theme.of(
-                                                                context,
-                                                              ).primaryColor,
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
+                                                                  return InkWell(
+                                                                    onTap: () {
+                                                                      if (AuthHelper.isLoggedIn()) {
+                                                                        isWished
+                                                                            ? getIt<
+                                                                                    FavouriteBloc
+                                                                                  >()
+                                                                                  .add(
+                                                                                    FavouriteRemoved(
+                                                                                      id: storeList[index].id,
+                                                                                      isStore: true,
+                                                                                    ),
+                                                                                  )
+                                                                            : getIt<
+                                                                                    FavouriteBloc
+                                                                                  >()
+                                                                                  .add(
+                                                                                    FavouriteAdded(
+                                                                                      store: storeList[index],
+                                                                                      isStore: true,
+                                                                                    ),
+                                                                                  );
+                                                                      } else {
+                                                                        showCustomSnackBar(
+                                                                          'you_are_not_logged_in'
+                                                                              .tr,
+                                                                        );
+                                                                      }
+                                                                    },
+                                                                    child: Icon(
+                                                                      isWished
+                                                                          ? Icons.favorite
+                                                                          : Icons.favorite_border,
+                                                                      size: 20,
+                                                                      color: Theme.of(
+                                                                        context,
+                                                                      ).primaryColor,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                          ),
                                                     ),
                                                   ],
                                                 ),
