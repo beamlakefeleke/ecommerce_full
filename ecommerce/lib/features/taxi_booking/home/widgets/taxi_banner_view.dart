@@ -1,5 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_state.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
@@ -16,8 +18,8 @@ class TaxiBannerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<BannerController>(
-      builder: (bannerController) {
+    return BlocBuilder<BannerBloc, BannerState>(
+      builder: (context, bannerController) {
         List<String?>? bannerList = bannerController.taxiBannerImageList;
         List<dynamic>? bannerDataList = bannerController.taxiBannerDataList;
 
@@ -38,7 +40,9 @@ class TaxiBannerView extends StatelessWidget {
                                 viewportFraction: 1,
                                 autoPlayInterval: const Duration(seconds: 7),
                                 onPageChanged: (index, reason) {
-                                  bannerController.setCurrentIndex(index, true);
+                                  context.read<BannerBloc>().add(
+                                    BannerIndexChanged(index),
+                                  );
                                 },
                               ),
                               itemCount: bannerList.isEmpty
@@ -47,11 +51,13 @@ class TaxiBannerView extends StatelessWidget {
                               itemBuilder: (context, index, _) {
                                 String? baseUrl =
                                     bannerDataList![index] is BasicCampaignModel
-                                    ? getIt<SplashBloc>().state
+                                    ? getIt<SplashBloc>()
+                                          .state
                                           .configModel!
                                           .baseUrls!
                                           .campaignImageUrl
-                                    : getIt<SplashBloc>().state
+                                    : getIt<SplashBloc>()
+                                          .state
                                           .configModel!
                                           .baseUrls!
                                           .bannerImageUrl;
@@ -79,7 +85,8 @@ class TaxiBannerView extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(
                                         Dimensions.radiusSmall,
                                       ),
-                                      child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
+                                      child: BlocBuilder<SplashBloc, SplashState>(
+                                        builder: (context, splashController) {
                                           return CustomImage(
                                             image:
                                                 '$baseUrl/${bannerList[index]}',

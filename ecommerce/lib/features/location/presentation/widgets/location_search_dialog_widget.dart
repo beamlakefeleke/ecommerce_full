@@ -2,7 +2,8 @@ import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/location/domain/repositories/location_repository.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
 import 'package:ecommerce/features/location/presentation/bloc/location_event.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_event.dart';
 import 'package:ecommerce/features/location/domain/models/prediction_model.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_event.dart';
@@ -108,10 +109,12 @@ class LocationSearchDialogWidget extends StatelessWidget {
             },
             onSelected: (PredictionModel suggestion) {
               if (isRider) {
-                Get.find<RiderController>().setLocationFromPlace(
-                  suggestion.placeId,
-                  suggestion.description,
-                  isFrom,
+                getIt<RiderBloc>().add(
+                  LocationFromPlaceSelected(
+                    placeId: suggestion.placeId,
+                    address: suggestion.description,
+                    isFrom: isFrom,
+                  ),
                 );
               } else {
                 if (isPickedUp == null) {

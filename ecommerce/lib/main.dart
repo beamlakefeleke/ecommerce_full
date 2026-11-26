@@ -45,6 +45,8 @@ import 'package:ecommerce/features/order/presentation/bloc/order_bloc.dart';
 import 'package:ecommerce/features/parcel/presentation/bloc/parcel_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/store/presentation/bloc/store_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/taxi_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
@@ -259,6 +261,12 @@ class _MyAppState extends State<MyApp> {
                             ),
                             BlocProvider<StoreBloc>(
                               create: (_) => clean_di.getIt<StoreBloc>(),
+                            ),
+                            BlocProvider<TaxiBloc>(
+                              create: (_) => clean_di.getIt<TaxiBloc>(),
+                            ),
+                            BlocProvider<RiderBloc>(
+                              create: (_) => clean_di.getIt<RiderBloc>(),
                             ),
                           ],
                           child: GetMaterialApp(

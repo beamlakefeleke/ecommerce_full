@@ -1,10 +1,17 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animarker/widgets/animarker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_state.dart';
 import 'package:ecommerce/helper/date_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -21,19 +28,96 @@ class SeeDetailsWidget extends StatefulWidget {
 }
 
 class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
+  GoogleMapController? _mapController;
+  final Map<MarkerId, Marker> _markers = {};
+
+  static const MarkerId _fromMarkerId = MarkerId('from_marker');
+  static const MarkerId _toMarkerId = MarkerId('to_marker');
+
   @override
   void initState() {
     super.initState();
-    Get.find<RiderController>().setFromToMarker(
-      from: LatLng(
-        double.parse(Get.find<RiderController>().fromAddress!.latitude!),
-        double.parse(Get.find<RiderController>().fromAddress!.longitude!),
-      ),
-      to: LatLng(
-        double.parse(Get.find<RiderController>().toAddress!.latitude!),
-        double.parse(Get.find<RiderController>().toAddress!.longitude!),
-      ),
+    _buildMarkers(context.read<RiderBloc>().state);
+  }
+
+  Future<BitmapDescriptor> _bitmap(String path, int width) async {
+    final ByteData data = await rootBundle.load(path);
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: width,
     );
+    final ui.FrameInfo fi = await codec.getNextFrame();
+    final bytes = (await fi.image.toByteData(
+      format: ui.ImageByteFormat.png,
+    ))!.buffer.asUint8List();
+    return BitmapDescriptor.fromBytes(bytes);
+  }
+
+  Future<void> _buildMarkers(RiderState state) async {
+    final from = state.fromLatLng;
+    final to = state.toLatLng;
+    if (from != null) {
+      final icon = await _bitmap(Images.liveMarker, 70);
+      _markers[_fromMarkerId] = Marker(
+        markerId: _fromMarkerId,
+        position: from,
+        icon: icon,
+      );
+    }
+    if (to != null) {
+      final icon = await _bitmap(Images.toMarker, 70);
+      _markers[_toMarkerId] = Marker(
+        markerId: _toMarkerId,
+        position: to,
+        icon: icon,
+      );
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && mounted) {
+      context.read<RiderBloc>().add(
+        TripDateSet(DateConverter.dateToReadableDate(picked)),
+      );
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat:
+                getIt<SplashBloc>().state.configModel!.timeformat == '24',
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (time != null && mounted) {
+      context.read<RiderBloc>().add(
+        TripTimeSet(
+          DateConverter.convertTimeToTimeDate(
+            DateTime(DateTime.now().year, 1, 1, time.hour, time.minute),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,13 +138,23 @@ class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
                 Radius.circular(Dimensions.radiusExtraLarge),
               ),
       ),
-      child: GetBuilder<RiderController>(
-        builder: (riderController) {
-          Completer<GoogleMapController> mapCompleter =
+      child: BlocBuilder<RiderBloc, RiderState>(
+        builder: (context, riderController) {
+          final Completer<GoogleMapController> mapCompleter =
               Completer<GoogleMapController>();
-          if (riderController.mapController != null) {
-            mapCompleter.complete(riderController.mapController);
+          if (_mapController != null) {
+            mapCompleter.complete(_mapController);
           }
+          final Set<Polyline> polylines = riderController.routePoints.isEmpty
+              ? <Polyline>{}
+              : {
+                  Polyline(
+                    polylineId: const PolylineId('my_polyline'),
+                    points: riderController.routePoints,
+                    width: 5,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                };
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -89,7 +183,7 @@ class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
                   useRotation: true,
                   duration: const Duration(milliseconds: 2300),
                   mapId: mapCompleter.future.then<int>((value) => value.mapId),
-                  markers: riderController.markers.values.toSet(),
+                  markers: _markers.values.toSet(),
                   child: GoogleMap(
                     mapType: MapType.normal,
                     zoomControlsEnabled: false,
@@ -98,11 +192,9 @@ class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
                       zoom: 15,
                     ),
                     onMapCreated: (controller) {
-                      riderController.setMapController(controller);
+                      _mapController = controller;
                     },
-                    polylines: Set<Polyline>.of(
-                      riderController.polyLines.values,
-                    ),
+                    polylines: polylines,
                   ),
                 ),
               ),
@@ -117,7 +209,6 @@ class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
                       fontSize: Dimensions.fontSizeSmall,
                     ),
                   ),
-                  // Image.asset(Images.edit, width: 16.0, height: 16.0),
                   const SizedBox(),
                 ],
               ),
@@ -189,20 +280,20 @@ class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
                           Padding(
                             padding: const EdgeInsets.only(top: 5),
                             child: RideAddressInfo(
-                              title: riderController.fromAddress!.address,
+                              title: riderController.fromAddress?.address,
                               subTitle:
-                                  '${riderController.fromAddress!.streetNumber != null ? '${riderController.fromAddress!.streetNumber!}, ' : ''}'
-                                  '${riderController.fromAddress!.house ?? ''}',
+                                  '${riderController.fromAddress?.streetNumber != null ? '${riderController.fromAddress!.streetNumber!}, ' : ''}'
+                                  '${riderController.fromAddress?.house ?? ''}',
                               isInsideCity: true,
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 5),
                             child: RideAddressInfo(
-                              title: riderController.toAddress!.address,
+                              title: riderController.toAddress?.address,
                               subTitle:
-                                  '${riderController.toAddress!.streetNumber != null ? '${riderController.toAddress!.streetNumber!}, ' : ''}'
-                                  '${riderController.toAddress!.house ?? ''}',
+                                  '${riderController.toAddress?.streetNumber != null ? '${riderController.toAddress!.streetNumber!}, ' : ''}'
+                                  '${riderController.toAddress?.house ?? ''}',
                               isInsideCity: true,
                             ),
                           ),
@@ -255,7 +346,7 @@ class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
                           ],
                         ),
                         InkWell(
-                          onTap: () => riderController.setDate(),
+                          onTap: _pickDate,
                           child: Image.asset(
                             Images.edit,
                             width: 16.0,
@@ -315,7 +406,7 @@ class _SeeDetailsWidgetState extends State<SeeDetailsWidget> {
                           ],
                         ),
                         InkWell(
-                          onTap: () => riderController.setTime(context),
+                          onTap: _pickTime,
                           child: Image.asset(
                             Images.edit,
                             width: 16.0,

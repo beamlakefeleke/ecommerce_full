@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/notification/domain/models/notification_body_model.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/features/chat/data/models/conversation_model.dart';
@@ -97,8 +96,7 @@ class BookingCompleteInfo extends StatelessWidget {
               color: Theme.of(context).cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors
-                      .grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!,
+                  color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                   blurRadius: 5,
                   spreadRadius: 1,
                 ),
@@ -205,9 +203,10 @@ class BookingCompleteInfo extends StatelessWidget {
                               await Get.toNamed(
                                 RouteHelper.getChatRoute(
                                   notificationBody: NotificationBodyModel(
-                                    orderId:
-                                        Get.find<BookingCheckoutController>()
-                                            .tripId,
+                                    orderId: context
+                                        .read<BookingCheckoutBloc>()
+                                        .state
+                                        .tripId,
                                     restaurantId: vehicle.provider!.vendorId,
                                   ),
                                   user: User(
@@ -249,8 +248,7 @@ class BookingCompleteInfo extends StatelessWidget {
               color: Theme.of(context).cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors
-                      .grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!,
+                  color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                   blurRadius: 5,
                   spreadRadius: 1,
                 ),

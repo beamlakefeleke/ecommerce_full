@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
-import 'package:ecommerce/common/controllers/theme_controller.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -12,8 +14,8 @@ class SelectPaymentMethod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<BookingCheckoutController>(
-      builder: (bookingCheckoutController) {
+    return BlocBuilder<BookingCheckoutBloc, BookingCheckoutState>(
+      builder: (context, bookingCheckoutController) {
         return Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: Dimensions.paddingSizeDefault,
@@ -56,7 +58,9 @@ class SelectPaymentMethod extends StatelessWidget {
                 title: 'cash_on_delivery'.tr,
                 subtitle: 'pay_your_payment_after_getting_item'.tr,
                 isSelected: bookingCheckoutController.paymentMethodIndex == 0,
-                onTap: () => bookingCheckoutController.setPaymentMethod(0),
+                onTap: () => context.read<BookingCheckoutBloc>().add(
+                  const PaymentMethodSelected(0),
+                ),
               ),
 
               TaxiPaymentButton(
@@ -64,7 +68,9 @@ class SelectPaymentMethod extends StatelessWidget {
                 title: 'digital_payment'.tr,
                 subtitle: 'faster_and_safe_way'.tr,
                 isSelected: bookingCheckoutController.paymentMethodIndex == 1,
-                onTap: () => bookingCheckoutController.setPaymentMethod(1),
+                onTap: () => context.read<BookingCheckoutBloc>().add(
+                  const PaymentMethodSelected(1),
+                ),
               ),
 
               TaxiPaymentButton(
@@ -72,7 +78,9 @@ class SelectPaymentMethod extends StatelessWidget {
                 title: 'wallet_payment'.tr,
                 subtitle: 'pay_from_your_existing_balance'.tr,
                 isSelected: bookingCheckoutController.paymentMethodIndex == 2,
-                onTap: () => bookingCheckoutController.setPaymentMethod(2),
+                onTap: () => context.read<BookingCheckoutBloc>().add(
+                  const PaymentMethodSelected(2),
+                ),
               ),
               const SizedBox(height: Dimensions.paddingSizeDefault),
             ],
@@ -94,8 +102,7 @@ class SelectPaymentMethod extends StatelessWidget {
         color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color:
-                Colors.grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!,
+            color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
             blurRadius: 5,
             spreadRadius: 1,
           ),

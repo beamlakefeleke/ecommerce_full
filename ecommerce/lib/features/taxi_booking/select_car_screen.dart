@@ -1,8 +1,11 @@
 import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_state.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -15,29 +18,36 @@ import 'package:ecommerce/features/taxi_booking/widgets/trip_info_widget.dart';
 import 'widgets/car_filter_widget.dart';
 import 'widgets/rider_car_list.dart';
 
-class SelectCarScreen extends StatefulWidget {
+class SelectCarScreen extends StatelessWidget {
   final UserInformationBody filterBody;
   const SelectCarScreen({super.key, required this.filterBody});
 
   @override
-  State<SelectCarScreen> createState() => _SelectCarScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider<CarSelectionBloc>(
+      create: (_) => getIt<CarSelectionBloc>()
+        ..add(const BrandListRequested())
+        ..add(VehiclesRequested(body: filterBody)),
+      child: _SelectCarView(filterBody: filterBody),
+    );
+  }
 }
 
-class _SelectCarScreenState extends State<SelectCarScreen> {
+class _SelectCarView extends StatefulWidget {
+  final UserInformationBody filterBody;
+  const _SelectCarView({required this.filterBody});
+
+  @override
+  State<_SelectCarView> createState() => _SelectCarViewState();
+}
+
+class _SelectCarViewState extends State<_SelectCarView> {
   final ScrollController scrollController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-
-    Get.find<CarSelectionController>().getBrandList();
-    Get.find<CarSelectionController>().getVehiclesList(widget.filterBody, 1);
-  }
-
-  @override
   void dispose() {
-    super.dispose();
     scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,17 +56,15 @@ class _SelectCarScreenState extends State<SelectCarScreen> {
       appBar: ResponsiveHelper.isDesktop(context)
           ? null
           : CustomAppBar(title: 'select_car'.tr),
-      body: GetBuilder<CarSelectionController>(
-        builder: (carSelectionController) {
-          if (kDebugMode) {
-            print("isCarFilterActive");
-            print(carSelectionController.isCarFilterActive);
-          }
+      body: BlocBuilder<CarSelectionBloc, CarSelectionState>(
+        builder: (context, state) {
           return ExpandableBottomSheet(
             background: GestureDetector(
               onTap: () {
-                if (carSelectionController.isCarFilterActive) {
-                  carSelectionController.carFilter();
+                if (state.isCarFilterActive) {
+                  context.read<CarSelectionBloc>().add(
+                    const CarFilterToggled(),
+                  );
                 }
               },
               child: Column(
@@ -83,7 +91,9 @@ class _SelectCarScreenState extends State<SelectCarScreen> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => carSelectionController.carFilter(),
+                              onTap: () => context.read<CarSelectionBloc>().add(
+                                const CarFilterToggled(),
+                              ),
                               child: Container(
                                 width: 27,
                                 height: 21,
@@ -107,19 +117,15 @@ class _SelectCarScreenState extends State<SelectCarScreen> {
                   ),
 
                   Expanded(
-                    child: carSelectionController.vehicleModel != null
-                        ? carSelectionController
-                                  .vehicleModel!
-                                  .vehicles!
-                                  .isNotEmpty
+                    child: state.vehicleModel != null
+                        ? state.vehicleModel!.vehicles!.isNotEmpty
                               ? RefreshIndicator(
                                   onRefresh: () async =>
-                                      await carSelectionController
-                                          .getVehiclesList(
-                                            widget.filterBody,
-                                            1,
-                                            isUpdate: true,
-                                          ),
+                                      context.read<CarSelectionBloc>().add(
+                                        VehiclesRequested(
+                                          body: widget.filterBody,
+                                        ),
+                                      ),
                                   child: Container(
                                     width: Dimensions.webMaxWidth,
                                     decoration: BoxDecoration(
@@ -128,22 +134,21 @@ class _SelectCarScreenState extends State<SelectCarScreen> {
                                     child: SingleChildScrollView(
                                       controller: scrollController,
                                       child: PaginatedListView(
-                                        offset: carSelectionController
-                                            .vehicleModel!
-                                            .offset,
+                                        offset: state.vehicleModel!.offset,
                                         onPaginate: (int? offset) async =>
-                                            await carSelectionController
-                                                .getVehiclesList(
-                                                  widget.filterBody,
-                                                  offset!,
+                                            context
+                                                .read<CarSelectionBloc>()
+                                                .add(
+                                                  VehiclesRequested(
+                                                    body: widget.filterBody,
+                                                    offset: offset!,
+                                                  ),
                                                 ),
                                         scrollController: scrollController,
-                                        totalSize: carSelectionController
-                                            .vehicleModel!
-                                            .totalSize,
+                                        totalSize:
+                                            state.vehicleModel!.totalSize,
                                         itemView: RiderCarList(
-                                          vehicleModel: carSelectionController
-                                              .vehicleModel,
+                                          vehicleModel: state.vehicleModel,
                                           filterBody: widget.filterBody,
                                         ),
                                       ),
@@ -158,7 +163,7 @@ class _SelectCarScreenState extends State<SelectCarScreen> {
             ),
             persistentContentHeight: 500,
             expandableContent: const CarFilterWidget(),
-            persistentFooter: carSelectionController.isCarFilterActive
+            persistentFooter: state.isCarFilterActive
                 ? Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -173,29 +178,23 @@ class _SelectCarScreenState extends State<SelectCarScreen> {
                         child: CustomButton(
                           buttonText: 'apply_filter'.tr,
                           onPressed: () {
-                            UserInformationBody filterBody =
+                            final UserInformationBody filterBody =
                                 UserInformationBody(
                                   from: widget.filterBody.from,
                                   to: widget.filterBody.to,
                                   fareCategory: widget.filterBody.fareCategory,
                                   distance: widget.filterBody.distance,
-                                  minPrice:
-                                      carSelectionController.startingPrice,
-                                  maxPrice: carSelectionController.endingPrice,
-                                  brandModelId: carSelectionController
-                                      .brandModels![carSelectionController
-                                          .selectedBrand]
-                                      .id,
-                                  filterType:
-                                      carSelectionController.sortByIndex == 0
+                                  minPrice: state.startingPrice,
+                                  maxPrice: state.endingPrice,
+                                  brandModelId:
+                                      state.brandModels[state.selectedBrand].id,
+                                  filterType: state.sortByIndex == 0
                                       ? 'top_rated'
                                       : 'km/h',
                                 );
-                            carSelectionController.carFilter();
-                            Get.find<CarSelectionController>().getVehiclesList(
-                              filterBody,
-                              1,
-                            );
+                            final bloc = context.read<CarSelectionBloc>();
+                            bloc.add(const CarFilterToggled());
+                            bloc.add(VehiclesRequested(body: filterBody));
                           },
                         ),
                       ),

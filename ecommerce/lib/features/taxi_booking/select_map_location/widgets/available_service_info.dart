@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_state.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -27,13 +32,56 @@ class _AvailableServiceInfoState extends State<AvailableServiceInfo> {
   @override
   void initState() {
     super.initState();
-    Get.find<RiderController>().initSetup();
+    // Seed default trip date/time (legacy RiderController.initSetup).
+    final bloc = context.read<RiderBloc>();
+    final now = DateTime.now();
+    bloc.add(TripDateSet(DateConverter.dateToReadableDate(now)));
+    bloc.add(TripTimeSet(DateConverter.convertTimeToTimeDate(now)));
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && mounted) {
+      context.read<RiderBloc>().add(
+        TripDateSet(DateConverter.dateToReadableDate(picked)),
+      );
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat:
+                getIt<SplashBloc>().state.configModel!.timeformat == '24',
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (time != null && mounted) {
+      context.read<RiderBloc>().add(
+        TripTimeSet(
+          DateConverter.convertTimeToTimeDate(
+            DateTime(DateTime.now().year, 1, 1, time.hour, time.minute),
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<RiderController>(
-      builder: (riderController) {
+    return BlocBuilder<RiderBloc, RiderState>(
+      builder: (context, riderController) {
         return Container(
           color: Theme.of(context).cardColor,
           child: Column(
@@ -67,7 +115,6 @@ class _AvailableServiceInfoState extends State<AvailableServiceInfo> {
                             fontSize: Dimensions.fontSizeSmall,
                           ),
                         ),
-                        // Image.asset(Images.edit, width: 16.0, height: 16.0),
                         const SizedBox(),
                       ],
                     ),
@@ -139,20 +186,20 @@ class _AvailableServiceInfoState extends State<AvailableServiceInfo> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 5),
                                   child: RideAddressInfo(
-                                    title: riderController.fromAddress!.address,
+                                    title: riderController.fromAddress?.address,
                                     subTitle:
-                                        '${riderController.fromAddress!.streetNumber != null ? '${riderController.fromAddress!.streetNumber!}, ' : ''}'
-                                        '${riderController.fromAddress!.house ?? ''}',
+                                        '${riderController.fromAddress?.streetNumber != null ? '${riderController.fromAddress!.streetNumber!}, ' : ''}'
+                                        '${riderController.fromAddress?.house ?? ''}',
                                     isInsideCity: true,
                                   ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 5),
                                   child: RideAddressInfo(
-                                    title: riderController.toAddress!.address,
+                                    title: riderController.toAddress?.address,
                                     subTitle:
-                                        '${riderController.toAddress!.streetNumber != null ? '${riderController.toAddress!.streetNumber!}, ' : ''}'
-                                        '${riderController.toAddress!.house ?? ''}',
+                                        '${riderController.toAddress?.streetNumber != null ? '${riderController.toAddress!.streetNumber!}, ' : ''}'
+                                        '${riderController.toAddress?.house ?? ''}',
                                     isInsideCity: true,
                                   ),
                                 ),
@@ -208,7 +255,7 @@ class _AvailableServiceInfoState extends State<AvailableServiceInfo> {
                                 ],
                               ),
                               InkWell(
-                                onTap: () => riderController.setDate(),
+                                onTap: _pickDate,
                                 child: Image.asset(
                                   Images.edit,
                                   width: 16.0,
@@ -267,7 +314,7 @@ class _AvailableServiceInfoState extends State<AvailableServiceInfo> {
                                 ],
                               ),
                               InkWell(
-                                onTap: () => riderController.setTime(context),
+                                onTap: _pickTime,
                                 child: Image.asset(
                                   Images.edit,
                                   width: 16.0,
@@ -288,14 +335,18 @@ class _AvailableServiceInfoState extends State<AvailableServiceInfo> {
                           rentType: '${'hourly'.tr}(hr)',
                           rentPrice: "45",
                           isSelected: riderController.carType == 0,
-                          onTap: () => riderController.setCarType(0),
+                          onTap: () => context.read<RiderBloc>().add(
+                            const CarTypeSet(0),
+                          ),
                         ),
                         const SizedBox(width: Dimensions.paddingSizeSmall),
                         ServiceTypeCard(
                           rentType: '${'distance_wise'.tr}(km)',
                           rentPrice: "35",
                           isSelected: riderController.carType == 1,
-                          onTap: () => riderController.setCarType(1),
+                          onTap: () => context.read<RiderBloc>().add(
+                            const CarTypeSet(1),
+                          ),
                         ),
                       ],
                     ),
@@ -311,8 +362,10 @@ class _AvailableServiceInfoState extends State<AvailableServiceInfo> {
                   title: 'return_same_location'.tr,
                   value: riderController.isReturnSameLocation,
                   onClick: () {
-                    riderController.toggleIsReturnSameLocation(
-                      !riderController.isReturnSameLocation,
+                    context.read<RiderBloc>().add(
+                      ReturnSameLocationToggled(
+                        !riderController.isReturnSameLocation,
+                      ),
                     );
                   },
                 ),

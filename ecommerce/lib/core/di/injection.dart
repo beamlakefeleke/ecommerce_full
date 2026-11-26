@@ -178,6 +178,14 @@ import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/domain/services/deliveryman_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/domain/services/store_registration_service_interface.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/data/datasources/taxi_remote_data_source.dart';
+import 'package:ecommerce/features/taxi_booking/data/repositories/taxi_repository_impl.dart';
+import 'package:ecommerce/features/taxi_booking/domain/repositories/taxi_repository.dart';
+import 'package:ecommerce/features/taxi_booking/domain/usecases/taxi_usecases.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/taxi_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_bloc.dart';
 import 'package:ecommerce/features/store/data/datasources/store_remote_data_source.dart';
 import 'package:ecommerce/features/store/data/repositories/store_repository_impl.dart';
 import 'package:ecommerce/features/store/domain/repositories/store_repository.dart';
@@ -239,6 +247,7 @@ void configureDependencies() {
   _registerSearch();
   _registerSplash();
   _registerStore();
+  _registerTaxi();
   _registerVerification();
   _registerWallet();
 }
@@ -877,6 +886,54 @@ void _registerChat() {
       getMessages: getIt(),
       sendMessage: getIt(),
       repository: getIt(),
+    ),
+  );
+}
+
+void _registerTaxi() {
+  getIt.registerLazySingleton<TaxiRemoteDataSource>(
+    () => TaxiRemoteDataSourceImpl(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<TaxiRepository>(
+    () => TaxiRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerFactory(() => GetTopRatedVehiclesUseCase(getIt()));
+  getIt.registerFactory(() => GetVehiclesUseCase(getIt()));
+  getIt.registerFactory(() => GetBrandListUseCase(getIt()));
+  // app-wide: the top-rated vehicles list is read on the ride-sharing home
+  // screen; kept as a singleton so the loaded list survives screen rebuilds
+  // during the taxi-booking migration.
+  getIt.registerLazySingleton(() => TaxiBloc(getTopRatedVehicles: getIt()));
+  // screen-scoped: a fresh bloc per select-car screen (the vehicle list +
+  // filter selection are owned by that screen).
+  getIt.registerFactory(
+    () => CarSelectionBloc(getVehicles: getIt(), getBrandList: getIt()),
+  );
+  getIt.registerFactory(() => PlaceTripUseCase(getIt()));
+  // screen-scoped: a fresh bloc per booking-checkout screen (page state +
+  // payment selection are owned by that screen).
+  getIt.registerFactory(() => BookingCheckoutBloc(placeTrip: getIt()));
+
+  getIt.registerFactory(() => GetTaxiPlaceDetailsUseCase(getIt()));
+  getIt.registerFactory(() => GetRouteUseCase(getIt()));
+  getIt.registerFactory(() => GetRunningTripListUseCase(getIt()));
+  // app-wide: the from/to addresses, map route and running-trip list are read
+  // across the ride-sharing home, select-map-location and trip-history screens.
+  getIt.registerLazySingleton(
+    () => RiderBloc(
+      getPlaceDetails: getIt(),
+      getRoute: getIt(),
+      getRunningTripList: getIt(),
+      checkoutRepository: getIt(),
+      locationRepository: getIt(),
+      currentUserAddress: () => AddressHelper.getUserAddressFromSharedPref(),
+      defaultPosition: () {
+        final config = getIt<SplashBloc>().state.configModel;
+        return LatLng(
+          double.parse(config?.defaultLocation?.lat ?? '0'),
+          double.parse(config?.defaultLocation?.lng ?? '0'),
+        );
+      }(),
     ),
   );
 }

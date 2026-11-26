@@ -1,10 +1,6 @@
 import 'dart:convert';
-import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
+
 import 'package:ecommerce/common/controllers/theme_controller.dart';
-import 'package:ecommerce/features/taxi_booking/repo/car_selection_repo.dart';
-import 'package:ecommerce/features/taxi_booking/repo/rider_repo.dart';
 import 'package:ecommerce/api/api_client.dart';
 
 import 'package:ecommerce/features/auth/domain/reposotories/auth_repository.dart';
@@ -36,12 +32,6 @@ Future<Map<String, Map<String, String>>> init() async {
       sharedPreferences: Get.find(),
     ),
   );
-
-  /// Repository
-  Get.lazyPut(
-    () => RiderRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
-  );
-  Get.lazyPut(() => CarSelectionRepo(apiClient: Get.find()));
 
   /// Repository interface
   AuthRepositoryInterface authRepositoryInterface = AuthRepository(
@@ -94,9 +84,8 @@ Future<Map<String, Map<String, String>>> init() async {
   // service interfaces above stay GetX-registered and are bridged into get_it.
   // StoreController moved to StoreBloc in injection.dart
   // WalletController moved to WalletBloc in injection.dart
-  Get.lazyPut(() => RiderController(riderRepo: Get.find()));
-  Get.lazyPut(() => CarSelectionController(carSelectionRepo: Get.find()));
-  Get.lazyPut(() => BookingCheckoutController(riderRepo: Get.find()));
+  // RiderController/CarSelectionController/BookingCheckoutController moved to
+  // RiderBloc/CarSelectionBloc/BookingCheckoutBloc in injection.dart
   // VerificationController moved to VerificationBloc in injection.dart
 
   /// Retrieving localized data

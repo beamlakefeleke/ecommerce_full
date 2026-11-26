@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -29,7 +28,7 @@ class TripInfoWidget extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: Colors
-                    .grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!,
+                    .grey[Get.isDarkMode ? 800 : 300]!,
                 blurRadius: 5,
                 spreadRadius: 1,
               ),

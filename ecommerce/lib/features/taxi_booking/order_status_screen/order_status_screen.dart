@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
@@ -111,7 +110,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                   boxShadow: [
                     BoxShadow(
                       color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
+                          Colors.grey[Get.isDarkMode
                               ? 800
                               : 300]!,
                       blurRadius: 5,
@@ -233,7 +232,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                   boxShadow: [
                     BoxShadow(
                       color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
+                          Colors.grey[Get.isDarkMode
                               ? 800
                               : 300]!,
                       blurRadius: 5,

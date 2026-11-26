@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/price_converter.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -40,7 +40,7 @@ class _TaxiCouponScreenState extends State<TaxiCouponScreen> {
 
   initCall() {
     if (_isLoggedIn) {
-      Get.find<CouponController>().getTaxiCouponList();
+      context.read<CouponBloc>().add(const TaxiCouponListRequested());
     }
   }
 
@@ -52,13 +52,15 @@ class _TaxiCouponScreenState extends State<TaxiCouponScreen> {
       endDrawer: const MenuDrawer(),
       endDrawerEnableOpenDragGesture: false,
       body: _isLoggedIn
-          ? GetBuilder<CouponController>(
-              builder: (couponController) {
+          ? BlocBuilder<CouponBloc, CouponState>(
+              builder: (context, couponController) {
                 return couponController.taxiCouponList != null
                     ? couponController.taxiCouponList!.isNotEmpty
                           ? RefreshIndicator(
                               onRefresh: () async {
-                                await couponController.getTaxiCouponList();
+                                context.read<CouponBloc>().add(
+                                  const TaxiCouponListRequested(),
+                                );
                               },
                               child: SingleChildScrollView(
                                 physics: const AlwaysScrollableScrollPhysics(),
@@ -123,9 +125,8 @@ class _TaxiCouponScreenState extends State<TaxiCouponScreen> {
                                                       ),
                                                   child: Transform.rotate(
                                                     angle:
-                                                        Get.find<
-                                                              LocalizationController
-                                                            >()
+                                                        getIt<LanguageBloc>()
+                                                            .state
                                                             .isLtr
                                                         ? 0
                                                         : pi,

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
-import 'package:ecommerce/features/notification/controllers/notification_controller.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
+import 'package:ecommerce/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/address_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -28,7 +31,8 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
             padding: const EdgeInsets.symmetric(
               horizontal: Dimensions.paddingSizeSmall,
             ),
-            child: BlocBuilder<SplashBloc, SplashState>(builder: (context, splashController) {
+            child: BlocBuilder<SplashBloc, SplashState>(
+              builder: (context, splashController) {
                 return Padding(
                   padding: const EdgeInsets.only(
                     top: Dimensions.paddingSizeLarge,
@@ -39,7 +43,9 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
                       (splashController.module != null &&
                               splashController.configModel!.module == null)
                           ? InkWell(
-                              onTap: () => getIt<SplashBloc>().add(const SplashModuleRemoved()),
+                              onTap: () => getIt<SplashBloc>().add(
+                                const SplashModuleRemoved(),
+                              ),
                               child: Image.asset(
                                 Images.moduleIcon,
                                 height: 22,
@@ -59,8 +65,8 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                       Expanded(
                         child: InkWell(
-                          onTap: () => Get.find<LocationController>()
-                              .navigateToLocationScreen('home'),
+                          onTap: () =>
+                              LocationHelper.navigateToLocationScreen('home'),
                           child: Padding(
                             padding: EdgeInsets.symmetric(
                               vertical: Dimensions.paddingSizeSmall,
@@ -68,8 +74,8 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   ? Dimensions.paddingSizeSmall
                                   : 0,
                             ),
-                            child: GetBuilder<LocationController>(
-                              builder: (locationController) {
+                            child: BlocBuilder<LocationBloc, LocationState>(
+                              builder: (context, locationController) {
                                 return Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -118,8 +124,8 @@ class RiderAppBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                       ),
                       InkWell(
-                        child: GetBuilder<NotificationController>(
-                          builder: (notificationController) {
+                        child: BlocBuilder<NotificationBloc, NotificationState>(
+                          builder: (context, notificationController) {
                             return Stack(
                               children: [
                                 Icon(

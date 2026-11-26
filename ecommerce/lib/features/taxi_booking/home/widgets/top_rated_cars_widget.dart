@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/taxi_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/taxi_state.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -25,18 +26,16 @@ class TopRatedCars extends StatelessWidget {
         ),
         const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-        GetBuilder<RiderController>(
-          builder: (riderController) {
-            return riderController.topRatedVehicleModel != null &&
-                    riderController.topRatedVehicleModel!.vehicles!.isNotEmpty
+        BlocBuilder<TaxiBloc, TaxiState>(
+          builder: (context, taxiState) {
+            final topRatedVehicleModel = taxiState.topRatedVehicles;
+            return topRatedVehicleModel != null &&
+                    topRatedVehicleModel.vehicles!.isNotEmpty
                 ? SizedBox(
                     height: 177,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: riderController
-                          .topRatedVehicleModel!
-                          .vehicles!
-                          .length,
+                      itemCount: topRatedVehicleModel.vehicles!.length,
                       physics: const BouncingScrollPhysics(),
                       itemBuilder: (context, index) {
                         return Padding(
@@ -49,8 +48,7 @@ class TopRatedCars extends StatelessWidget {
                               RouteHelper.getSelectRideMapLocationRoute(
                                 "initial",
                                 null,
-                                riderController
-                                    .topRatedVehicleModel!
+                                topRatedVehicleModel
                                     .vehicles![index],
                               ),
                             ),
@@ -87,14 +85,14 @@ class TopRatedCars extends StatelessWidget {
                                                     ),
                                                 child: CustomImage(
                                                   image:
-                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleImageUrl}/${riderController.topRatedVehicleModel!.vehicles![index].carImages!.isNotEmpty ? riderController.topRatedVehicleModel!.vehicles![index].carImages![0] : ''}',
+                                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleImageUrl}/${topRatedVehicleModel.vehicles![index].carImages!.isNotEmpty ? topRatedVehicleModel.vehicles![index].carImages![0] : ''}',
                                                   height: 130,
                                                   width: Get.width,
                                                 ),
                                               ),
                                               ReviewStackTag(
                                                 value:
-                                                    "${riderController.topRatedVehicleModel!.vehicles![index].avgRating}, (${riderController.topRatedVehicleModel!.vehicles![index].ratingCount} ${'review'.tr})",
+                                                    "${topRatedVehicleModel.vehicles![index].avgRating}, (${topRatedVehicleModel.vehicles![index].ratingCount} ${'review'.tr})",
                                               ),
                                             ],
                                           ),
@@ -107,8 +105,7 @@ class TopRatedCars extends StatelessWidget {
                                     Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        riderController
-                                            .topRatedVehicleModel!
+                                        topRatedVehicleModel
                                             .vehicles![index]
                                             .name!,
                                         style: robotoBold.copyWith(
@@ -131,7 +128,7 @@ class TopRatedCars extends StatelessWidget {
                                             width: 18,
                                             image:
                                                 '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleImageUrl}/'
-                                                '${riderController.topRatedVehicleModel!.vehicles![index].provider != null ? riderController.topRatedVehicleModel!.vehicles![index].provider!.logo : ''}',
+                                                '${topRatedVehicleModel.vehicles![index].provider != null ? topRatedVehicleModel.vehicles![index].provider!.logo : ''}',
                                           ),
                                         ),
                                         const SizedBox(
@@ -140,13 +137,11 @@ class TopRatedCars extends StatelessWidget {
                                         ),
 
                                         Text(
-                                          riderController
-                                                      .topRatedVehicleModel!
+                                          topRatedVehicleModel
                                                       .vehicles![index]
                                                       .provider !=
                                                   null
-                                              ? riderController
-                                                    .topRatedVehicleModel!
+                                              ? topRatedVehicleModel
                                                     .vehicles![index]
                                                     .provider!
                                                     .name!

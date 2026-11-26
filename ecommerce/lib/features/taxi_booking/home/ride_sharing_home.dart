@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
-import 'package:ecommerce/features/profile/controllers/profile_controller.dart';
-import 'package:ecommerce/features/address/controllers/address_controller.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_bloc.dart';
+import 'package:ecommerce/features/banner/presentation/bloc/banner_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/taxi_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/taxi_event.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_bloc.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_event.dart';
+import 'package:ecommerce/features/address/presentation/bloc/address_state.dart';
+import 'package:ecommerce/features/address/data/models/address_model.dart';
 import 'package:ecommerce/features/taxi_booking/home/widgets/rider_app_bar.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -35,12 +42,13 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
 
     _isLoggedIn = AuthHelper.isLoggedIn();
     if (_isLoggedIn) {
-      Get.find<AddressController>().getAddressList();
+      context.read<AddressBloc>().add(const AddressListRequested());
     }
-    Get.find<RiderController>().getTopRatedVehiclesList(1);
-    Get.find<BannerController>().getTaxiBannerList(false);
-    if (_isLoggedIn && Get.find<ProfileController>().userInfoModel == null) {
-      Get.find<ProfileController>().getUserInfo();
+    context.read<TaxiBloc>().add(const TopRatedVehiclesRequested());
+    context.read<BannerBloc>().add(const TaxiBannerListRequested());
+    if (_isLoggedIn &&
+        context.read<ProfileBloc>().state.userInfoModel == null) {
+      context.read<ProfileBloc>().add(const ProfileInfoRequested());
     }
   }
 
@@ -48,17 +56,21 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const RiderAppBar(),
-      body: GetBuilder<AddressController>(
-        builder: (locationController) {
+      body: BlocBuilder<AddressBloc, AddressState>(
+        builder: (context, locationController) {
+          final List<AddressModel> addressList = locationController.addresses
+              .map((a) => AddressModel.fromEntity(a))
+              .toList();
           return Stack(
             clipBehavior: Clip.none,
             children: [
               RefreshIndicator(
                 onRefresh: () async {
-                  await Get.find<BannerController>().getTaxiBannerList(false);
-                  await Get.find<RiderController>().getTopRatedVehiclesList(
-                    1,
-                    isUpdate: true,
+                  context.read<BannerBloc>().add(
+                    const TaxiBannerListRequested(reload: true),
+                  );
+                  context.read<TaxiBloc>().add(
+                    const TopRatedVehiclesRequested(),
                   );
                 },
                 child: SingleChildScrollView(
@@ -121,7 +133,7 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                             ),
                           ),
                           const SizedBox(height: Dimensions.paddingSizeDefault),
-                          _isLoggedIn && locationController.addressList!.isEmpty
+                          _isLoggedIn && addressList.isEmpty
                               ? const AddAddressWidget()
                               : const SizedBox(),
                           _isLoggedIn
@@ -138,10 +150,7 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                                       height: Dimensions.paddingSizeDefault,
                                     ),
 
-                                    locationController.addressList != null &&
-                                            locationController
-                                                .addressList!
-                                                .isNotEmpty
+                                    addressList.isNotEmpty
                                         ? GridView.builder(
                                             controller: ScrollController(),
                                             gridDelegate:
@@ -167,15 +176,9 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                                                   mainAxisSpacing: Dimensions
                                                       .paddingSizeSmall,
                                                 ),
-                                            itemCount:
-                                                locationController
-                                                        .addressList!
-                                                        .length >
-                                                    3
+                                            itemCount: addressList.length > 3
                                                 ? 3
-                                                : locationController
-                                                      .addressList!
-                                                      .length,
+                                                : addressList.length,
                                             shrinkWrap: true,
                                             physics:
                                                 const NeverScrollableScrollPhysics(),
@@ -185,8 +188,7 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                                                   Get.toNamed(
                                                     RouteHelper.getSelectRideMapLocationRoute(
                                                       "initial",
-                                                      locationController
-                                                          .addressList![index],
+                                                      addressList[index],
                                                       null,
                                                     ),
                                                   );
@@ -230,14 +232,12 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                                                               .rectangle,
                                                         ),
                                                         child: Image.asset(
-                                                          locationController
-                                                                      .addressList![index]
+                                                          addressList[index]
                                                                       .addressType ==
                                                                   'others'
                                                               ? Images
                                                                     .addressJourney
-                                                              : locationController
-                                                                        .addressList![index]
+                                                              : addressList[index]
                                                                         .addressType ==
                                                                     'home'
                                                               ? Images
@@ -261,8 +261,7 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                                                                   .center,
                                                           children: [
                                                             Text(
-                                                              locationController
-                                                                  .addressList![index]
+                                                              addressList[index]
                                                                   .addressType!,
                                                               style:
                                                                   robotoMedium,
@@ -272,8 +271,7 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                                                                   .paddingSizeExtraSmall,
                                                             ),
                                                             Text(
-                                                              locationController
-                                                                  .addressList![index]
+                                                              addressList[index]
                                                                   .address!,
                                                               maxLines: 2,
                                                               overflow:

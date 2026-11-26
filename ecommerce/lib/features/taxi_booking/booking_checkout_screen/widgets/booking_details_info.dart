@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
-import 'package:ecommerce/features/coupon/controllers/coupon_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_state.dart';
+import 'package:ecommerce/features/coupon/presentation/bloc/coupon_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/profile/domain/models/user_information_body.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/helper/date_converter.dart';
@@ -47,8 +48,8 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-      child: GetBuilder<BookingCheckoutController>(
-        builder: (bookingCheckoutController) {
+      child: BlocBuilder<BookingCheckoutBloc, BookingCheckoutState>(
+        builder: (context, bookingCheckoutController) {
           double subTotalPrice =
               widget.filterBody.distance! *
               (widget.filterBody.fareCategory == 'hourly'
@@ -68,10 +69,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                   color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
-                              ? 800
-                              : 300]!,
+                      color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                       blurRadius: 5,
                       spreadRadius: 1,
                     ),
@@ -125,10 +123,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                   color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
-                              ? 800
-                              : 300]!,
+                      color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                       blurRadius: 5,
                       spreadRadius: 1,
                     ),
@@ -344,10 +339,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                   color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
-                              ? 800
-                              : 300]!,
+                      color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                       blurRadius: 5,
                       spreadRadius: 1,
                     ),
@@ -355,8 +347,22 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                  child: GetBuilder<CouponController>(
-                    builder: (couponController) {
+                  child: BlocConsumer<CouponBloc, CouponState>(
+                    listenWhen: (previous, current) =>
+                        previous.discount != current.discount,
+                    listener: (context, couponState) {
+                      if ((couponState.discount ?? 0) > 0) {
+                        context.read<BookingCheckoutBloc>().add(
+                          CouponDiscountSet(couponState.discount!),
+                        );
+                      } else {
+                        context.read<BookingCheckoutBloc>().add(
+                          const CouponDiscountSet(0),
+                        );
+                      }
+                    },
+                    builder: (context, couponController) {
+                      final bool isLtr = getIt<LanguageBloc>().state.isLtr;
                       return Column(
                         children: [
                           Row(
@@ -372,7 +378,9 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                                 onTap: () {
                                   if (!bookingCheckoutController
                                       .showCouponSection) {
-                                    bookingCheckoutController.showHideCoupon();
+                                    context.read<BookingCheckoutBloc>().add(
+                                      const CouponSectionToggled(),
+                                    );
                                   }
                                 },
                                 child: Text(
@@ -429,24 +437,15 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                                                 context,
                                               ).cardColor,
                                               border: OutlineInputBorder(
-                                                borderRadius: BorderRadius.horizontal(
-                                                  left: Radius.circular(
-                                                    Get.find<
-                                                              LocalizationController
-                                                            >()
-                                                            .isLtr
-                                                        ? 10
-                                                        : 0,
-                                                  ),
-                                                  right: Radius.circular(
-                                                    Get.find<
-                                                              LocalizationController
-                                                            >()
-                                                            .isLtr
-                                                        ? 0
-                                                        : 10,
-                                                  ),
-                                                ),
+                                                borderRadius:
+                                                    BorderRadius.horizontal(
+                                                      left: Radius.circular(
+                                                        isLtr ? 10 : 0,
+                                                      ),
+                                                      right: Radius.circular(
+                                                        isLtr ? 0 : 10,
+                                                      ),
+                                                    ),
                                                 borderSide: BorderSide.none,
                                               ),
                                             ),
@@ -457,47 +456,39 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                                         onTap: () {
                                           String couponCode =
                                               _couponTextController.text.trim();
-                                          if (couponController.discount! < 1) {
+                                          if ((couponController.discount ?? 0) <
+                                              1) {
                                             if (couponCode.isNotEmpty &&
                                                 !couponController.isLoading) {
-                                              couponController
-                                                  .applyTaxiCoupon(
-                                                    couponCode,
-                                                    widget
-                                                            .filterBody
-                                                            .distance! *
-                                                        (widget
-                                                                    .filterBody
-                                                                    .fareCategory ==
-                                                                'hourly'
-                                                            ? widget
-                                                                  .vehicle
-                                                                  .insidePerHourCharge!
-                                                            : widget
-                                                                  .vehicle
-                                                                  .insidePerKmCharge!),
-                                                    widget.vehicle.providerId,
-                                                  )
-                                                  .then((discount) {
-                                                    if (discount! > 0) {
-                                                      bookingCheckoutController
-                                                          .setCouponDiscount(
-                                                            discount,
-                                                          );
-                                                      showCustomSnackBar(
-                                                        '${'you_got_discount_of'.tr} ${PriceConverter.convertPrice(discount)}',
-                                                        isError: false,
-                                                      );
-                                                    }
-                                                  });
+                                              context.read<CouponBloc>().add(
+                                                TaxiCouponApplied(
+                                                  couponCode: couponCode,
+                                                  orderAmount:
+                                                      widget
+                                                          .filterBody
+                                                          .distance! *
+                                                      (widget
+                                                                  .filterBody
+                                                                  .fareCategory ==
+                                                              'hourly'
+                                                          ? widget
+                                                                .vehicle
+                                                                .insidePerHourCharge!
+                                                          : widget
+                                                                .vehicle
+                                                                .insidePerKmCharge!),
+                                                  providerId:
+                                                      widget.vehicle.providerId,
+                                                ),
+                                              );
                                             } else if (couponCode.isEmpty) {
                                               showCustomSnackBar(
                                                 'enter_a_coupon_code'.tr,
                                               );
                                             }
                                           } else {
-                                            couponController.removeCouponData(
-                                              true,
+                                            context.read<CouponBloc>().add(
+                                              const CouponDataRemoved(),
                                             );
                                           }
                                         },
@@ -510,27 +501,20 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                                               context,
                                             ).primaryColor,
                                             // boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 800 : 200], spreadRadius: 1, blurRadius: 5)],
-                                            borderRadius: BorderRadius.horizontal(
-                                              left: Radius.circular(
-                                                Get.find<
-                                                          LocalizationController
-                                                        >()
-                                                        .isLtr
-                                                    ? 0
-                                                    : 10,
-                                              ),
-                                              right: Radius.circular(
-                                                Get.find<
-                                                          LocalizationController
-                                                        >()
-                                                        .isLtr
-                                                    ? 10
-                                                    : 0,
-                                              ),
-                                            ),
+                                            borderRadius:
+                                                BorderRadius.horizontal(
+                                                  left: Radius.circular(
+                                                    isLtr ? 0 : 10,
+                                                  ),
+                                                  right: Radius.circular(
+                                                    isLtr ? 10 : 0,
+                                                  ),
+                                                ),
                                           ),
                                           child:
-                                              (couponController.discount! <= 0)
+                                              ((couponController.discount ??
+                                                      0) <=
+                                                  0)
                                               ? !couponController.isLoading
                                                     ? Text(
                                                         'apply'.tr,
@@ -572,10 +556,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                   color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
-                              ? 800
-                              : 300]!,
+                      color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                       blurRadius: 5,
                       spreadRadius: 1,
                     ),
@@ -628,10 +609,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                   color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
-                              ? 800
-                              : 300]!,
+                      color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                       blurRadius: 5,
                       spreadRadius: 1,
                     ),
@@ -702,10 +680,7 @@ class _BookingDetailsInfoState extends State<BookingDetailsInfo> {
                   color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Colors.grey[Get.find<ThemeController>().darkTheme
-                              ? 800
-                              : 300]!,
+                      color: Colors.grey[Get.isDarkMode ? 800 : 300]!,
                       blurRadius: 5,
                       spreadRadius: 1,
                     ),

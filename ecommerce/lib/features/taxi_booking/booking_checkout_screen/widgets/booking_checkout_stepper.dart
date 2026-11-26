@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/booking_checkout_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/booking_checkout_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/features/taxi_booking/booking_checkout_screen/widgets/custom_header_icon.dart';
@@ -14,10 +18,14 @@ class BookingCheckoutStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isLtr = getIt<LanguageBloc>().state.isLtr;
     return SizedBox(
       width: 426,
-      child: GetBuilder<BookingCheckoutController>(
-        builder: (controller) {
+      child: BlocBuilder<BookingCheckoutBloc, BookingCheckoutState>(
+        builder: (context, controller) {
+          void goTo(PageState page) => context.read<BookingCheckoutBloc>().add(
+            CheckoutPageChanged(page),
+          );
           return Column(
             children: [
               Padding(
@@ -33,12 +41,7 @@ class BookingCheckoutStepper extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           InkWell(
-                            onTap: () {
-                              controller.updateState(
-                                PageState.payment,
-                                shouldUpdate: true,
-                              );
-                            },
+                            onTap: () => goTo(PageState.payment),
                             child: const CustomHeaderIcon(
                               assetIconUnSelected:
                                   Images.bookingDetailsUnselected,
@@ -96,12 +99,7 @@ class BookingCheckoutStepper extends StatelessWidget {
                                   ).primaryColor,
                                 ),
                           InkWell(
-                            onTap: () {
-                              controller.updateState(
-                                PageState.complete,
-                                shouldUpdate: true,
-                              );
-                            },
+                            onTap: () => goTo(PageState.complete),
                             child: const CustomHeaderIcon(
                               assetIconUnSelected: Images.completeUnselected,
                             ),
@@ -113,21 +111,12 @@ class BookingCheckoutStepper extends StatelessWidget {
                     if (controller.currentPage == PageState.orderDetails &&
                         PageState.orderDetails.name == pageState)
                       Positioned(
-                        left: Get.find<LocalizationController>().isLtr
-                            ? 0
-                            : null,
-                        right: Get.find<LocalizationController>().isLtr
-                            ? null
-                            : 0,
+                        left: isLtr ? 0 : null,
+                        right: isLtr ? null : 0,
                         top: 0,
                         bottom: 0,
                         child: GestureDetector(
-                          onTap: () {
-                            controller.updateState(
-                              PageState.payment,
-                              shouldUpdate: true,
-                            );
-                          },
+                          onTap: () => goTo(PageState.payment),
                           child: Container(
                             height: 55,
                             width: 55,
@@ -150,12 +139,7 @@ class BookingCheckoutStepper extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.center,
                           child: GestureDetector(
-                            onTap: () {
-                              controller.updateState(
-                                PageState.orderDetails,
-                                shouldUpdate: true,
-                              );
-                            },
+                            onTap: () => goTo(PageState.orderDetails),
                             child: Container(
                               height: 55,
                               width: 55,
@@ -173,21 +157,12 @@ class BookingCheckoutStepper extends StatelessWidget {
                     if (controller.currentPage == PageState.complete ||
                         pageState == 'complete')
                       Positioned(
-                        right: Get.find<LocalizationController>().isLtr
-                            ? 0
-                            : null,
-                        left: Get.find<LocalizationController>().isLtr
-                            ? null
-                            : 0,
+                        right: isLtr ? 0 : null,
+                        left: isLtr ? null : 0,
                         top: 0,
                         bottom: 0,
                         child: GestureDetector(
-                          onTap: () {
-                            controller.updateState(
-                              PageState.orderDetails,
-                              shouldUpdate: true,
-                            );
-                          },
+                          onTap: () => goTo(PageState.orderDetails),
                           child: Container(
                             height: 55,
                             width: 55,
@@ -223,12 +198,8 @@ class BookingCheckoutStepper extends StatelessWidget {
                     ),
                     Padding(
                       padding: EdgeInsets.only(
-                        right: Get.find<LocalizationController>().isLtr
-                            ? 25
-                            : 0,
-                        left: Get.find<LocalizationController>().isLtr
-                            ? 0
-                            : 35.0,
+                        right: isLtr ? 25 : 0,
+                        left: isLtr ? 0 : 35.0,
                       ),
                       child: CustomText(
                         text: "payment".tr,

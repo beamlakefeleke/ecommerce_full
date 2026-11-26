@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/taxi_booking/models/vehicle_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -18,7 +17,7 @@ class ProviderDetails extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color:
-                Colors.grey[Get.find<ThemeController>().darkTheme ? 800 : 300]!,
+                Colors.grey[Get.isDarkMode ? 800 : 300]!,
             blurRadius: 5,
             spreadRadius: 1,
           ),

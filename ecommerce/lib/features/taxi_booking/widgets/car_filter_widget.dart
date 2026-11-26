@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_state.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:ecommerce/common/widgets/custom_image.dart';
@@ -14,8 +16,8 @@ class CarFilterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CarSelectionController>(
-      builder: (carSelectionController) {
+    return BlocBuilder<CarSelectionBloc, CarSelectionState>(
+      builder: (context, carSelectionController) {
         if (carSelectionController.isCarFilterActive) {
           return Container(
             color: Theme.of(context).cardColor,
@@ -153,7 +155,9 @@ class CarFilterWidget extends StatelessWidget {
                     max: 5.0,
                     divisions: 10,
                     onChanged: (RangeValues newRange) {
-                      carSelectionController.selectPriceRange(newRange);
+                      context.read<CarSelectionBloc>().add(
+                        PriceRangeSelected(newRange),
+                      );
                     },
                   ),
                   const SizedBox(height: Dimensions.paddingSizeDefault),
@@ -215,7 +219,7 @@ class CarFilterWidget extends StatelessWidget {
                   SizedBox(
                     height: 50,
                     child: ListView.builder(
-                      itemCount: carSelectionController.brandModels!.length,
+                      itemCount: carSelectionController.brandModels.length,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
                         return Padding(
@@ -224,7 +228,9 @@ class CarFilterWidget extends StatelessWidget {
                           ),
                           child: InkWell(
                             onTap: () {
-                              carSelectionController.setBrandModel(index);
+                              context.read<CarSelectionBloc>().add(
+                                BrandSelected(index),
+                              );
                             },
                             child: Container(
                               width: 54,
@@ -262,7 +268,7 @@ class CarFilterWidget extends StatelessWidget {
                                 ),
                                 child: CustomImage(
                                   image:
-                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleBrandImageUrl}/${carSelectionController.brandModels![index].logo}',
+                                      '${getIt<SplashBloc>().state.configModel!.baseUrls!.vehicleBrandImageUrl}/${carSelectionController.brandModels[index].logo}',
                                 ),
                               ),
                             ),

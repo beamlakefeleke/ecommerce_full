@@ -1,9 +1,12 @@
-import 'package:ecommerce/features/taxi_booking/controllers/rider_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/rider_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/common/widgets/footer_view.dart';
 import 'package:ecommerce/common/widgets/no_data_screen.dart';
 import 'package:ecommerce/common/widgets/paginated_list_view.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../widgets/trip_history_item.dart';
 
@@ -16,15 +19,14 @@ class TripHistoryList extends StatelessWidget {
     final ScrollController scrollController = ScrollController();
 
     return Scaffold(
-      body: GetBuilder<RiderController>(
-        builder: (riderController) {
+      body: BlocBuilder<RiderBloc, RiderState>(
+        builder: (context, riderController) {
           return riderController.runningTrip != null
               ? riderController.runningTrip!.orders!.data!.isNotEmpty
                     ? RefreshIndicator(
                         onRefresh: () async {
-                          await riderController.getRunningTripList(
-                            1,
-                            isUpdate: true,
+                          context.read<RiderBloc>().add(
+                            const RunningTripListRequested(),
                           );
                         },
                         child: SingleChildScrollView(
@@ -36,11 +38,9 @@ class TripHistoryList extends StatelessWidget {
                               child: PaginatedListView(
                                 scrollController: scrollController,
                                 onPaginate: (int? offset) =>
-                                    Get.find<RiderController>()
-                                        .getRunningTripList(
-                                          offset!,
-                                          isUpdate: true,
-                                        ),
+                                    context.read<RiderBloc>().add(
+                                      RunningTripListRequested(offset: offset!),
+                                    ),
                                 totalSize:
                                     riderController.runningTrip?.totalSize,
                                 offset: riderController.runningTrip != null

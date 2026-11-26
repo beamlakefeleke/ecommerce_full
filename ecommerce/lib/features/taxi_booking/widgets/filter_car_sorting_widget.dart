@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/taxi_booking/controllers/car_selection_controller.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_bloc.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_event.dart';
+import 'package:ecommerce/features/taxi_booking/presentation/bloc/car_selection_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 
@@ -9,26 +12,19 @@ class FilterCarSortingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CarSelectionController>(
-      builder: (carSelectionController) {
+    return BlocBuilder<CarSelectionBloc, CarSelectionState>(
+      builder: (context, state) {
         return Column(
           children: [
             _myRadioButton(
-              carSelectionController: carSelectionController,
+              context: context,
+              sortByIndex: state.sortByIndex,
               title: 'top_rated'.tr,
               value: 0,
               onChanged: () {
-                carSelectionController.setSortBy(0);
+                context.read<CarSelectionBloc>().add(const SortBySelected(0));
               },
             ),
-            // _myRadioButton(
-            //   carSelectionController: carSelectionController,
-            //   title: "Km/h",
-            //   value: 1,
-            //   onChanged: (){
-            //     carSelectionController.setSortBy(1);
-            //   },
-            // ),
           ],
         );
       },
@@ -36,10 +32,11 @@ class FilterCarSortingWidget extends StatelessWidget {
   }
 
   Widget _myRadioButton({
+    required BuildContext context,
+    required int sortByIndex,
     required String title,
     int? value,
     Function? onChanged,
-    required CarSelectionController carSelectionController,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -53,7 +50,7 @@ class FilterCarSortingWidget extends StatelessWidget {
           children: [
             Text(
               title,
-              style: carSelectionController.sortByIndex == value
+              style: sortByIndex == value
                   ? robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)
                   : robotoRegular.copyWith(
                       fontSize: Dimensions.fontSizeDefault,
@@ -63,10 +60,10 @@ class FilterCarSortingWidget extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Theme.of(Get.context!).primaryColor,
+                  color: Theme.of(context).primaryColor,
                   width: 2,
                 ),
-                color: Theme.of(Get.context!).cardColor,
+                color: Theme.of(context).cardColor,
                 shape: BoxShape.circle,
               ),
               padding: const EdgeInsets.all(2),
@@ -75,9 +72,9 @@ class FilterCarSortingWidget extends StatelessWidget {
                 width: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: carSelectionController.sortByIndex == value
-                      ? Theme.of(Get.context!).primaryColor
-                      : Theme.of(Get.context!).cardColor,
+                  color: sortByIndex == value
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).cardColor,
                 ),
               ),
             ),
