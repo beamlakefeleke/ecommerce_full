@@ -10,7 +10,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/registration_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/domain/models/store_body_model.dart';
 import 'package:ecommerce/common/models/translation.dart';
 import 'package:ecommerce/common/models/config_model.dart';
@@ -305,25 +304,25 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                               ),
                                                           child: DottedBorder(
                                                             options: RoundedRectDottedBorderOptions(
-                                                            color: Theme.of(
-                                                              context,
-                                                            ).primaryColor,
-                                                            strokeWidth: 1,
-                                                            strokeCap:
-                                                                StrokeCap.butt,
-                                                            dashPattern: const [
-                                                              5,
-                                                              5,
-                                                            ],
-                                                            padding:
-                                                                const EdgeInsets.all(
-                                                                  0,
-                                                                ),
-                                                          
-                                                            radius: const Radius.circular(
-                                                              Dimensions
-                                                                  .radiusDefault,
-                                                            ),),
+                                                              color: Theme.of(
+                                                                context,
+                                                              ).primaryColor,
+                                                              strokeWidth: 1,
+                                                              strokeCap:
+                                                                  StrokeCap
+                                                                      .butt,
+                                                              dashPattern:
+                                                                  const [5, 5],
+                                                              padding:
+                                                                  const EdgeInsets.all(
+                                                                    0,
+                                                                  ),
+
+                                                              radius: const Radius.circular(
+                                                                Dimensions
+                                                                    .radiusDefault,
+                                                              ),
+                                                            ),
                                                             child: Center(
                                                               child: Visibility(
                                                                 visible:
@@ -466,26 +465,26 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                                             ),
                                                         child: DottedBorder(
                                                           options: RoundedRectDottedBorderOptions(
-                                                          color: Theme.of(
-                                                            context,
-                                                          ).primaryColor,
-                                                          strokeWidth: 1,
-                                                          strokeCap:
-                                                              StrokeCap.butt,
-                                                          dashPattern: const [
-                                                            5,
-                                                            5,
-                                                          ],
-                                                          padding:
-                                                              const EdgeInsets.all(
-                                                                0,
-                                                              ),
-                                                          
-                                                          radius:
-                                                              const Radius.circular(
-                                                                Dimensions
-                                                                    .radiusDefault,
-                                                              ),),
+                                                            color: Theme.of(
+                                                              context,
+                                                            ).primaryColor,
+                                                            strokeWidth: 1,
+                                                            strokeCap:
+                                                                StrokeCap.butt,
+                                                            dashPattern: const [
+                                                              5,
+                                                              5,
+                                                            ],
+                                                            padding:
+                                                                const EdgeInsets.all(
+                                                                  0,
+                                                                ),
+
+                                                            radius: const Radius.circular(
+                                                              Dimensions
+                                                                  .radiusDefault,
+                                                            ),
+                                                          ),
                                                           child: Center(
                                                             child: Visibility(
                                                               visible:
@@ -1192,15 +1191,21 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                               ),
                                             ),
                                         child: DottedBorder(
-                                          options: RoundedRectDottedBorderOptions(
-                                          color: Theme.of(context).primaryColor,
-                                          strokeWidth: 1,
-                                          strokeCap: StrokeCap.butt,
-                                          dashPattern: const [5, 5],
-                                          padding: const EdgeInsets.all(0),                                          
-                                          radius: const Radius.circular(
-                                            Dimensions.radiusDefault,
-                                          ),),
+                                          options:
+                                              RoundedRectDottedBorderOptions(
+                                                color: Theme.of(
+                                                  context,
+                                                ).primaryColor,
+                                                strokeWidth: 1,
+                                                strokeCap: StrokeCap.butt,
+                                                dashPattern: const [5, 5],
+                                                padding: const EdgeInsets.all(
+                                                  0,
+                                                ),
+                                                radius: const Radius.circular(
+                                                  Dimensions.radiusDefault,
+                                                ),
+                                              ),
                                           child: Center(
                                             child: Visibility(
                                               visible:
@@ -1340,14 +1345,15 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                                           ),
                                       child: DottedBorder(
                                         options: RoundedRectDottedBorderOptions(
-                                        color: Theme.of(context).primaryColor,
-                                        strokeWidth: 1,
-                                        strokeCap: StrokeCap.butt,
-                                        dashPattern: const [5, 5],
-                                        padding: const EdgeInsets.all(0),
-                                        radius: const Radius.circular(
-                                          Dimensions.radiusDefault,
-                                        ),),
+                                          color: Theme.of(context).primaryColor,
+                                          strokeWidth: 1,
+                                          strokeCap: StrokeCap.butt,
+                                          dashPattern: const [5, 5],
+                                          padding: const EdgeInsets.all(0),
+                                          radius: const Radius.circular(
+                                            Dimensions.radiusDefault,
+                                          ),
+                                        ),
                                         child: Center(
                                           child: Visibility(
                                             visible:
@@ -1598,7 +1604,9 @@ class _StoreRegistrationScreenState extends State<StoreRegistrationScreen>
                   for (int i = 0; i < _addressController.length; i++) {
                     _addressController[i].text = '';
                   }
-                  storeRegController.resetStoreRegistration();
+                  context.read<RegistrationBloc>().add(
+                    const RegistrationReset(),
+                  );
 
                   //profileController.initData(isUpdate: true);
                 },

@@ -1,8 +1,7 @@
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
@@ -21,15 +20,15 @@ class VegFilterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool ltr = Get.find<LocalizationController>().isLtr;
+    final bool ltr = getIt<LanguageBloc>().state.isLtr;
     List<PopupMenuEntry> entryList = [];
-    for (int i = 0; i < Get.find<ItemController>().itemTypeList.length; i++) {
+    for (int i = 0; i < ItemState.itemTypeList.length; i++) {
       entryList.add(
         PopupMenuItem<int>(
           value: i,
           child: Row(
             children: [
-              Get.find<ItemController>().itemTypeList[i] == type
+              ItemState.itemTypeList[i] == type
                   ? Icon(
                       Icons.radio_button_checked_sharp,
                       color: Theme.of(context).primaryColor,
@@ -41,9 +40,9 @@ class VegFilterWidget extends StatelessWidget {
               const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
               Text(
-                Get.find<ItemController>().itemTypeList[i].tr,
+                ItemState.itemTypeList[i].tr,
                 style: robotoMedium.copyWith(
-                  color: Get.find<ItemController>().itemTypeList[i] == type
+                  color: ItemState.itemTypeList[i] == type
                       ? Theme.of(context).textTheme.bodyMedium!.color
                       : Theme.of(context).disabledColor,
                 ),
@@ -54,7 +53,8 @@ class VegFilterWidget extends StatelessWidget {
       );
     }
 
-    return (getIt<SplashBloc>().state
+    return (getIt<SplashBloc>()
+                .state
                 .configModel!
                 .moduleConfig!
                 .module!
@@ -71,7 +71,7 @@ class VegFilterWidget extends StatelessWidget {
               offset: const Offset(-20, 20),
               itemBuilder: (BuildContext context) => entryList,
               onSelected: (dynamic value) =>
-                  onSelected!(Get.find<ItemController>().itemTypeList[value]),
+                  onSelected!(ItemState.itemTypeList[value]),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(
                   Radius.circular(Dimensions.radiusDefault),

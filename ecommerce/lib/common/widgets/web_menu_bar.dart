@@ -1,9 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ecommerce/common/widgets/hover/text_hover.dart';
+import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
-import 'package:ecommerce/features/location/controllers/location_controller.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_event.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_state.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_bloc.dart';
+import 'package:ecommerce/features/location/presentation/bloc/location_state.dart';
+import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/common/controllers/theme_controller.dart';
 import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/helper/address_helper.dart';
@@ -13,6 +19,7 @@ import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:ecommerce/common/widgets/custom_dropdown.dart';
 
@@ -36,14 +43,15 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                     width: 500,
                     child: AddressHelper.getUserAddressFromSharedPref() != null
                         ? InkWell(
-                            onTap: () => Get.find<LocationController>()
-                                .navigateToLocationScreen('home'),
+                            onTap: () =>
+                                LocationHelper.navigateToLocationScreen('home'),
                             child: Padding(
                               padding: const EdgeInsets.all(
                                 Dimensions.paddingSizeSmall,
                               ),
-                              child: GetBuilder<LocationController>(
-                                builder: (locationController) {
+                              child: BlocBuilder<LocationBloc, LocationState>(
+                                bloc: getIt<LocationBloc>(),
+                                builder: (context, locationState) {
                                   return Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -103,8 +111,9 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
 
                   const Spacer(),
 
-                  GetBuilder<LocalizationController>(
-                    builder: (localizationController) {
+                  BlocBuilder<LanguageBloc, LanguageState>(
+                    bloc: getIt<LanguageBloc>(),
+                    builder: (context, languageState) {
                       List<DropdownItem<int>> languageList = [];
                       List<DropdownItem<int>> joinUsList = [];
 
@@ -178,13 +187,19 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                             width: 120,
                             child: CustomDropdown<int>(
                               onChange: (int? value, int index) {
-                                localizationController.setLanguage(
-                                  Locale(
-                                    AppConstants.languages[index].languageCode!,
-                                    AppConstants.languages[index].countryCode,
+                                getIt<LanguageBloc>().add(
+                                  LanguageChanged(
+                                    Locale(
+                                      AppConstants
+                                          .languages[index]
+                                          .languageCode!,
+                                      AppConstants.languages[index].countryCode,
+                                    ),
                                   ),
                                 );
-                                localizationController.setSelectIndex(index);
+                                getIt<LanguageBloc>().add(
+                                  LanguageIndexSelected(index),
+                                );
                               },
                               dropdownButtonStyle: DropdownButtonStyle(
                                 height: 50,
@@ -213,7 +228,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                                     width: 15,
                                     child: Image.asset(
                                       AppConstants
-                                          .languages[localizationController
+                                          .languages[languageState
                                               .selectedIndex]
                                           .imageUrl!,
                                     ),
@@ -225,7 +240,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                                     ),
                                     child: Text(
                                       AppConstants
-                                          .languages[localizationController
+                                          .languages[languageState
                                               .selectedIndex]
                                           .languageName!,
                                       style: robotoMedium.copyWith(
@@ -521,8 +536,9 @@ class MenuIconButton extends StatelessWidget {
       builder: (hovered) {
         return IconButton(
           onPressed: onTap as void Function()?,
-          icon: GetBuilder<CartController>(
-            builder: (cartController) {
+          icon: BlocBuilder<CartBloc, CartState>(
+            bloc: getIt<CartBloc>(),
+            builder: (context, cartState) {
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -532,7 +548,7 @@ class MenuIconButton extends StatelessWidget {
                         ? Theme.of(context).primaryColor
                         : Theme.of(context).textTheme.bodyLarge!.color,
                   ),
-                  (isCart && cartController.cartList.isNotEmpty)
+                  (isCart && cartState.cartList.isNotEmpty)
                       ? Positioned(
                           top: -5,
                           right: -5,
@@ -545,7 +561,7 @@ class MenuIconButton extends StatelessWidget {
                               color: Theme.of(context).primaryColor,
                             ),
                             child: Text(
-                              cartController.cartList.length.toString(),
+                              cartState.cartList.length.toString(),
                               style: robotoRegular.copyWith(
                                 fontSize: 12,
                                 color: Theme.of(context).cardColor,

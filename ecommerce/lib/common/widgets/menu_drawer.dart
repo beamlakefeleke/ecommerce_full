@@ -5,12 +5,11 @@ import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart
 import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:ecommerce/features/profile/presentation/bloc/profile_event.dart';
 import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
-import 'package:ecommerce/features/favourite/presentation/bloc/favourite_event.dart';
 import 'package:ecommerce/features/auth/presentation/pages/sign_in_screen.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
@@ -290,7 +289,7 @@ class MenuDrawerState extends State<MenuDrawer>
 
   Widget _buildContent() {
     return Align(
-      alignment: Get.find<LocalizationController>().isLtr
+      alignment: getIt<LanguageBloc>().state.isLtr
           ? Alignment.topRight
           : Alignment.topLeft,
       child: Container(

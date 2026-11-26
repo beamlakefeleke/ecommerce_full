@@ -1,7 +1,6 @@
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
@@ -24,7 +23,7 @@ class SocialLoginWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignIn googleSignIn = GoogleSignIn.instance;
 
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (prev, curr) =>
@@ -65,20 +64,31 @@ class SocialLoginWidget extends StatelessWidget {
                   getIt<SplashBloc>().state.configModel!.socialLogin![0].status!
                       ? InkWell(
                           onTap: () async {
-                            GoogleSignInAccount googleAccount =
-                                (await googleSignIn.signIn())!;
-                            GoogleSignInAuthentication auth =
-                                await googleAccount.authentication;
-                            context.read<AuthBloc>().add(
-                              SocialLoginRequested(
-                                SocialSignInParams(
-                                  email: googleAccount.email,
-                                  token: auth.idToken,
-                                  uniqueId: googleAccount.id,
-                                  medium: 'google',
+                            try {
+                              await googleSignIn.initialize();
+                              final GoogleSignInAccount googleAccount =
+                                  await googleSignIn.authenticate();
+                              final GoogleSignInAuthentication auth =
+                                  googleAccount.authentication;
+                              if (!context.mounted) return;
+                              context.read<AuthBloc>().add(
+                                SocialLoginRequested(
+                                  SocialSignInParams(
+                                    email: googleAccount.email,
+                                    token: auth.idToken,
+                                    uniqueId: googleAccount.id,
+                                    medium: 'google',
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            } on GoogleSignInException catch (e) {
+                              if (e.code !=
+                                  GoogleSignInExceptionCode.canceled) {
+                                showCustomSnackBar(
+                                  e.description ?? e.code.name,
+                                );
+                              }
+                            }
                           },
                           child: Container(
                             height: 40,
@@ -124,12 +134,13 @@ class SocialLoginWidget extends StatelessWidget {
                             if (result.status == LoginStatus.success) {
                               Map userData = await FacebookAuth.instance
                                   .getUserData();
+                              if (!context.mounted) return;
                               context.read<AuthBloc>().add(
                                 SocialLoginRequested(
                                   SocialSignInParams(
                                     email: userData['email'],
-                                    token: result.accessToken!.token,
-                                    uniqueId: result.accessToken!.userId,
+                                    token: result.accessToken!.tokenString,
+                                    uniqueId: userData['id']?.toString() ?? '',
                                     medium: 'facebook',
                                   ),
                                 ),

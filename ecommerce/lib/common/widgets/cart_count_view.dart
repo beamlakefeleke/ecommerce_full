@@ -1,7 +1,10 @@
- import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/util/dimensions.dart';
 import 'package:ecommerce/util/styles.dart';
@@ -13,12 +16,13 @@ class CartCountView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CartController>(
-      builder: (cartController) {
-        int cartQty = cartController.cartQuantity(item.id!);
-        int cartIndex = cartController.isExistInCart(
+    return BlocBuilder<CartBloc, CartState>(
+      bloc: getIt<CartBloc>(),
+      builder: (context, cartState) {
+        int cartQty = cartState.cartQuantity(item.id!);
+        int cartIndex = cartState.isExistInCart(
           item.id,
-          cartController.cartVariant(item.id!),
+          cartState.cartVariant(item.id!),
           false,
           null,
         );
@@ -36,24 +40,27 @@ class CartCountView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InkWell(
-                        onTap: cartController.isLoading
+                        onTap: cartState.isLoading
                             ? null
                             : () {
-                                if (cartController
-                                        .cartList[cartIndex]
-                                        .quantity! >
+                                if (cartState.cartList[cartIndex].quantity! >
                                     1) {
-                                  cartController.setQuantity(
-                                    false,
-                                    cartIndex,
-                                    cartController.cartList[cartIndex].stock,
-                                    cartController
-                                        .cartList[cartIndex]
-                                        .item!
-                                        .quantityLimit,
+                                  getIt<CartBloc>().add(
+                                    CartItemQuantityUpdated(
+                                      isIncrement: false,
+                                      cartIndex: cartIndex,
+                                      stock:
+                                          cartState.cartList[cartIndex].stock,
+                                      quantityLimit: cartState
+                                          .cartList[cartIndex]
+                                          .item!
+                                          .quantityLimit,
+                                    ),
                                   );
                                 } else {
-                                  cartController.removeFromCart(cartIndex);
+                                  getIt<CartBloc>().add(
+                                    CartItemRemoved(index: cartIndex),
+                                  );
                                 }
                               },
                         child: Container(
@@ -79,7 +86,7 @@ class CartCountView extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                           horizontal: Dimensions.paddingSizeSmall,
                         ),
-                        child: !cartController.isLoading
+                        child: !cartState.isLoading
                             ? Text(
                                 cartQty.toString(),
                                 style: robotoMedium.copyWith(
@@ -97,16 +104,18 @@ class CartCountView extends StatelessWidget {
                       ),
 
                       InkWell(
-                        onTap: cartController.isLoading
+                        onTap: cartState.isLoading
                             ? null
                             : () {
-                                cartController.setQuantity(
-                                  true,
-                                  cartIndex,
-                                  cartController.cartList[cartIndex].stock,
-                                  cartController
-                                      .cartList[cartIndex]
-                                      .quantityLimit,
+                                getIt<CartBloc>().add(
+                                  CartItemQuantityUpdated(
+                                    isIncrement: true,
+                                    cartIndex: cartIndex,
+                                    stock: cartState.cartList[cartIndex].stock,
+                                    quantityLimit: cartState
+                                        .cartList[cartIndex]
+                                        .quantityLimit,
+                                  ),
                                 );
                               },
                         child: Container(
@@ -133,10 +142,7 @@ class CartCountView extends StatelessWidget {
               )
             : InkWell(
                 onTap: () {
-                  Get.find<ItemController>().itemDirectlyAddToCart(
-                    item,
-                    context,
-                  );
+                  ItemHelper.itemDirectlyAddToCart(item, context);
                 },
                 child:
                     child ??

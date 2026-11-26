@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/helper/auth_helper.dart';
 import 'package:ecommerce/common/widgets/custom_snackbar.dart';
@@ -23,18 +25,20 @@ class AddFavouriteView extends StatelessWidget {
       top: top,
       right: right,
       left: left,
-      child: GetBuilder<FavouriteController>(
-        builder: (favouriteController) {
-          bool isWished = favouriteController.wishItemIdList.contains(item.id);
+      child: BlocBuilder<FavouriteBloc, FavouriteState>(
+        bloc: getIt<FavouriteBloc>(),
+        builder: (context, favouriteState) {
+          bool isWished = favouriteState.wishItemIdList.contains(item.id);
           return InkWell(
             onTap: () {
               if (AuthHelper.isLoggedIn()) {
                 isWished
-                    ? favouriteController.removeFromFavouriteList(
-                        item.id,
-                        false,
+                    ? getIt<FavouriteBloc>().add(
+                        FavouriteRemoved(id: item.id, isStore: false),
                       )
-                    : favouriteController.addToFavouriteList(item, null, false);
+                    : getIt<FavouriteBloc>().add(
+                        FavouriteAdded(product: item, isStore: false),
+                      );
               } else {
                 showCustomSnackBar('you_are_not_logged_in'.tr);
               }

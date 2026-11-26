@@ -1,9 +1,8 @@
 import 'package:ecommerce/common/widgets/hover/on_hover.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -96,15 +95,14 @@ class WebItemWidget extends StatelessWidget {
           }
         } else {
           if (isFeatured && getIt<SplashBloc>().state.moduleList != null) {
-            for (ModuleModel module
-                in getIt<SplashBloc>().state.moduleList!) {
+            for (ModuleModel module in getIt<SplashBloc>().state.moduleList!) {
               if (module.id == item!.moduleId) {
                 getIt<SplashBloc>().add(SplashModuleSet(module));
                 break;
               }
             }
           }
-          Get.find<ItemController>().navigateToItemPage(
+          ItemHelper.navigateToItemPage(
             item,
             context,
             inStore: inStore,
@@ -229,12 +227,14 @@ class WebItemWidget extends StatelessWidget {
                                         width: Dimensions.paddingSizeExtraSmall,
                                       ),
 
-                                      (getIt<SplashBloc>().state
+                                      (getIt<SplashBloc>()
+                                                  .state
                                                   .configModel!
                                                   .moduleConfig!
                                                   .module!
                                                   .vegNonVeg! &&
-                                              getIt<SplashBloc>().state
+                                              getIt<SplashBloc>()
+                                                  .state
                                                   .configModel!
                                                   .toggleVegNonVeg!)
                                           ? Image.asset(

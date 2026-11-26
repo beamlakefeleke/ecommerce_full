@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
+import 'package:ecommerce/features/item/presentation/bloc/item_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/widgets/custom_app_bar.dart';
 
@@ -15,7 +15,8 @@ class ImageViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.find<ItemController>().setImageIndex(0, false);
+    final ItemBloc itemBloc = getIt<ItemBloc>();
+    itemBloc.add(const ItemImageIndexChanged(0));
     List<String?> imageList = [];
     imageList.add(item.image);
     imageList.addAll(item.images!);
@@ -23,11 +24,13 @@ class ImageViewerScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: CustomAppBar(title: 'product_images'.tr),
-      body: GetBuilder<ItemController>(
-        builder: (itemController) {
+      body: BlocBuilder<ItemBloc, ItemState>(
+        bloc: itemBloc,
+        builder: (context, itemState) {
           String? baseUrl = item.availableDateStarts == null
               ? getIt<SplashBloc>().state.configModel!.baseUrls!.itemImageUrl
-              : getIt<SplashBloc>().state
+              : getIt<SplashBloc>()
+                    .state
                     .configModel!
                     .baseUrls!
                     .campaignImageUrl;
@@ -67,10 +70,10 @@ class ImageViewerScreen extends StatelessWidget {
                         ),
                       ),
                       onPageChanged: (int index) =>
-                          itemController.setImageIndex(index, true),
+                          itemBloc.add(ItemImageIndexChanged(index)),
                     ),
 
-                    itemController.imageIndex != 0
+                    itemState.imageIndex != 0
                         ? Positioned(
                             left: 5,
                             top: 0,
@@ -83,9 +86,9 @@ class ImageViewerScreen extends StatelessWidget {
                               ),
                               child: InkWell(
                                 onTap: () {
-                                  if (itemController.imageIndex > 0) {
+                                  if (itemState.imageIndex > 0) {
                                     pageController.animateToPage(
-                                      itemController.imageIndex - 1,
+                                      itemState.imageIndex - 1,
                                       duration: const Duration(
                                         milliseconds: 500,
                                       ),
@@ -102,7 +105,7 @@ class ImageViewerScreen extends StatelessWidget {
                           )
                         : const SizedBox(),
 
-                    itemController.imageIndex != imageList.length - 1
+                    itemState.imageIndex != imageList.length - 1
                         ? Positioned(
                             right: 5,
                             top: 0,
@@ -115,10 +118,9 @@ class ImageViewerScreen extends StatelessWidget {
                               ),
                               child: InkWell(
                                 onTap: () {
-                                  if (itemController.imageIndex <
-                                      imageList.length) {
+                                  if (itemState.imageIndex < imageList.length) {
                                     pageController.animateToPage(
-                                      itemController.imageIndex + 1,
+                                      itemState.imageIndex + 1,
                                       duration: const Duration(
                                         milliseconds: 500,
                                       ),

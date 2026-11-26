@@ -1,13 +1,12 @@
 import 'package:ecommerce/common/widgets/corner_banner/banner.dart';
 import 'package:ecommerce/common/widgets/corner_banner/corner_discount_tag.dart';
 import 'package:ecommerce/common/widgets/custom_ink_well.dart';
-import 'package:ecommerce/features/item/controllers/item_controller.dart';
-import 'package:ecommerce/features/language/controllers/language_controller.dart';
+import 'package:ecommerce/features/item/presentation/helpers/item_helper.dart';
+import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_event.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
-import 'package:ecommerce/features/favourite/controllers/favourite_controller.dart';
+import 'package:ecommerce/features/favourite/presentation/bloc/favourite_bloc.dart';
 import 'package:ecommerce/common/models/config_model.dart';
 import 'package:ecommerce/features/item/domain/models/item_model.dart';
 import 'package:ecommerce/common/models/module_model.dart';
@@ -28,6 +27,7 @@ import 'package:ecommerce/common/widgets/organic_tag.dart';
 import 'package:ecommerce/common/widgets/rating_bar.dart';
 import 'package:ecommerce/features/store/presentation/pages/store_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
 class ItemWidget extends StatelessWidget {
@@ -61,7 +61,7 @@ class ItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool ltr = Get.find<LocalizationController>().isLtr;
+    final bool ltr = getIt<LanguageBloc>().state.isLtr;
     BaseUrls? baseUrls = getIt<SplashBloc>().state.configModel!.baseUrls;
     bool desktop = ResponsiveHelper.isDesktop(context);
     double? discount;
@@ -141,7 +141,7 @@ class ItemWidget extends StatelessWidget {
                     }
                   }
                 }
-                Get.find<ItemController>().navigateToItemPage(
+                ItemHelper.navigateToItemPage(
                   item,
                   context,
                   inStore: inStore,
@@ -242,12 +242,14 @@ class ItemWidget extends StatelessWidget {
                                   ),
 
                                   (!isStore &&
-                                          getIt<SplashBloc>().state
+                                          getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .moduleConfig!
                                               .module!
                                               .vegNonVeg! &&
-                                          getIt<SplashBloc>().state
+                                          getIt<SplashBloc>()
+                                              .state
                                               .configModel!
                                               .toggleVegNonVeg!)
                                       ? Image.asset(
@@ -309,7 +311,8 @@ class ItemWidget extends StatelessWidget {
                                     : 0,
                               ),
 
-                              (getIt<SplashBloc>().state
+                              (getIt<SplashBloc>()
+                                          .state
                                           .configModel!
                                           .moduleConfig!
                                           .module!
@@ -400,30 +403,37 @@ class ItemWidget extends StatelessWidget {
                                       size: 12,
                                     ),
                                   )
-                                : GetBuilder<FavouriteController>(
-                                    builder: (favouriteController) {
+                                : BlocBuilder<FavouriteBloc, FavouriteState>(
+                                    bloc: getIt<FavouriteBloc>(),
+                                    builder: (context, favouriteState) {
                                       bool isWished = isStore
-                                          ? favouriteController.wishStoreIdList
+                                          ? favouriteState.wishStoreIdList
                                                 .contains(store!.id)
-                                          : favouriteController.wishItemIdList
+                                          : favouriteState.wishItemIdList
                                                 .contains(item!.id);
                                       return InkWell(
-                                        onTap: !favouriteController.isRemoving
+                                        onTap: !favouriteState.isRemoving
                                             ? () {
                                                 if (AuthHelper.isLoggedIn()) {
                                                   isWished
-                                                      ? favouriteController
-                                                            .removeFromFavouriteList(
-                                                              isStore
-                                                                  ? store!.id
-                                                                  : item!.id,
-                                                              isStore,
+                                                      ? getIt<FavouriteBloc>()
+                                                            .add(
+                                                              FavouriteRemoved(
+                                                                id: isStore
+                                                                    ? store!.id
+                                                                    : item!.id,
+                                                                isStore:
+                                                                    isStore,
+                                                              ),
                                                             )
-                                                      : favouriteController
-                                                            .addToFavouriteList(
-                                                              item,
-                                                              store,
-                                                              isStore,
+                                                      : getIt<FavouriteBloc>()
+                                                            .add(
+                                                              FavouriteAdded(
+                                                                product: item,
+                                                                store: store,
+                                                                isStore:
+                                                                    isStore,
+                                                              ),
                                                             );
                                                 } else {
                                                   showCustomSnackBar(

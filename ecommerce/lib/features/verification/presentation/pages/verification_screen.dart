@@ -3,12 +3,9 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/verification/presentation/bloc/verification_bloc.dart';
-import 'package:ecommerce/features/verification/presentation/bloc/verification_event.dart';
-import 'package:ecommerce/features/verification/presentation/bloc/verification_state.dart';
 import 'package:ecommerce/features/location/presentation/helper/location_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
 import 'package:ecommerce/util/dimensions.dart';
@@ -232,44 +229,42 @@ class VerificationScreenState extends State<VerificationScreen> {
                                   horizontal: 39,
                                   vertical: 35,
                                 ),
-                                child: PinCodeTextField(
+                                child: MaterialPinField(
                                   length: 4,
-                                  appContext: context,
                                   keyboardType: TextInputType.number,
-                                  animationType: AnimationType.slide,
-                                  pinTheme: PinTheme(
-                                    shape: PinCodeFieldShape.box,
-                                    fieldHeight: 60,
-                                    fieldWidth: 60,
+                                  theme: MaterialPinTheme(
+                                    shape: MaterialPinShape.outlined,
+                                    entryAnimation: MaterialPinAnimation.slide,
+                                    animationDuration: const Duration(
+                                      milliseconds: 300,
+                                    ),
+                                    cellSize: const Size(60, 60),
                                     borderWidth: 1,
                                     borderRadius: BorderRadius.circular(
                                       Dimensions.radiusSmall,
                                     ),
-                                    selectedColor: Theme.of(
+                                    // empty cells
+                                    fillColor: Theme.of(
                                       context,
-                                    ).primaryColor.withOpacity(0.2),
-                                    selectedFillColor: Colors.white,
-                                    inactiveFillColor: Theme.of(
+                                    ).disabledColor.withValues(alpha: 0.2),
+                                    borderColor: Theme.of(
                                       context,
-                                    ).disabledColor.withOpacity(0.2),
-                                    inactiveColor: Theme.of(
+                                    ).primaryColor.withValues(alpha: 0.2),
+                                    // focused cell
+                                    focusedFillColor: Colors.white,
+                                    focusedBorderColor: Theme.of(
                                       context,
-                                    ).primaryColor.withOpacity(0.2),
-                                    activeColor: Theme.of(
+                                    ).primaryColor.withValues(alpha: 0.2),
+                                    // filled cells
+                                    filledFillColor: Theme.of(
                                       context,
-                                    ).primaryColor.withOpacity(0.4),
-                                    activeFillColor: Theme.of(
+                                    ).disabledColor.withValues(alpha: 0.2),
+                                    filledBorderColor: Theme.of(
                                       context,
-                                    ).disabledColor.withOpacity(0.2),
+                                    ).primaryColor.withValues(alpha: 0.4),
                                   ),
-                                  animationDuration: const Duration(
-                                    milliseconds: 300,
-                                  ),
-                                  backgroundColor: Colors.transparent,
-                                  enableActiveFill: true,
                                   onChanged: (code) =>
                                       bloc.add(VerificationCodeUpdated(code)),
-                                  beforeTextPaste: (text) => true,
                                 ),
                               ),
 

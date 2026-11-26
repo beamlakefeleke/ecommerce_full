@@ -1,8 +1,10 @@
-import 'package:ecommerce/features/cart/controllers/cart_controller.dart';
+import 'package:ecommerce/core/di/injection.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ecommerce/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ecommerce/util/images.dart';
 import 'package:ecommerce/util/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CartWidget extends StatelessWidget {
   final Color? color;
@@ -27,9 +29,10 @@ class CartWidget extends StatelessWidget {
           color: color,
         ),
 
-        GetBuilder<CartController>(
-          builder: (cartController) {
-            return cartController.cartList.isNotEmpty
+        BlocBuilder<CartBloc, CartState>(
+          bloc: getIt<CartBloc>(),
+          builder: (context, cartState) {
+            return cartState.cartList.isNotEmpty
                 ? Positioned(
                     top: -5,
                     right: -5,
@@ -50,7 +53,7 @@ class CartWidget extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        cartController.cartList.length.toString(),
+                        cartState.cartList.length.toString(),
                         style: robotoRegular.copyWith(
                           fontSize: size < 20 ? size / 3 : size / 3.8,
                           color: fromStore
