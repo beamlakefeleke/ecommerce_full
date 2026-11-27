@@ -4,14 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/domain/entities/social_sign_in_params.dart';
 import 'package:ecommerce/features/auth/data/models/social_log_in_body.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ecommerce/features/verification/presentation/bloc/verification_bloc.dart';
-import 'package:ecommerce/features/verification/presentation/bloc/verification_event.dart';
-import 'package:ecommerce/features/verification/presentation/bloc/verification_state.dart';
 import 'package:ecommerce/helper/custom_validator.dart';
 import 'package:ecommerce/helper/responsive_helper.dart';
 import 'package:ecommerce/helper/route_helper.dart';
@@ -42,9 +39,24 @@ class ForgetPassScreen extends StatefulWidget {
 
 class _ForgetPassScreenState extends State<ForgetPassScreen> {
   final TextEditingController _numberController = TextEditingController();
-  String? _countryDialCode = CountryCode.fromCountryCode(
-    getIt<SplashBloc>().state.configModel!.country!,
-  ).dialCode;
+  String? _countryDialCode;
+
+  @override
+  void initState() {
+    super.initState();
+    final country = getIt<SplashBloc>().state.configModel?.country;
+    if (country != null && country.isNotEmpty) {
+      _countryDialCode = CountryCode.fromCountryCode(country).dialCode;
+    }
+  }
+
+  /// ISO country code from config, or null when unavailable.
+  String? _resolveCountryCode() {
+    if (_countryDialCode == null) return null;
+    final country = getIt<SplashBloc>().state.configModel?.country;
+    if (country == null || country.isEmpty) return null;
+    return CountryCode.fromCountryCode(country).code;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,19 +148,17 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                                 onCountryChanged: (CountryCode countryCode) {
                                   _countryDialCode = countryCode.dialCode;
                                 },
-                                countryDialCode: _countryDialCode != null
-                                    ? CountryCode.fromCountryCode(
-                                        getIt<SplashBloc>()
-                                            .state
-                                            .configModel!
-                                            .country!,
-                                      ).code
-                                    : getIt<LanguageBloc>()
-                                          .state
-                                          .locale
-                                          .countryCode,
+                                countryDialCode:
+                                    _resolveCountryCode() ??
+                                    getIt<LanguageBloc>()
+                                        .state
+                                        .locale
+                                        .countryCode,
                                 onSubmit: (text) => GetPlatform.isWeb
-                                    ? _forgetPass(context, _countryDialCode!)
+                                    ? _forgetPass(
+                                        context,
+                                        _countryDialCode ?? '',
+                                      )
                                     : null,
                               ),
                               const SizedBox(
@@ -158,8 +168,10 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                               CustomButton(
                                 buttonText: 'next'.tr,
                                 isLoading: verificationState.isLoading,
-                                onPressed: () =>
-                                    _forgetPass(context, _countryDialCode!),
+                                onPressed: () => _forgetPass(
+                                  context,
+                                  _countryDialCode ?? '',
+                                ),
                               ),
                               const SizedBox(
                                 height: Dimensions.paddingSizeExtraLarge,

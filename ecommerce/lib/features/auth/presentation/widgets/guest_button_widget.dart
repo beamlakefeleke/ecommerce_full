@@ -22,7 +22,7 @@ class GuestButtonWidget extends StatelessWidget {
           curr.actionStatus == AuthActionStatus.success,
       listener: (context, state) {
         getIt<ProfileBloc>().add(const ProfileCleared());
-        Navigator.pushReplacementNamed(context, RouteHelper.getInitialRoute());
+        Get.offAllNamed(RouteHelper.getInitialRoute());
       },
       builder: (context, state) {
         return !state.guestLoading

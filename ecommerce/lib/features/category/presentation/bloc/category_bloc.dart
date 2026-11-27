@@ -152,8 +152,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       (f) => emit(state.copyWith(isLoading: false, errorMessage: f.message)),
       (itemModel) {
         final items = event.offset == 1
-            ? itemModel.items ?? []
-            : [...(state.categoryItems ?? []), ...(itemModel.items ?? [])];
+            ? itemModel.items ?? <Item>[]
+            : [
+                ...(state.categoryItems ?? <Item>[]),
+                ...(itemModel.items ?? <Item>[]),
+              ];
         emit(
           state.copyWith(
             categoryItems: items,
@@ -194,8 +197,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       (f) => emit(state.copyWith(isLoading: false, errorMessage: f.message)),
       (storeModel) {
         final stores = event.offset == 1
-            ? storeModel.stores ?? []
-            : [...(state.categoryStores ?? []), ...(storeModel.stores ?? [])];
+            ? storeModel.stores ?? <Store>[]
+            : [
+                ...(state.categoryStores ?? <Store>[]),
+                ...(storeModel.stores ?? <Store>[]),
+              ];
         emit(
           state.copyWith(
             categoryStores: stores,

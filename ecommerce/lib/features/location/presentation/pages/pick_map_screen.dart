@@ -60,13 +60,11 @@ class _PickMapScreenState extends State<PickMapScreen> {
     if (widget.fromAddAddress) {
       _bloc.add(const PickDataSeeded());
     }
+    final defaultLocation =
+        getIt<SplashBloc>().state.configModel?.defaultLocation;
     _initialPosition = LatLng(
-      double.parse(
-        getIt<SplashBloc>().state.configModel!.defaultLocation!.lat ?? '0',
-      ),
-      double.parse(
-        getIt<SplashBloc>().state.configModel!.defaultLocation!.lng ?? '0',
-      ),
+      double.parse(defaultLocation?.lat ?? '0'),
+      double.parse(defaultLocation?.lng ?? '0'),
     );
   }
 

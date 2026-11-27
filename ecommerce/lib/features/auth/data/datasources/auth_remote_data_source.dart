@@ -69,9 +69,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final Response response = await apiClient.postData(
       AppConstants.guestLoginUri,
       {'fcm_token': deviceToken},
+      handleError: false,
     );
-    if (response.statusCode == 200) {
-      return response.body['guest_id'].toString();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final content = response.body['content'];
+      final guestId = content != null
+          ? content['guest_id']
+          : response.body['guest_id'];
+      return guestId.toString();
     }
     throw _exceptionFor(response);
   }

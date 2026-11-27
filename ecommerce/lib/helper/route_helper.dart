@@ -1143,17 +1143,23 @@ class RouteHelper {
     AccessLocationScreen? locationScreen,
     bool byPuss = false,
   }) {
-    double? minimumVersion = 0;
-    if (GetPlatform.isAndroid) {
-      minimumVersion =
-          getIt<SplashBloc>().state.configModel!.appMinimumVersionAndroid;
-    } else if (GetPlatform.isIOS) {
-      minimumVersion =
-          getIt<SplashBloc>().state.configModel!.appMinimumVersionIos;
+    final configModel = getIt<SplashBloc>().state.configModel;
+    // Config is loaded by the splash flow before any other route is shown.
+    // If a route is built before that completes (e.g. a deep link or refresh
+    // on web), fall back to the splash screen instead of crashing on a null
+    // configModel. SplashScreen loads the config and then navigates onward.
+    if (configModel == null) {
+      return const SplashScreen(body: null);
     }
-    return AppConstants.appVersion < minimumVersion!
+    double minimumVersion = 0;
+    if (GetPlatform.isAndroid) {
+      minimumVersion = configModel.appMinimumVersionAndroid ?? 0;
+    } else if (GetPlatform.isIOS) {
+      minimumVersion = configModel.appMinimumVersionIos ?? 0;
+    }
+    return AppConstants.appVersion < minimumVersion
         ? const UpdateScreen(isUpdate: true)
-        : getIt<SplashBloc>().state.configModel!.maintenanceMode!
+        : (configModel.maintenanceMode ?? false)
         ? const UpdateScreen(isUpdate: false)
         : (AddressHelper.getUserAddressFromSharedPref() == null && !byPuss)
         ? AccessLocationScreen(

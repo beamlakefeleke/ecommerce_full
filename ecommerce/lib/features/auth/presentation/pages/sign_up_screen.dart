@@ -3,7 +3,6 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:ecommerce/features/language/presentation/bloc/language_bloc.dart';
 import 'package:ecommerce/core/di/injection.dart';
 import 'package:ecommerce/features/splash/presentation/bloc/splash_bloc.dart';
-import 'package:ecommerce/features/splash/presentation/bloc/splash_state.dart';
 import 'package:ecommerce/features/auth/domain/entities/sign_up_params.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecommerce/features/auth/presentation/bloc/auth_event.dart';
@@ -54,9 +53,19 @@ class SignUpScreenState extends State<SignUpScreen> {
   void initState() {
     super.initState();
 
-    _countryDialCode = CountryCode.fromCountryCode(
-      getIt<SplashBloc>().state.configModel!.country!,
-    ).dialCode;
+    final country = getIt<SplashBloc>().state.configModel?.country;
+    if (country != null && country.isNotEmpty) {
+      _countryDialCode = CountryCode.fromCountryCode(country).dialCode;
+    }
+  }
+
+  /// Returns the ISO country code from the configured country, or null when
+  /// no dial code has been resolved or the config has no country.
+  String? _resolveCountryCode() {
+    if (_countryDialCode == null) return null;
+    final country = getIt<SplashBloc>().state.configModel?.country;
+    if (country == null || country.isEmpty) return null;
+    return CountryCode.fromCountryCode(country).code;
   }
 
   @override
@@ -227,17 +236,12 @@ class SignUpScreenState extends State<SignUpScreen> {
                                           _countryDialCode =
                                               countryCode.dialCode;
                                         },
-                                    countryDialCode: _countryDialCode != null
-                                        ? CountryCode.fromCountryCode(
-                                            getIt<SplashBloc>()
-                                                .state
-                                                .configModel!
-                                                .country!,
-                                          ).code
-                                        : getIt<LanguageBloc>()
-                                              .state
-                                              .locale
-                                              .countryCode,
+                                    countryDialCode:
+                                        _resolveCountryCode() ??
+                                        getIt<LanguageBloc>()
+                                            .state
+                                            .locale
+                                            .countryCode,
                                   ),
                                 ),
                               ],

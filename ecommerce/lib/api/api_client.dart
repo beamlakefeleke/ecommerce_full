@@ -223,33 +223,39 @@ class ApiClient extends GetxService {
     try {
       body = jsonDecode(response.body);
     } catch (_) {}
+    final http.BaseRequest? httpRequest = response.request;
     Response response0 = Response(
       body: body ?? response.body,
       bodyString: response.body.toString(),
-      request: Request(
-        headers: response.request!.headers,
-        method: response.request!.method,
-        url: response.request!.url,
-      ),
+      request: httpRequest != null
+          ? Request(
+              headers: httpRequest.headers,
+              method: httpRequest.method,
+              url: httpRequest.url,
+            )
+          : null,
       headers: response.headers,
       statusCode: response.statusCode,
       statusText: response.reasonPhrase,
     );
     if (response0.statusCode != 200 &&
         response0.body != null &&
-        response0.body is! String) {
-      if (response0.body.toString().startsWith('{errors: [{code:')) {
-        ErrorResponse errorResponse = ErrorResponse.fromJson(response0.body);
+        response0.body is Map) {
+      final Map body = response0.body as Map;
+      String? message;
+      final errorsList = body['errors'];
+      if (errorsList is List && errorsList.isNotEmpty) {
+        final ErrorResponse errorResponse = ErrorResponse.fromJson(body);
+        if (errorResponse.errors != null && errorResponse.errors!.isNotEmpty) {
+          message = errorResponse.errors!.first.message;
+        }
+      }
+      message ??= body['message']?.toString();
+      if (message != null) {
         response0 = Response(
           statusCode: response0.statusCode,
           body: response0.body,
-          statusText: errorResponse.errors![0].message,
-        );
-      } else if (response0.body.toString().startsWith('{message')) {
-        response0 = Response(
-          statusCode: response0.statusCode,
-          body: response0.body,
-          statusText: response0.body['message'],
+          statusText: message,
         );
       }
     } else if (response0.statusCode != 200 && response0.body == null) {

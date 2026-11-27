@@ -305,7 +305,7 @@ class _MyAppState extends State<MyApp> {
                                 child: Material(
                                   child: Stack(
                                     children: [
-                                      widget!,
+                                      widget ?? const SizedBox.shrink(),
                                       BlocBuilder<SplashBloc, SplashState>(
                                         builder: (context, splashState) {
                                           if (!splashState.savedCookiesData &&
@@ -314,9 +314,10 @@ class _MyAppState extends State<MyApp> {
                                                   .getAcceptCookiesStatus(
                                                     splashState.configModel !=
                                                             null
-                                                        ? splashState
-                                                              .configModel!
-                                                              .cookiesText!
+                                                        ? (splashState
+                                                                  .configModel!
+                                                                  .cookiesText ??
+                                                              '')
                                                         : '',
                                                   )) {
                                             return ResponsiveHelper.isWeb()

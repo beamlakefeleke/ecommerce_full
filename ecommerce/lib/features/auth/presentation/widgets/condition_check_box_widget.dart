@@ -26,29 +26,37 @@ class ConditionCheckBoxWidget extends StatelessWidget {
           : MainAxisAlignment.center,
       children: [
         forDeliveryMan
-            ? BlocBuilder<RegistrationBloc, RegistrationState>(
-                builder: (context, regState) {
-                  return BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, authState) {
-                      return Checkbox(
-                        activeColor: Theme.of(context).primaryColor,
-                        visualDensity: const VisualDensity(
-                          horizontal: -4,
-                          vertical: -4,
-                        ),
-                        value: forSignUp
-                            ? authState.acceptTerms
-                            : regState.acceptTerms,
-                        onChanged: (bool? isChecked) => forSignUp
-                            ? context.read<AuthBloc>().add(const TermsToggled())
-                            : context.read<RegistrationBloc>().add(
-                                const DmTermsToggled(),
-                              ),
-                      );
-                    },
-                  );
-                },
-              )
+            ? (forSignUp
+                  ? BlocBuilder<AuthBloc, AuthState>(
+                      builder: (context, authState) {
+                        return Checkbox(
+                          activeColor: Theme.of(context).primaryColor,
+                          visualDensity: const VisualDensity(
+                            horizontal: -4,
+                            vertical: -4,
+                          ),
+                          value: authState.acceptTerms,
+                          onChanged: (bool? isChecked) => context
+                              .read<AuthBloc>()
+                              .add(const TermsToggled()),
+                        );
+                      },
+                    )
+                  : BlocBuilder<RegistrationBloc, RegistrationState>(
+                      builder: (context, regState) {
+                        return Checkbox(
+                          activeColor: Theme.of(context).primaryColor,
+                          visualDensity: const VisualDensity(
+                            horizontal: -4,
+                            vertical: -4,
+                          ),
+                          value: regState.acceptTerms,
+                          onChanged: (bool? isChecked) => context
+                              .read<RegistrationBloc>()
+                              .add(const DmTermsToggled()),
+                        );
+                      },
+                    ))
             : const SizedBox(),
 
         forDeliveryMan

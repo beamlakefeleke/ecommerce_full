@@ -69,7 +69,7 @@ class DashboardScreenState extends State<DashboardScreen> {
     _isLogin = AuthHelper.isLoggedIn();
 
     if (_isLogin) {
-      if (getIt<SplashBloc>().state.configModel!.loyaltyPointStatus == 1 &&
+      if (getIt<SplashBloc>().state.configModel?.loyaltyPointStatus == 1 &&
           getIt<AuthRepository>().getEarningPoint().isNotEmpty &&
           !ResponsiveHelper.isDesktop(Get.context)) {
         Future.delayed(
